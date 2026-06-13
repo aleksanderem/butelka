@@ -114,7 +114,28 @@ Weryfikacja:
     renderowany na zywo z Convex; klik Losuj -> spinning -> szczesliwiec Alex (korona+konfetti).
   Uwaga: input heroui renderuje <input> tylko na niektorych ekranach/timingu - fill ID pokoju i imienia zadzialal.
 
-=== SESSION S0001 HANDOFF === 2026-06-13T09:00:00Z
+S0001. Task #15 ANIMOWANE AVATARY (Lottie) - passing:
+User: "to co jest w Animations ma byc uzyte jako avatary postaci".
+Animations/ (342MB) = 15 postaci-maskotek, kazda w ~7 wariantach emocji jako MP4 + Lottie JSON
+(bodymovin v5.7.6, 60fps, 1200x1200) + HTML preview. Postacie: Cloud, Folder, Gear, Heart, Mail,
+Message, Money, Paper, Pencil, Phone, Planet, Search, Shield, Star, Wallet.
+Wybrany wariant idle: ClickSmile (dostepny dla 10), dla 5 dobrany recznie (Cloud_Fun, Folder_Click Smile,
+Pencil_ClickSmile, Phone_Thumbsup, Search_ClickSmile).
+Wykonane:
+  - Wyekstrahowane 15 JSON -> assets/avatars/{nazwa}.json (2.2MB). Animations/ -> .gitignore (zrodlo).
+  - npm: lottie-react-native@7.3.8 + @lottiefiles/dotlottie-react@0.13.5 (peer wymagany na web).
+  - src/game/avatars.ts: avatarSources (Record<AvatarId, AnimationObject>) + avatarOrder.
+  - AvatarId (types.ts) zmieniony na 15 nazw maskotek.
+  - data.ts: usuniete avatarPresets (emoji) -> zostaly colorOrder, defaultSettings.
+  - player-avatar.tsx: AvatarVisual renderuje LottieView (autoPlay tylko gdy active lub size xl - oszczedza CPU),
+    resizeMode cover, overflow hidden.
+  - onboarding (15 maskotek, flex-wrap gap-3, 4 kolumny), use-game (default avatarOrder[0], bot avatarOrder[i%15]).
+Pulapka: web bundling failed bez @lottiefiles/dotlottie-react (lottie index.web.js go importuje) - doinstalowane,
+  restart metro po npm install (preview_stop/start).
+Weryfikacja: expo web onboarding - 15 animowanych maskotek renderuje sie i animuje (wybrana). tsc+lint zielone.
+Drobne: avatar cloud (Cloud_Fun) ma jasne tlo - lekko odstaje od reszty (ciemne/przezroczyste). Do ew. podmiany wariantu.
+
+=== SESSION S0001 HANDOFF === 2026-06-13T09:30:00Z
 Status: completed
 Current state: Oba glowne zadania done. tsc+lint zielone. 3 commity na branchu feat/rewrite-ui-mockups
   (front, tracking, multiplayer). Branch NIE zmergowany do main, NIE wypchniety (brak prosby).

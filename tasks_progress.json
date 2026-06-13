@@ -15,7 +15,8 @@
     { "id": 11, "name": "screen7_approval_voting_modal", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
     { "id": 12, "name": "polish_diacritics_all_strings", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
     { "id": 13, "name": "verify_typecheck_lint_preview", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 14, "name": "multiplayer_backend", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" }
+    { "id": 14, "name": "multiplayer_backend", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 15, "name": "animated_lottie_avatars", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" }
   ],
   "reason": "Front przepisany od zera pod 7 mockupow oraz multiplayer na Convex - oba ukonczone i zweryfikowane.",
   "thinking_process": "Fundament -> 7 ekranow 1:1 -> weryfikacja w expo web -> Convex (schema/functions) -> przepiecie use-game na useQuery/useMutation za niezmienionym GameApi -> weryfikacja przez convex run + UI multiplayer (3 graczy na zywo). Szczegoly w tasks_progress_verbose.txt.",
@@ -25,6 +26,7 @@
     { "id": 2, "name": "npm run lint przechodzi", "status": "done", "is_ok": "true", "data_for_next_step": [], "session_id": "S0001" },
     { "id": 3, "name": "Kazdy z 7 ekranow zgodny wizualnie z mockupem (neon, korona, konfetti, karta, sidebar, glosowanie)", "status": "done", "is_ok": "true", "data_for_next_step": ["Zweryfikowane screenshotami w expo web na porcie 8090"], "session_id": "S0001" },
     { "id": 4, "name": "Wszystkie polskie stringi z poprawna diakrytyka", "status": "done", "is_ok": "true", "data_for_next_step": [], "session_id": "S0001" },
-    { "id": 5, "name": "Multiplayer: 2+ klientow w jednym pokoju widza siebie i akcje na zywo (Convex)", "status": "done", "is_ok": "true", "data_for_next_step": ["convex run: createRoom/joinRoom x2/spin/pickChallenge/requestAction/vote -> reset; UI: 3 graczy (alex+basia z CLI, webtest z UI) w pokoju H9L54A, spin->szczesliwiec"], "session_id": "S0001" }
+    { "id": 5, "name": "Multiplayer: 2+ klientow w jednym pokoju widza siebie i akcje na zywo (Convex)", "status": "done", "is_ok": "true", "data_for_next_step": ["convex run: createRoom/joinRoom x2/spin/pickChallenge/requestAction/vote -> reset; UI: 3 graczy (alex+basia z CLI, webtest z UI) w pokoju H9L54A, spin->szczesliwiec"], "session_id": "S0001" },
+    { "id": 6, "name": "Animowane avatary Lottie renderuja sie i animuja (15 maskotek)", "status": "done", "is_ok": "true", "data_for_next_step": ["expo web onboarding: 15 maskotek w siatce, wybrana animuje sie z ringiem; wymaga @lottiefiles/dotlottie-react na web"], "session_id": "S0001" }
   ]
 }
