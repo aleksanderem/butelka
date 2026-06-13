@@ -135,7 +135,27 @@ Pulapka: web bundling failed bez @lottiefiles/dotlottie-react (lottie index.web.
 Weryfikacja: expo web onboarding - 15 animowanych maskotek renderuje sie i animuje (wybrana). tsc+lint zielone.
 Drobne: avatar cloud (Cloud_Fun) ma jasne tlo - lekko odstaje od reszty (ciemne/przezroczyste). Do ew. podmiany wariantu.
 
-=== SESSION S0001 HANDOFF === 2026-06-13T09:30:00Z
+S0001. Naprawa "Utworz pokoj nie dziala" + CLOUD DEPLOY:
+Objaw: klik UTWORZ POKOJ nic nie robil. Przyczyna: createRoom robil await mutacji Convex
+przed setStage("profile"); gdy lokalny backend (npx convex dev) nie byl uruchomiony, mutacja
+wisiala w nieskonczonosc (Convex kolejkuje offline) -> brak przejscia.
+Naprawa (commit 3d08240):
+  - createRoom generuje kod lokalnie (makeRoomCode w data.ts), przechodzi do onboardingu
+    natychmiast bez backendu. Pokoj powstaje przy completeProfile.
+  - Nowa mutacja createOrJoinRoom (asHost) zastapila createRoom+joinRoom+roomExists.
+  - Zweryfikowane: Utworz dziala nawet przy wylaczonym Convex.
+CLOUD DEPLOY (user: testuje na Macu web/symulator + chce cloud):
+  - User mial juz token w ~/.convex/config.json (zalogowany).
+  - `npx convex dev --once --configure=new --dev-deployment cloud --project butelka`
+    -> utworzyl cloud projekt "butelka" (team aleksander-3191c), dev deployment
+    exciting-sheep-101.convex.cloud. .env.local zaktualizowane na cloud URL (gitignore).
+  - Cloud dziala 24/7 bez lokalnego convex dev, dostepny z kazdego urzadzenia (telefon tez).
+  - Zweryfikowane: expo web z cloud env -> pelny flow Utworz->profil->Alex->Dolacz->pokoj FWDLNB
+    BEZ uruchomionego lokalnego convex dev. Dziala.
+  Dashboard: https://dashboard.convex.dev/t/aleksander-3191c/butelka
+  Do PRODUKCJI (release): `npx convex deploy` (osobny prod deployment) - jeszcze nie zrobione.
+
+=== SESSION S0001 HANDOFF === 2026-06-13T14:25:00Z
 Status: completed
 Current state: Oba glowne zadania done. tsc+lint zielone. 3 commity na branchu feat/rewrite-ui-mockups
   (front, tracking, multiplayer). Branch NIE zmergowany do main, NIE wypchniety (brak prosby).
