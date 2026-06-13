@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Dialog, Input, Label } from "heroui-native";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { NeonButton } from "@/components/neon-button";
@@ -54,7 +54,11 @@ export function StartScreen({ game }: { game: GameApi }) {
           <LinearGradient colors={gradients.violet} end={{ x: 1, y: 1 }} start={{ x: 0, y: 0 }}>
             <View className="flex-row items-center gap-4 p-5">
               <View className="h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
-                <Ionicons color="#FFFFFF" name="people" size={28} />
+                <Image
+                  resizeMode="contain"
+                  source={require("../../icons/icons8-user-male-96.png")}
+                  style={{ height: 30, width: 30 }}
+                />
               </View>
               <View className="flex-1">
                 <Text className="text-xl font-extrabold uppercase tracking-wide text-white">
