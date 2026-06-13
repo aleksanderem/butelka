@@ -21,7 +21,7 @@ import "../global.css";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout(): JSX.Element | null {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
     PlusJakartaSans_600SemiBold,
@@ -29,13 +29,17 @@ export default function RootLayout(): JSX.Element | null {
     PlusJakartaSans_800ExtraBold,
   });
 
+  // Renderuj, gdy fonty się wczytają LUB gdy ich ładowanie zawiedzie — nigdy nie
+  // zostawiaj użytkownika na czarnym ekranie, gdy font nie wstanie (np. na natywie).
+  const ready = fontsLoaded || fontError !== null;
+
   useEffect(() => {
-    if (fontsLoaded) {
+    if (ready) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded]);
+  }, [ready]);
 
-  if (!fontsLoaded) {
+  if (!ready) {
     return null;
   }
 
