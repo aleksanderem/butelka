@@ -21,7 +21,8 @@ const TIMING = { duration: 240, easing: Easing.out(Easing.cubic) };
 
 /** Rozstaw kart zależny od liczby: mniej graczy = szerzej (widać więcej avatara i nazwy). */
 function xStepFor(count: number): number {
-  if (count <= 3) return 92;
+  if (count <= 2) return 134; // 2 karty: prawie obok siebie (lekkie nachodzenie)
+  if (count === 3) return 92;
   if (count === 4) return 62;
   return 50;
 }
@@ -35,12 +36,15 @@ export function CardFan({ players }: { players: Player[] }) {
   const list = self ? [self, ...shownOthers] : shownOthers;
   const xStep = xStepFor(list.length);
 
-  // Sloty: środek = 0 (karta „Ty”), reszta naprzemiennie +1,-1,+2,-2 → wachlarz wyśrodkowany.
-  const cards = list.map((player, i) => ({
+  // Sloty: „Ty” w środku, reszta naprzemiennie +1,-1,+2,-2. Następnie przesuwamy wszystkie
+  // o średnią, żeby GRUPA była zawsze wyśrodkowana (też przy parzystej liczbie, np. 2 karty).
+  const raw = list.map((player, i) => ({
     player,
     slot: i === 0 ? 0 : i % 2 === 1 ? Math.ceil(i / 2) : -Math.ceil(i / 2),
     prominent: self ? player.isSelf === true : i === 0,
   }));
+  const avg = raw.reduce((sum, c) => sum + c.slot, 0) / raw.length;
+  const cards = raw.map((c) => ({ ...c, slot: c.slot - avg }));
 
   return (
     <View style={{ height: CONTAINER_H, width: CONTAINER_W }}>
