@@ -1,0 +1,18 @@
+{
+  "session_id": "S0001",
+  "started_at": "2026-06-13T07:49:00Z",
+  "last_updated": "2026-06-13T08:45:00Z",
+  "status": "active",
+  "focus": "Front przepisany 1:1 pod mockupy i zweryfikowany w przegladarce. Pozostaje multiplayer (backend do ustalenia z userem).",
+  "tasks_snapshot": {
+    "total": 14,
+    "not_started": 1,
+    "in_progress": 0,
+    "passing": 13,
+    "failing": 0,
+    "blocked": 0
+  },
+  "active_task_ids": [14],
+  "blockers": ["Task #14 multiplayer: czeka na decyzje usera o backendzie (Convex / Supabase / inny)"],
+  "notes": "FRONT GOTOWY: wszystkie 7 ekranow przepisane od zera pod mockupy (neon fiolet+magenta), rozbite na komponenty (src/theme, src/game, src/components, src/screens), poprawna polszczyzna, typecheck+lint zielone, zweryfikowane wizualnie w expo web (preview) - kazdy ekran zgodny z mockupem. Stan gry w izolowanym hooku src/game/use-game.ts gotowym do podmiany na backend. Drobny placeholder: avatary to emoji (do podmiany na ilustracje), glosowanie w modalu akceptacji zasymulowane (single-device). NEXT: multiplayer - zapytac usera o stack."
+}

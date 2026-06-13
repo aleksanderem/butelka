@@ -1,0 +1,89 @@
+Task Progress Log
+=================
+
+=== SESSION S0001 START === 2026-06-13T07:49:00Z
+Focus: Przepisanie aplikacji Butelka od zera pod mockupy (7 ekranow), poprawna polszczyzna, multiplayer.
+First session.
+
+---
+
+S0001. Analiza wyjsciowa (kod codexa):
+- Stack: Expo + React Native, expo-router, heroui-native, uniwind (Tailwind v4).
+- Cala gra w 1 pliku src/app/index.tsx (1156 linii) - lamie reguly file-org (<800 linii).
+- Typecheck: 0 bledow (przechodzi).
+- Stan lokalny (useState), single-device, demoPlayers + "dodaj gracza testowego". Brak backendu/multiplayer.
+
+Rozbieznosci z mockupami:
+1. PALETA: kod ma cieply brzoskwiniowo-brazowy motyw (--accent hsl(24 80% 75%), tlo hsl(20 13% 5%), glow #f4b58c). Mockup: neon fiolet+roz na czerni.
+2. Branding: brak logo "PRAWDA czy WYZWANIE". logo.png i crown.png leza w repo NIEUZYWANE.
+3. Ekran 1: kod ma karte z zakladkami + OTP cyfrowy. Mockup: dwa kafle UTWORZ/DOLACZ + pole ID.
+4. ID pokoju: makeRoomCode() = 6 CYFR, join InputOTP REGEXP_ONLY_DIGITS. Mockup: alfanumeryczne "AB12CD".
+5. Onboarding: kod 5 avatarow-IKON, brak osobnego koloru, brak licznika. Mockup: 8 avatarow-twarzy + 7 kolorow + licznik 0/20.
+6. Ekran 3: kod = siatka kafelkow "Telefon", anim setTimeout 420ms. Mockup: rzad awatarow + duza animowana karta "Ty" + sekcja "Jak to dziala".
+7. Ekran 4: brak korony/konfetti (crown.png nieuzywany!). Mockup: zlota korona + konfetti + "Wylosuj inne".
+8. Ekran 6: kod = bottom-sheet 3 switche. Mockup: panel z sidebarem (Ogolne/Rozgrywka/Dzwieki/Zarzadzanie graczami).
+9. Ekran 7: kod = dialog "prototyp zatwierdza recznie". Mockup: awatary z zielonymi checkmarkami + progress 5/6.
+10. Polskie znaki: bałagan - polowa stringow bez diakrytyki (Dolacz, Utworz, Pokoj, Losuj szczesliwca, udawales, rozbawilby, smieszy, zostal).
+11. Brak multiplayer mimo ze caly design to gra real-time na osobnych telefonach.
+
+Decyzje uzytkownika:
+- Zakres: poprawne polskie znaki + ekrany 1:1 + multiplayer (backend).
+- Podejscie: PRZEPISAC OD ZERA pod mockupy (rozbic monolit na komponenty).
+
+Plan (front-first, stan w izolowanym hooku zeby multiplayer byl tani do podpiecia):
+  FAZA 1 (fundament): #1 paleta neon (global.css), #2 struktura plikow, #3 hook stanu + dane, #4 logo/brand.
+  FAZA 2 (ekrany 1:1): #5-#11, poprawna polszczyzna (#12) wpleciona od razu.
+  FAZA 3: #13 weryfikacja (tsc/lint/preview), #14 multiplayer (backend do ustalenia z userem).
+
+Paleta docelowa (z mockupow):
+  bg ~#0A0810 (czarny fiolet), surface ~#15121E, accent fiolet #8B5CF6, magenta/pink #EC4899/#F43F5E (WYZWANIE/DOLACZ),
+  gold korona #FCD34D, success zielony #22C55E, muted szaro-fiolet.
+
+S0001. Task #1 (paleta neon) - in_progress:
+- Start: przepisuje src/global.css na neonowa palete.
+- Next: struktura plikow + hook stanu.
+
+---
+
+S0001. FRONT PRZEPISANY OD ZERA (tasks #1-#13 passing):
+Nowa struktura:
+  src/theme/colors.ts          - neon hexy + gradienty + paleta graczy (7 kolorow)
+  src/global.css               - tokeny HeroUI przemapowane na neon (fiolet/magenta/czern), dark-only
+  src/game/types.ts            - Phase, ChallengeType, Player, RoomSettings, AvatarId, ApprovalAction
+  src/game/data.ts             - 8 avatarow (emoji placeholder), prompty PL (poprawna diakrytyka), makeRoomCode (alfanum 6), pickPrompt
+  src/game/use-game.ts         - CALY stan i logika gry w 1 hooku (izolowane pod multiplayer); eksport GameApi
+  src/components/screen.tsx     - tlo neon + 2 poswiaty (fiolet/magenta)
+  src/components/neon-button.tsx- przyciski gradient violet/pink/ghost z glow
+  src/components/neon-card.tsx  - karta z neon borderem/glow
+  src/components/player-avatar.tsx - AvatarVisual + PlayerAvatar (emoji w kolorowym ringu)
+  src/components/brand-logo.tsx - logo "PRAWDA czy WYZWANIE" (textShadow neon)
+  src/components/color-dot.tsx, selectable-avatar.tsx - wybor koloru/avatara
+  src/components/crown.tsx      - korona z crown.png (codex go ignorowal)
+  src/components/confetti.tsx   - deterministyczny rozrzut konfetti
+  src/components/game-card.tsx  - duza karta "Ty" (gradient, glow)
+  src/components/room-header.tsx- naglowek pokoju + rzad awatarow z highlightem
+  src/components/how-it-works.tsx - sekcja "Jak to dziala" (3 kroki)
+  src/screens/start-screen.tsx       - EKRAN 1
+  src/screens/onboarding-screen.tsx  - EKRAN 2
+  src/screens/room-screen.tsx + room/{circulating,lucky,challenge}-view.tsx - EKRANY 3/4/5
+  src/screens/settings-sheet.tsx     - EKRAN 6 (sidebar + switche)
+  src/screens/approval-modal.tsx     - EKRAN 7 (glosy + progress 5/6)
+  src/app/index.tsx            - cienki orchestrator (useGame + przelaczanie stage)
+Usuniete: src/components/glass.tsx (zastapione neon-card/neon-button).
+
+Weryfikacja (task #13): typecheck 0 bledow, lint czysty, KAZDY ekran sprawdzony screenshotem w expo web (port 8090) - zgodny z mockupem. Naprawiony bug GameCard (gradient nie wypelnial wysokosci). Kolory onboardingu w 1 rzedzie (justify-between, size 40). Logo + dekoracje rozmieszczone bez nachodzenia.
+
+Znane placeholdery (swiadome):
+- Avatary = emoji twarze (do podmiany na docelowe ilustracje).
+- Modal akceptacji: glosy zasymulowane (nie-self=tak, self decyduje) - single-device, do zastapienia realnymi glosami przy multiplayerze.
+- demoPlayers / "Dodaj gracza testowego" - znikna po multiplayerze.
+
+=== SESSION S0001 HANDOFF === 2026-06-13T08:45:00Z
+Status: paused (czeka na decyzje usera)
+Current state: Front 100% gotowy i zweryfikowany. tsc+lint zielone. Nie commitowano (user nie prosil).
+Immediate next action: Task #14 multiplayer - ustalic z userem backend (Convex rekomendowany dla real-time rooms/voting, alt. Supabase). Potem: schema (rooms, players, turns, votes), podmiana use-game.ts na warstwe backendowa (useQuery/useMutation), zachowac ten sam interfejs GameApi by ekrany sie nie zmienily.
+Open questions: Jaki backend? Czy avatary zostaja emoji czy docelowe ilustracje? Czy commitowac obecny stan?
+Warnings: Metro na porcie 8081 zajmuje inny projekt (sudoku-heroui) - uzywac 8090. CI=1 wylacza hot reload - preview_start uruchamia bez CI (watch dziala).
+Files modified: src/global.css, src/app/index.tsx, src/components/screen.tsx; usunieto src/components/glass.tsx; nowe: caly src/theme, src/game, wiekszosc src/components, caly src/screens; .claude/launch.json; pliki trackingu.
+
+---

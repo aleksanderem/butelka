@@ -1,0 +1,29 @@
+{
+  "session_id": "S0001",
+  "date": "2026-06-13",
+  "tasks": [
+    { "id": 1, "name": "design_system_neon_palette", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 2, "name": "file_structure_split_monolith", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 3, "name": "game_state_hook_and_data", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 4, "name": "logo_and_brand_components", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 5, "name": "screen1_start", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 6, "name": "screen2_onboarding_avatars_colors", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 7, "name": "screen3_card_circulating_animation", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 8, "name": "screen4_lucky_crown_confetti", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 9, "name": "screen5_truth_or_dare", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 10, "name": "screen6_settings_panel_sidebar", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 11, "name": "screen7_approval_voting_modal", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 12, "name": "polish_diacritics_all_strings", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 13, "name": "verify_typecheck_lint_preview", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
+    { "id": 14, "name": "multiplayer_backend", "status": "not_started", "created_session": "S0001", "last_updated_session": "S0001" }
+  ],
+  "reason": "Front przepisany od zera pod 7 mockupow i zweryfikowany wizualnie. Multiplayer czeka na decyzje o backendzie.",
+  "thinking_process": "Fundament (paleta+struktura+hook+brand) -> 7 ekranow 1:1 -> weryfikacja w expo web. Wszystkie ekrany zgodne z mockupami. Stan w src/game/use-game.ts izolowany pod podmiane na backend. Szczegoly w tasks_progress_verbose.txt (handoff S0001).",
+  "connected_tasks": [3, 14],
+  "how_to_test": [
+    { "id": 1, "name": "npx tsc --noEmit zwraca 0 bledow", "status": "done", "is_ok": "true", "data_for_next_step": [], "session_id": "S0001" },
+    { "id": 2, "name": "npm run lint przechodzi", "status": "done", "is_ok": "true", "data_for_next_step": [], "session_id": "S0001" },
+    { "id": 3, "name": "Kazdy z 7 ekranow zgodny wizualnie z mockupem (neon, korona, konfetti, karta, sidebar, glosowanie)", "status": "done", "is_ok": "true", "data_for_next_step": ["Zweryfikowane screenshotami w expo web na porcie 8090"], "session_id": "S0001" },
+    { "id": 4, "name": "Wszystkie polskie stringi z poprawna diakrytyka", "status": "done", "is_ok": "true", "data_for_next_step": [], "session_id": "S0001" }
+  ]
+}
