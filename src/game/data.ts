@@ -18,13 +18,8 @@ export const defaultSettings: RoomSettings = {
   requireNextDareApproval: false,
 };
 
-const ROOM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-
-/** ID pokoju: 6 znaków alfanumerycznych (jak „AB12CD”). Generowane lokalnie,
- *  aby „Utwórz pokój” dzialalo natychmiast bez czekania na backend. */
+/** ID pokoju: 6 cyfr (jak kod OTP). Generowane lokalnie, aby „Utwórz pokój”
+ *  dzialalo natychmiast bez czekania na backend. */
 export function makeRoomCode(): string {
-  return Array.from(
-    { length: 6 },
-    () => ROOM_CODE_ALPHABET[Math.floor(Math.random() * ROOM_CODE_ALPHABET.length)]
-  ).join("");
+  return Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)).join("");
 }

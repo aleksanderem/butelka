@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { Dialog, Input, Label } from "heroui-native";
+import { Dialog, InputOTP } from "heroui-native";
 import { useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 
@@ -71,31 +71,37 @@ export function StartScreen({ game }: { game: GameApi }) {
         </View>
       </Pressable>
 
-      <NeonCard className="gap-4">
-        <View className="flex-row items-center gap-3">
+      <NeonCard className="items-center gap-5">
+        <View className="items-center gap-2">
           <View className="h-11 w-11 items-center justify-center rounded-xl bg-secondary">
             <Ionicons color={neon.magenta} name="enter-outline" size={22} />
           </View>
-          <View className="flex-1">
-            <Text className="text-lg font-extrabold text-foreground">Dołącz do pokoju</Text>
-            <Text className="text-sm text-muted">Wpisz ID pokoju, aby dołączyć</Text>
-          </View>
+          <Text className="text-lg font-extrabold text-foreground">Dołącz do pokoju</Text>
+          <Text className="text-center text-sm text-muted">Wpisz ID pokoju, aby dołączyć</Text>
         </View>
 
-        <View className="gap-2">
-          <Label className="uppercase">ID pokoju</Label>
-          <Input
-            autoCapitalize="characters"
-            autoCorrect={false}
-            maxLength={6}
-            onChangeText={(value) => game.setJoinCode(value.toUpperCase())}
-            placeholder="Wpisz ID pokoju"
-            value={game.joinCode}
-          />
-        </View>
+        <InputOTP
+          inputMode="numeric"
+          maxLength={6}
+          onChange={(value) => game.setJoinCode(value.replace(/\D/g, ""))}
+          value={game.joinCode}
+        >
+          <InputOTP.Group>
+            <InputOTP.Slot index={0} />
+            <InputOTP.Slot index={1} />
+            <InputOTP.Slot index={2} />
+          </InputOTP.Group>
+          <InputOTP.Separator />
+          <InputOTP.Group>
+            <InputOTP.Slot index={3} />
+            <InputOTP.Slot index={4} />
+            <InputOTP.Slot index={5} />
+          </InputOTP.Group>
+        </InputOTP>
 
         <NeonButton
-          disabled={game.normalizedJoinCode.length < 4}
+          className="w-full"
+          disabled={game.normalizedJoinCode.length < 6}
           label="Dołącz"
           onPress={game.joinRoom}
           variant="pink"

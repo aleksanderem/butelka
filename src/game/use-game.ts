@@ -151,7 +151,7 @@ export function useGame() {
   }, [inRoom, state]);
 
   const normalizedName = playerName.trim();
-  const normalizedJoinCode = joinCode.trim().toUpperCase();
+  const normalizedJoinCode = joinCode.replace(/\D/g, "");
   const canEnterRoom = normalizedName.length >= 2;
   const canSpin = phase === "lobby" && players.length >= 2;
 
@@ -174,7 +174,7 @@ export function useGame() {
   }, []);
 
   const joinRoom = useCallback(() => {
-    if (normalizedJoinCode.length < 4) {
+    if (normalizedJoinCode.length < 6) {
       return;
     }
     setRoomCode(normalizedJoinCode);

@@ -37,12 +37,3 @@ export function pickPrompt(type: "prawda" | "wyzwanie", exclude?: string | null)
   const source = pool.length > 0 ? pool : prompts;
   return source[Math.floor(Math.random() * source.length)];
 }
-
-const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-
-export function makeRoomCode(): string {
-  return Array.from(
-    { length: 6 },
-    () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]
-  ).join("");
-}
