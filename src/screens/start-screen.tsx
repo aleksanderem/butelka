@@ -33,8 +33,7 @@ export function StartScreen({ game }: { game: GameApi }) {
   return (
     <View className="flex-1 gap-6 px-5 pt-6">
       <View className="items-center pb-2 pt-4">
-        <FloatingDecor />
-        <BrandLogo size={50} />
+        <BrandLogo width={300} />
       </View>
 
       <Pressable
@@ -146,32 +145,5 @@ function FooterLink({
       <Ionicons color={neon.textMuted} name={icon} size={24} />
       <Text className="text-xs font-medium text-muted">{label}</Text>
     </Pressable>
-  );
-}
-
-/** Rozrzucone neonowe ikonki wokół logo (jak na mockupie ekranu startowego). */
-function FloatingDecor() {
-  const decor: {
-    icon: keyof typeof Ionicons.glyphMap;
-    color: string;
-    top: number;
-    left?: number;
-    right?: number;
-    size: number;
-  }[] = [
-    { icon: "help", color: neon.purpleBright, top: -6, left: 2, size: 24 },
-    { icon: "flash", color: neon.magenta, top: 2, right: 0, size: 22 },
-    { icon: "heart", color: neon.pink, top: 80, left: -10, size: 18 },
-    { icon: "star", color: neon.gold, top: 96, right: -6, size: 20 },
-  ];
-
-  return (
-    <View pointerEvents="none" style={{ height: 0, width: "100%" }}>
-      {decor.map((d, i) => (
-        <View key={i} style={{ left: d.left, position: "absolute", right: d.right, top: d.top }}>
-          <Ionicons color={d.color} name={d.icon} size={d.size} style={{ opacity: 0.85 }} />
-        </View>
-      ))}
-    </View>
   );
 }
