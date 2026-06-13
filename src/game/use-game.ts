@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { api } from "../../convex/_generated/api";
 import { avatarOrder } from "@/game/avatars";
-import { colorOrder, defaultSettings } from "@/game/data";
+import { colorOrder, defaultSettings, makeRoomCode } from "@/game/data";
 import type {
   ApprovalState,
   AvatarId,
@@ -43,8 +43,7 @@ export function useGame() {
   const [spinTick, setSpinTick] = useState(0);
 
   // Mutacje backendu.
-  const createRoomMut = useMutation(api.rooms.createRoom);
-  const joinRoomMut = useMutation(api.rooms.joinRoom);
+  const enterRoomMut = useMutation(api.rooms.createOrJoinRoom);
   const leaveRoomMut = useMutation(api.rooms.leaveRoom);
   const spinMut = useMutation(api.rooms.spin);
   const pickChallengeMut = useMutation(api.rooms.pickChallenge);
@@ -136,15 +135,13 @@ export function useGame() {
     [settings]
   );
 
-  const createRoom = useCallback(async () => {
-    if (!clientId) {
-      return;
-    }
-    const { code } = await createRoomMut({ clientId });
-    setRoomCode(code);
+  const createRoom = useCallback(() => {
+    // Kod generujemy lokalnie — przejscie do onboardingu jest natychmiastowe,
+    // a pokoj powstaje w backendzie dopiero przy wejsciu do gry (completeProfile).
+    setRoomCode(makeRoomCode());
     setRoomTab("create");
     setStage("profile");
-  }, [clientId, createRoomMut]);
+  }, []);
 
   const joinRoom = useCallback(() => {
     if (normalizedJoinCode.length < 4) {
@@ -159,9 +156,16 @@ export function useGame() {
     if (!canEnterRoom || !clientId || !roomCode) {
       return;
     }
-    await joinRoomMut({ code: roomCode, clientId, name: normalizedName, avatarId, colorId });
+    await enterRoomMut({
+      code: roomCode,
+      asHost: roomTab === "create",
+      clientId,
+      name: normalizedName,
+      avatarId,
+      colorId,
+    });
     setStage("room");
-  }, [avatarId, canEnterRoom, clientId, colorId, joinRoomMut, normalizedName, roomCode]);
+  }, [avatarId, canEnterRoom, clientId, colorId, enterRoomMut, normalizedName, roomCode, roomTab]);
 
   const leaveRoom = useCallback(async () => {
     if (roomCode && clientId) {
@@ -178,14 +182,15 @@ export function useGame() {
       return;
     }
     const i = players.length;
-    void joinRoomMut({
+    void enterRoomMut({
       code: roomCode,
+      asHost: false,
       clientId: botClientId(),
       name: `Gracz ${i + 1}`,
       avatarId: avatarOrder[i % avatarOrder.length],
       colorId: colorOrder[i % colorOrder.length],
     });
-  }, [joinRoomMut, players.length, roomCode]);
+  }, [enterRoomMut, players.length, roomCode]);
 
   const spin = useCallback(() => {
     if (roomCode) {

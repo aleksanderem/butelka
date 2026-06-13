@@ -9,7 +9,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "./_generated/server";
-import { makeRoomCode, pickPrompt } from "./prompts";
+import { pickPrompt } from "./prompts";
 import { approvalActionValidator, challengeTypeValidator, settingsValidator } from "./schema";
 
 const DEFAULT_SETTINGS = {
@@ -54,45 +54,34 @@ function resetRoundPatch() {
   };
 }
 
-export const createRoom = mutation({
-  args: { clientId: v.string() },
-  handler: async (ctx, { clientId }) => {
-    let code = makeRoomCode();
-    // Bardzo mało prawdopodobna kolizja kodu — w razie czego losuj ponownie.
-    while (await roomByCode(ctx, code)) {
-      code = makeRoomCode();
-    }
-    await ctx.db.insert("rooms", {
-      code,
-      phase: "lobby",
-      hostClientId: clientId,
-      luckyClientId: null,
-      spinSeed: null,
-      spinStartedAt: null,
-      challengeType: null,
-      challengeText: null,
-      settings: DEFAULT_SETTINGS,
-      pendingAction: null,
-      createdAt: Date.now(),
-    });
-    return { code };
-  },
-});
-
-export const roomExists = query({
-  args: { code: v.string() },
-  handler: async (ctx, { code }) => {
-    return (await roomByCode(ctx, code)) !== null;
-  },
-});
-
-export const joinRoom = mutation({
-  args: { code: v.string(), ...profileArgs },
-  handler: async (ctx, { code, clientId, name, avatarId, colorId }) => {
-    const room = await roomByCode(ctx, code);
+/**
+ * Wejscie do pokoju: tworzy pokoj (gdy asHost i jeszcze nie istnieje) albo dolacza
+ * do istniejacego. Kod generuje front, wiec „Utworz pokoj” nie czeka na backend.
+ */
+export const createOrJoinRoom = mutation({
+  args: { code: v.string(), asHost: v.boolean(), ...profileArgs },
+  handler: async (ctx, { code, asHost, clientId, name, avatarId, colorId }) => {
+    let room = await roomByCode(ctx, code);
     if (!room) {
-      throw new Error("Pokój o tym kodzie nie istnieje.");
+      if (!asHost) {
+        throw new Error("Pokój o tym kodzie nie istnieje.");
+      }
+      const id = await ctx.db.insert("rooms", {
+        code,
+        phase: "lobby",
+        hostClientId: clientId,
+        luckyClientId: null,
+        spinSeed: null,
+        spinStartedAt: null,
+        challengeType: null,
+        challengeText: null,
+        settings: DEFAULT_SETTINGS,
+        pendingAction: null,
+        createdAt: Date.now(),
+      });
+      room = (await ctx.db.get(id))!;
     }
+
     const existing = await ctx.db
       .query("players")
       .withIndex("by_room_client", (q) => q.eq("roomId", room._id).eq("clientId", clientId))
