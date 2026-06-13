@@ -19,18 +19,24 @@ export function RoomScreen({ game }: { game: GameApi }) {
 
   return (
     <View className="flex-1 gap-4 px-5 pt-4">
-      <RoomHeader
-        highlightIndex={highlightIndex}
-        onBack={game.leaveRoom}
-        onPlayers={() => game.setPlayersOpen(true)}
-        onSettings={() => game.setSettingsOpen(true)}
-        players={game.players}
-        roomCode={game.roomCode}
-      />
+      <View style={{ zIndex: 10 }}>
+        <RoomHeader
+          highlightIndex={highlightIndex}
+          onBack={game.leaveRoom}
+          onPlayers={() => game.setPlayersOpen(true)}
+          onSettings={() => game.setSettingsOpen(true)}
+          players={game.players}
+          roomCode={game.roomCode}
+        />
 
-      {game.isImpersonating ? <ImpersonationBanner game={game} /> : null}
+        {game.isImpersonating ? <ImpersonationBanner game={game} /> : null}
+      </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 28 }}
+        showsVerticalScrollIndicator={false}
+      >
         {game.phase === "chosen" ? (
           <LuckyView game={game} />
         ) : game.phase === "task" ? (
@@ -49,7 +55,11 @@ function ImpersonationBanner({ game }: { game: GameApi }) {
   return (
     <View
       className="flex-row items-center gap-2 rounded-2xl px-3.5 py-2.5"
-      style={{ backgroundColor: "rgba(251,191,36,0.14)", borderColor: "rgba(251,191,36,0.4)", borderWidth: 1 }}
+      style={{
+        backgroundColor: "rgba(251,191,36,0.14)",
+        borderColor: "rgba(251,191,36,0.4)",
+        borderWidth: 1,
+      }}
     >
       <Ionicons color={neon.gold} name="eye" size={16} />
       <Text className="flex-1 text-sm font-semibold" style={{ color: neon.goldBright }}>

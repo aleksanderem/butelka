@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Dialog } from "heroui-native";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import { AvatarVisual } from "@/components/player-avatar";
 import { NeonButton } from "@/components/neon-button";
@@ -57,7 +57,12 @@ export function ApprovalModal({ game }: { game: GameApi }) {
 
           <View className="flex-row flex-wrap items-start justify-center gap-3 py-1">
             {game.players.map((player) => (
-              <VoteAvatar key={player.id} player={player} voted={!!player.approved} />
+              <VoteAvatar
+                key={player.id}
+                player={player}
+                voted={!!player.approved}
+                onSwitch={() => game.setActingAs(player.clientId ?? null)}
+              />
             ))}
           </View>
 
@@ -101,9 +106,9 @@ export function ApprovalModal({ game }: { game: GameApi }) {
               variant="violet"
             />
           </View>
-          <Text className="text-[11px] text-muted">
+          <Text className="text-center text-[11px] text-muted">
             {myVote !== null
-              ? "Twój głos został oddany. Czekamy na pozostałych graczy."
+              ? "Twój głos oddany. Dotknij innego gracza, aby zagłosować w jego imieniu (test)."
               : `Wymagana zgoda ${needed} z ${total} graczy.`}
           </Text>
         </Dialog.Content>
@@ -112,14 +117,28 @@ export function ApprovalModal({ game }: { game: GameApi }) {
   );
 }
 
-function VoteAvatar({ player, voted }: { player: Player; voted: boolean }) {
+function VoteAvatar({
+  player,
+  voted,
+  onSwitch,
+}: {
+  player: Player;
+  voted: boolean;
+  onSwitch: () => void;
+}) {
   return (
-    <View className="items-center gap-1">
+    <Pressable
+      accessibilityLabel={`Głosuj jako ${player.name}`}
+      accessibilityRole="button"
+      className="items-center gap-1"
+      onPress={onSwitch}
+    >
       <View>
         <AvatarVisual
+          active={player.isSelf}
           avatarId={player.avatarId}
           colorId={player.colorId}
-          dimmed={!voted}
+          dimmed={!voted && !player.isSelf}
           size="sm"
         />
         <View
@@ -140,9 +159,13 @@ function VoteAvatar({ player, voted }: { player: Player; voted: boolean }) {
           <Ionicons color="#FFFFFF" name={voted ? "checkmark" : "ellipsis-horizontal"} size={12} />
         </View>
       </View>
-      <Text numberOfLines={1} className="max-w-14 text-center text-[11px] text-muted">
+      <Text
+        numberOfLines={1}
+        className="max-w-14 text-center text-[11px]"
+        style={{ color: player.isSelf ? neon.white : neon.textMuted }}
+      >
         {player.isSelf ? "Ty" : player.name}
       </Text>
-    </View>
+    </Pressable>
   );
 }
