@@ -1,7 +1,10 @@
+import { BlurView } from "expo-blur";
 import { StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Defs, Polygon, RadialGradient, Rect, Stop } from "react-native-svg";
 
-import { neon } from "@/theme/colors";
+import { AvatarVisual } from "@/components/player-avatar";
+import type { AvatarId } from "@/game/types";
+import { neon, type PlayerColorId } from "@/theme/colors";
 import { fonts } from "@/theme/fonts";
 
 const W = 160;
@@ -40,8 +43,27 @@ const SPARKLES = [
   { x: 44, y: 184, r: 1 },
 ];
 
-/** Duża neonowa karta „Ty” z sunburstem, która krąży wśród graczy (ekran 3). */
-export function GameCard({ label, spinning = false }: { label: string; spinning?: boolean }) {
+/** Duża neonowa karta „Ty” z sunburstem (krąży wśród graczy / wachlarz w lobby). */
+export function GameCard({
+  label,
+  avatarId,
+  colorId,
+  animate,
+  spinning = false,
+  blur = 0,
+  dim = 0,
+}: {
+  label?: string;
+  avatarId?: AvatarId;
+  colorId?: PlayerColorId;
+  animate?: boolean;
+  spinning?: boolean;
+  /** Rozmycie własnej zawartości karty (głębia w wachlarzu) — 0 = ostra. */
+  blur?: number;
+  /** Przyciemnienie karty (głębia) — 0..1. */
+  dim?: number;
+}) {
+  const hasAvatar = avatarId !== undefined && colorId !== undefined;
   return (
     <View
       style={{
@@ -81,25 +103,60 @@ export function GameCard({ label, spinning = false }: { label: string; spinning?
           <Rect fill="url(#card-edge)" height={H} width={W} />
           <Rect fill="url(#card-center)" height={H} width={W} />
           {SPARKLES.map((s) => (
-            <Circle cx={s.x} cy={s.y} fill="#EDE0FF" fillOpacity={0.85} key={`${s.x}-${s.y}`} r={s.r} />
+            <Circle
+              cx={s.x}
+              cy={s.y}
+              fill="#EDE0FF"
+              fillOpacity={0.85}
+              key={`${s.x}-${s.y}`}
+              r={s.r}
+            />
           ))}
         </Svg>
 
-        <View className="items-center justify-center" style={StyleSheet.absoluteFill}>
-          <Text
-            style={{
-              color: "#FFFFFF",
-              fontFamily: fonts.extrabold,
-              fontSize: 52,
-              letterSpacing: 0.5,
-              textShadowColor: "rgba(0,0,0,0.35)",
-              textShadowOffset: { width: 0, height: 2 },
-              textShadowRadius: 8,
-            }}
-          >
-            {label}
-          </Text>
+        <View
+          className="items-center justify-center"
+          style={[StyleSheet.absoluteFill, { gap: 12, paddingHorizontal: 10 }]}
+        >
+          {hasAvatar ? (
+            <AvatarVisual animate={animate} avatarId={avatarId} colorId={colorId} size="lg" />
+          ) : null}
+          {label ? (
+            <Text
+              adjustsFontSizeToFit
+              numberOfLines={1}
+              style={{
+                color: "#FFFFFF",
+                fontFamily: fonts.extrabold,
+                fontSize: hasAvatar ? 24 : 52,
+                letterSpacing: 0.5,
+                maxWidth: W - 24,
+                textAlign: "center",
+                textShadowColor: "rgba(0,0,0,0.35)",
+                textShadowOffset: { width: 0, height: 2 },
+                textShadowRadius: 8,
+              }}
+            >
+              {label}
+            </Text>
+          ) : null}
         </View>
+
+        {/* Głębia wachlarza: blur rozmywa własną zawartość karty (jest pod nim), dim przyciemnia. */}
+        {blur > 0 ? (
+          <BlurView
+            intensity={blur}
+            pointerEvents="none"
+            style={StyleSheet.absoluteFill}
+            tint="dark"
+          />
+        ) : null}
+        {dim > 0 ? (
+          <View
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFill, { backgroundColor: `rgba(4,2,10,${dim})` }]}
+          />
+        ) : null}
       </View>
     </View>
   );

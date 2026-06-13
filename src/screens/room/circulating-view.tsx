@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
+import { CardFan } from "@/components/card-fan";
 import { GameCard } from "@/components/game-card";
 import { HowItWorks } from "@/components/how-it-works";
 import { NeonButton } from "@/components/neon-button";
@@ -24,7 +25,11 @@ export function CirculatingView({ game }: { game: GameApi }) {
   return (
     <View className="gap-7">
       <View className="items-center gap-5 pt-2">
-        <GameCard label={label} spinning={spinning} />
+        {isLobby ? (
+          <CardFan players={game.players} />
+        ) : (
+          <GameCard label={label} spinning={spinning} />
+        )}
         <View className="items-center gap-1.5">
           <Text className="text-2xl font-extrabold text-foreground">
             {spinning ? "Karta krąży…" : "Gotowi na rundę?"}
