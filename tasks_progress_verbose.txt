@@ -233,3 +233,15 @@ Warnings/gotchas:
   - Permissions kolekcji: role "any" CRUD, document security OFF -> guest pisze bez sesji (app wysyla tylko endpoint+projectId, BEZ klucza).
 Files modified: patrz commit d8384ee. Bursty/ikony/karta.png NADAL niezacommitowane (osobna robota, poza migracja).
 
+
+=== SESSION S0002 FOLLOWUP === 2026-06-13T23:18:00Z (po HANDOFF)
+Bug zgloszony przez uzytkownika na symulatorze: dialog glosowania nie do zamkniecia (wisial na 2/2).
+Diagnoza (odczyt DB pokoju 085135): host PRAWIDLOWO rozstrzygnal w bazie (phase=lobby, pending=null), ale jego LOKALNY stan byl nieodswiezony -> dialog wisi. Przyczyna: zdjety reload po resolveVotes (mial isc przez Realtime), a natywny Realtime nie dostarcza.
+Odkrycie: serwer Realtime OK (Node `ws` dostaje connected+event po PATCH), ale natywny react-native-appwrite nie odbiera (test: REST PATCH pokoju nie zmienil widoku symulatora).
+Naprawione (commit e96d28b):
+  1. Dialog zamykalny: <Dialog.Close/> (X) + onOpenChange -> game.cancelApproval() (cancelAction czysci pending+glosy). Wczesniej onOpenChange={()=>undefined}.
+  2. Host przeladowuje po realnym rozstrzygnieciu: resolveVotes zwraca boolean acted; efekt robi reload tylko gdy acted (brak petli).
+  3. Loader w modalu po osiagnieciu progu: approved>=needed -> "Zaakceptowano - wykonuje...", reject-decided -> "Odrzucono - pomijam...". ApprovalState + pole rejected.
+  4. POLLING fallback co 2,5s w efekcie subskrypcji (obok Realtime) -> sync na natywie.
+Weryfikacja end-to-end na iPhone 16e (przez REST + polling, bez taps): ustawiono glosowanie 1/3 -> symulator sam pokazal modal (polling dziala) z przyciskiem X; dodano 2. glos 2/3 -> host-sim rozstrzygnal, przeladowal, dialog SAM sie zamknal, pojawila sie nowa prawda. DB potwierdzil phase=task, pending=null. tsc+lint zielone.
+Sprzatniete: pokoj 619027 -> lobby; .gitignore -> .expo-*.log.

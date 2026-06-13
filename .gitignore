@@ -45,8 +45,8 @@ yarn-error.*
 # heroui-agents-md
 .heroui-docs/
 
-# Local preview server log
-.expo-web.log
+# Local preview / Metro / build logs
+.expo-*.log
 
 # Zrodlo animacji maskotek (342MB) — uzyte avatary wyekstrahowane do assets/avatars/
 Animations/
