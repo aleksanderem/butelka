@@ -1,11 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Text, useWindowDimensions, View } from "react-native";
+import { Text, View } from "react-native";
 
-import { useBurst } from "@/components/burst-overlay";
 import { GameCard } from "@/components/game-card";
 import { HowItWorks } from "@/components/how-it-works";
 import { NeonButton } from "@/components/neon-button";
-import { bursts } from "@/game/bursts";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 
@@ -17,17 +15,10 @@ function cardLabelFor(name: string | null, isSelf: boolean | undefined): string 
 }
 
 export function CirculatingView({ game }: { game: GameApi }) {
-  const fire = useBurst();
-  const { width, height } = useWindowDimensions();
   const spinning = game.phase === "spinning";
   const isLobby = game.phase === "lobby";
   const label = cardLabelFor(game.activePlayer?.name ?? null, game.activePlayer?.isSelf);
   const enoughPlayers = game.players.length >= 2;
-
-  const handleSpin = () => {
-    fire(bursts.spin, { x: width / 2, y: height * 0.38, size: 420 });
-    game.spin();
-  };
 
   return (
     <View className="gap-7">
@@ -53,7 +44,7 @@ export function CirculatingView({ game }: { game: GameApi }) {
             disabled={!game.canSpin}
             icon="sparkles"
             label="Losuj szczęśliwca"
-            onPress={handleSpin}
+            onPress={game.spin}
             variant="violet"
           />
           {!enoughPlayers ? (
