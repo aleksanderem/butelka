@@ -155,7 +155,28 @@ CLOUD DEPLOY (user: testuje na Macu web/symulator + chce cloud):
   Dashboard: https://dashboard.convex.dev/t/aleksander-3191c/butelka
   Do PRODUKCJI (release): `npx convex deploy` (osobny prod deployment) - jeszcze nie zrobione.
 
-=== SESSION S0001 HANDOFF === 2026-06-13T14:25:00Z
+S0001. Font + role visibility + iOS hot reload + craft (critique):
+FONT: Plus Jakarta Sans (nowoczesny grotesk, nie ai-slop). @expo-google-fonts/plus-jakarta-sans
+  (wagi 400-800) + expo-font. useFonts+splash w _layout. global.css @theme --font-normal..extrabold
+  (heroui komponenty I surowe Text przez uniwind laduja Jakarte globalnie). src/theme/fonts.ts stale.
+  Uwaga: Jakarta max waga 800 -> wszystkie font-black/fontWeight 900 zmienione na extrabold/fonts.extrabold.
+ROLE VISIBILITY (kluczowe wg usera): gameState +isHost per gracz; use-game +amHost/+amLucky.
+  - lobby: tylko HOST losuje (LOSUJ + dodaj gracza); reszta "Czekajcie az host rozpocznie".
+  - chosen: tylko SZCZESLIWIEC widzi Prawda/Wyzwanie; reszta spinner "X wybiera...".
+  - task: segment+tresc dla WSZYSTKICH; sterowanie (nastepne/podaj dalej/wylosuj inne) tylko szczesliwiec.
+  - korona 👑 przy avatarze hosta (player-avatar badge).
+  Zweryfikowane multi-clientId w web: host widzi LOSUJ+korone, gosc widzi czekanie (pokoj 2ZTNTH, 3 graczy).
+iOS HOT RELOAD: `npm run ios` = expo run:ios (dev build, bo Lottie wymaga native, Expo Go nie wystarcza).
+  app.json: bundleIdentifier com.butelka.game, userInterfaceStyle dark, splash/bg #0A0712.
+  Build OK na iPhone 16e (booted), Metro port 8092 (8081 zajmuje sudoku). ios/ w .gitignore (prebuild generuje).
+  Metro dziala w tle (task b14bqc4en) - hot reload aktywny.
+  `npm run web` = expo start --web (podglad/test). Warning: expo-system-ui dla ios.backgroundColor (nieszkodliwy).
+CRAFT: dark splash/UI, font spojnosc, lepszy spacing/rytm w przepisanych widokach (lucky/challenge/circulating
+  gap-7, info-boxy, spinner czekania). Pelny pixel-audyt settings/approval/room-header - do ew. dalszego dopracowania.
+TESTING (multi-device): cloud backend -> telefony lacza sie kodem. Web: ?clientId=X wymusza tozsamosc (rozne karty).
+  Lottie => Expo Go nie dziala na telefonach, potrzebny dev build / EAS. Przewodnik: TESTING.md.
+
+=== SESSION S0001 HANDOFF === 2026-06-13T15:15:00Z
 Status: completed
 Current state: Oba glowne zadania done. tsc+lint zielone. 3 commity na branchu feat/rewrite-ui-mockups
   (front, tracking, multiplayer). Branch NIE zmergowany do main, NIE wypchniety (brak prosby).
