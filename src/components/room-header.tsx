@@ -9,22 +9,57 @@ type RoomHeaderProps = {
   roomCode: string;
   players: Player[];
   highlightIndex: number | null;
-  onMenu: () => void;
+  onBack: () => void;
+  onPlayers: () => void;
+  onSettings: () => void;
 };
 
-export function RoomHeader({ roomCode, players, highlightIndex, onMenu }: RoomHeaderProps) {
+export function RoomHeader({
+  roomCode,
+  players,
+  highlightIndex,
+  onBack,
+  onPlayers,
+  onSettings,
+}: RoomHeaderProps) {
   return (
     <View className="gap-4">
-      <View className="flex-row items-center justify-between px-1">
-        <Pressable accessibilityLabel="Menu pokoju" accessibilityRole="button" onPress={onMenu}>
-          <Ionicons color={neon.white} name="menu" size={26} />
+      <View className="flex-row items-center justify-between">
+        <Pressable
+          accessibilityLabel="Opuść pokój"
+          accessibilityRole="button"
+          className="-ml-1 h-9 w-9 items-center justify-center"
+          hitSlop={8}
+          onPress={onBack}
+        >
+          <Ionicons color={neon.white} name="arrow-back" size={24} />
         </Pressable>
+
         <Text className="text-base font-bold text-foreground">
           Pokój: <Text style={{ color: neon.purpleBright }}>{roomCode}</Text>
         </Text>
-        <View className="flex-row items-center gap-1.5">
-          <Ionicons color={neon.textMuted} name="people" size={20} />
-          <Text className="text-base font-bold text-foreground">{players.length}</Text>
+
+        <View className="flex-row items-center gap-1">
+          <Pressable
+            accessibilityLabel="Gracze w pokoju"
+            accessibilityRole="button"
+            className="flex-row items-center gap-1.5 rounded-full px-2.5 py-1.5"
+            hitSlop={6}
+            onPress={onPlayers}
+            style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
+          >
+            <Ionicons color={neon.textMuted} name="people" size={18} />
+            <Text className="text-sm font-bold text-foreground">{players.length}</Text>
+          </Pressable>
+          <Pressable
+            accessibilityLabel="Ustawienia pokoju"
+            accessibilityRole="button"
+            className="h-9 w-9 items-center justify-center"
+            hitSlop={6}
+            onPress={onSettings}
+          >
+            <Ionicons color={neon.white} name="settings-outline" size={20} />
+          </Pressable>
         </View>
       </View>
 

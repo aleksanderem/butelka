@@ -124,6 +124,35 @@ export const leaveRoom = mutation({
   },
 });
 
+/** Host usuwa gracza z pokoju. Jeśli wyleciał szczęśliwiec — runda wraca do lobby. */
+export const kickPlayer = mutation({
+  args: { code: v.string(), hostClientId: v.string(), targetClientId: v.string() },
+  handler: async (ctx, { code, hostClientId, targetClientId }) => {
+    const room = await roomByCode(ctx, code);
+    if (!room || room.hostClientId !== hostClientId) {
+      return;
+    }
+    if (targetClientId === room.hostClientId) {
+      return; // host nie wyrzuca samego siebie
+    }
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_room_client", (q) => q.eq("roomId", room._id).eq("clientId", targetClientId))
+      .unique();
+    if (player) {
+      await ctx.db.delete(player._id);
+    }
+    if (room.luckyClientId === targetClientId) {
+      await clearVotes(ctx, room._id);
+      await ctx.db.patch(room._id, resetRoundPatch());
+    }
+    const remaining = await listPlayers(ctx, room._id);
+    if (remaining.length === 0) {
+      await ctx.db.delete(room._id);
+    }
+  },
+});
+
 export const spin = mutation({
   args: { code: v.string() },
   handler: async (ctx, { code }) => {

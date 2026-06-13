@@ -40,11 +40,16 @@ export function useGame() {
   const [avatarId, setAvatarId] = useState<AvatarId>(avatarOrder[0]);
   const [colorId, setColorId] = useState<PlayerColorId>(colorOrder[0]);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [playersOpen, setPlayersOpen] = useState(false);
   const [spinTick, setSpinTick] = useState(0);
+  // Testowanie na jednym urządzeniu: tożsamość, jako którą oglądamy/gramy.
+  // null = realne urządzenie; inaczej clientId wybranego gracza testowego.
+  const [actingClientId, setActingClientId] = useState<string | null>(null);
 
   // Mutacje backendu.
   const enterRoomMut = useMutation(api.rooms.createOrJoinRoom);
   const leaveRoomMut = useMutation(api.rooms.leaveRoom);
+  const kickPlayerMut = useMutation(api.rooms.kickPlayer);
   const spinMut = useMutation(api.rooms.spin);
   const pickChallengeMut = useMutation(api.rooms.pickChallenge);
   const rerollChallengeMut = useMutation(api.rooms.rerollChallenge);
@@ -53,11 +58,14 @@ export function useGame() {
   const voteMut = useMutation(api.rooms.vote);
   const updateSettingsMut = useMutation(api.rooms.updateSettings);
 
+  // Tożsamość, którą backend traktuje jako „Ty” (umożliwia podgląd jako gracz testowy).
+  const effectiveClientId = actingClientId ?? clientId;
+
   // Reaktywny stan pokoju.
-  const inRoom = stage === "room" && roomCode.length > 0 && clientId !== null;
+  const inRoom = stage === "room" && roomCode.length > 0 && effectiveClientId !== null;
   const state = useQuery(
     api.rooms.gameState,
-    inRoom ? { code: roomCode, clientId: clientId! } : "skip"
+    inRoom ? { code: roomCode, clientId: effectiveClientId! } : "skip"
   );
 
   const players: Player[] = useMemo(
@@ -76,6 +84,24 @@ export function useGame() {
   );
 
   const amHost = players.some((p) => p.isSelf && p.isHost);
+
+  // Podgląd jako gracz testowy: kogo aktualnie oglądamy i czy to ktoś inny niż my.
+  const viewAsPlayer = players.find((p) => p.isSelf) ?? null;
+  const isImpersonating =
+    actingClientId !== null &&
+    actingClientId !== clientId &&
+    players.some((p) => p.clientId === actingClientId);
+
+  // Jeśli oglądany gracz testowy zniknął (wyleciał/wyszedł) — wróć do swojego widoku.
+  useEffect(() => {
+    if (actingClientId === null) {
+      return;
+    }
+    if (players.length > 0 && !players.some((p) => p.clientId === actingClientId)) {
+      const id = setTimeout(() => setActingClientId(null), 0);
+      return () => clearTimeout(id);
+    }
+  }, [actingClientId, players]);
 
   const phase: Phase = state?.phase ?? "lobby";
   const settings: RoomSettings = state?.settings ?? defaultSettings;
@@ -172,14 +198,35 @@ export function useGame() {
   }, [avatarId, canEnterRoom, clientId, colorId, enterRoomMut, normalizedName, roomCode, roomTab]);
 
   const leaveRoom = useCallback(async () => {
+    // Wychodzimy zawsze jako realne urządzenie, nie jako podglądany gracz testowy.
     if (roomCode && clientId) {
       await leaveRoomMut({ code: roomCode, clientId });
     }
+    setActingClientId(null);
+    setPlayersOpen(false);
+    setSettingsOpen(false);
     setStage("entry");
     setRoomCode("");
     setJoinCode("");
     setPlayerName("");
   }, [clientId, leaveRoomMut, roomCode]);
+
+  /** Podgląd jako wybrany gracz (null = wróć do własnego widoku). */
+  const setActingAs = useCallback(
+    (target: string | null) => {
+      setActingClientId(target === clientId ? null : target);
+    },
+    [clientId]
+  );
+
+  const kickPlayer = useCallback(
+    (targetClientId: string) => {
+      if (roomCode && effectiveClientId) {
+        void kickPlayerMut({ code: roomCode, hostClientId: effectiveClientId, targetClientId });
+      }
+    },
+    [effectiveClientId, kickPlayerMut, roomCode]
+  );
 
   const addDemoPlayer = useCallback(() => {
     if (!roomCode) {
@@ -224,33 +271,33 @@ export function useGame() {
   }, [rerollLuckyMut, roomCode]);
 
   const nextChallenge = useCallback(() => {
-    if (!roomCode || !clientId || !challengeType) {
+    if (!roomCode || !effectiveClientId || !challengeType) {
       return;
     }
     void requestActionMut({
       code: roomCode,
-      clientId,
+      clientId: effectiveClientId,
       action: challengeType === "prawda" ? "nextTruth" : "nextDare",
     });
-  }, [challengeType, clientId, requestActionMut, roomCode]);
+  }, [challengeType, effectiveClientId, requestActionMut, roomCode]);
 
   const passTurn = useCallback(() => {
-    if (roomCode && clientId) {
-      void requestActionMut({ code: roomCode, clientId, action: "endTurn" });
+    if (roomCode && effectiveClientId) {
+      void requestActionMut({ code: roomCode, clientId: effectiveClientId, action: "endTurn" });
     }
-  }, [clientId, requestActionMut, roomCode]);
+  }, [effectiveClientId, requestActionMut, roomCode]);
 
   const confirmApproval = useCallback(() => {
-    if (roomCode && clientId) {
-      void voteMut({ code: roomCode, clientId, approved: true });
+    if (roomCode && effectiveClientId) {
+      void voteMut({ code: roomCode, clientId: effectiveClientId, approved: true });
     }
-  }, [clientId, roomCode, voteMut]);
+  }, [effectiveClientId, roomCode, voteMut]);
 
   const rejectApproval = useCallback(() => {
-    if (roomCode && clientId) {
-      void voteMut({ code: roomCode, clientId, approved: false });
+    if (roomCode && effectiveClientId) {
+      void voteMut({ code: roomCode, clientId: effectiveClientId, approved: false });
     }
-  }, [clientId, roomCode, voteMut]);
+  }, [effectiveClientId, roomCode, voteMut]);
 
   const updateSettings = useCallback(
     (patch: Partial<RoomSettings>) => {
@@ -289,6 +336,11 @@ export function useGame() {
     canSpin,
     normalizedName,
     normalizedJoinCode,
+    // podgląd jako gracz testowy
+    playersOpen,
+    actingClientId,
+    isImpersonating,
+    viewAsPlayer,
     // settery pól formularza
     setRoomTab,
     setJoinCode,
@@ -296,12 +348,15 @@ export function useGame() {
     setAvatarId,
     setColorId,
     setSettingsOpen,
+    setPlayersOpen,
     // akcje
     createRoom,
     joinRoom,
     leaveRoom,
     completeProfile,
     addDemoPlayer,
+    setActingAs,
+    kickPlayer,
     spin,
     pickChallenge,
     rerollLucky,

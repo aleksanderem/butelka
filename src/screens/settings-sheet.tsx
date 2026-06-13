@@ -7,13 +7,12 @@ import type { RoomSettings } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 
-type TabId = "general" | "gameplay" | "sounds" | "players";
+type TabId = "general" | "gameplay" | "sounds";
 
 const TABS: { id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
   { id: "general", icon: "settings-outline", label: "Ogólne" },
   { id: "gameplay", icon: "game-controller-outline", label: "Rozgrywka" },
   { id: "sounds", icon: "volume-high-outline", label: "Dźwięki" },
-  { id: "players", icon: "people-outline", label: "Zarządzanie graczami" },
 ];
 
 export function SettingsSheet({ game }: { game: GameApi }) {
