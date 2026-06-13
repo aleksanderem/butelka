@@ -61,14 +61,11 @@ export function StartScreen({ game }: { game: GameApi }) {
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-xl font-extrabold uppercase tracking-wide text-white">
-                  Utwórz pokój
-                </Text>
+                <Text className="text-xl font-extrabold text-white">Utwórz pokój</Text>
                 <Text className="mt-0.5 text-sm text-white/80">
                   Stwórz pokój i zaproś znajomych
                 </Text>
               </View>
-              <Ionicons color="rgba(255,255,255,0.8)" name="chevron-forward" size={22} />
             </View>
           </LinearGradient>
         </View>
