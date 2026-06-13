@@ -64,11 +64,14 @@ export function NeonButton({
       ]}
     >
       <ButtonSurface isGhost={isGhost} variant={variant}>
-        <View className="h-14 flex-row items-center justify-center gap-2 px-5">
+        <View className="h-14 flex-row items-center justify-center gap-2 px-4">
           {icon ? <Ionicons color={tint} name={icon} size={20} /> : null}
           <Text
-            style={{ color: tint }}
-            className="text-base font-extrabold uppercase tracking-wide"
+            adjustsFontSizeToFit
+            minimumFontScale={0.8}
+            numberOfLines={1}
+            style={{ color: tint, flexShrink: 1 }}
+            className="text-base font-extrabold uppercase"
           >
             {label}
           </Text>
