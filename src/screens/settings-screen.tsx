@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Switch } from "heroui-native";
+import { Separator, Slider, Switch } from "heroui-native";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
@@ -15,12 +15,14 @@ const TABS: { id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }[]
   { id: "sounds", icon: "volume-high-outline", label: "Dźwięki" },
 ];
 
-const THRESHOLDS: { id: ApprovalThreshold; label: string }[] = [
-  { id: "off", label: "Bez zgody" },
-  { id: "half", label: "Połowa" },
-  { id: "majority", label: "Większość" },
-  { id: "all", label: "Wszyscy" },
-];
+/** Kolejność poziomów progu na suwaku: 0=brak zgody … 3=wszyscy. */
+const THRESHOLD_ORDER: ApprovalThreshold[] = ["off", "half", "majority", "all"];
+const THRESHOLD_LABEL: Record<ApprovalThreshold, string> = {
+  off: "Bez zgody",
+  half: "Połowa",
+  majority: "Większość",
+  all: "Wszyscy",
+};
 
 /** Pełnoekranowa podstrona ustawień pokoju (taby u góry). */
 export function SettingsScreen({ game }: { game: GameApi }) {
@@ -51,7 +53,9 @@ export function SettingsScreen({ game }: { game: GameApi }) {
               className="flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl px-2 py-2.5"
               key={item.id}
               onPress={() => setTab(item.id)}
-              style={{ backgroundColor: active ? "rgba(139,92,246,0.18)" : "rgba(255,255,255,0.04)" }}
+              style={{
+                backgroundColor: active ? "rgba(139,92,246,0.18)" : "rgba(255,255,255,0.04)",
+              }}
             >
               <Ionicons
                 color={active ? neon.purpleBright : neon.textMuted}
@@ -93,7 +97,7 @@ function GameplayTab({
   onChange: (patch: Partial<RoomSettings>) => void;
 }) {
   return (
-    <View className="gap-5">
+    <View className="gap-4">
       <View className="gap-3">
         <Text className="text-base font-bold text-foreground">Start rundy</Text>
         <SettingRow
@@ -103,6 +107,8 @@ function GameplayTab({
         />
       </View>
 
+      <Separator />
+
       <View className="gap-3">
         <Text className="text-base font-bold text-foreground">Ile osób musi się zgodzić na…</Text>
         <ThresholdRow
@@ -110,17 +116,21 @@ function GameplayTab({
           value={settings.nextTruthApproval}
           onChange={(v) => onChange({ nextTruthApproval: v })}
         />
+        <Separator className="opacity-50" />
         <ThresholdRow
           label="zmianę wyzwania"
           value={settings.nextDareApproval}
           onChange={(v) => onChange({ nextDareApproval: v })}
         />
+        <Separator className="opacity-50" />
         <ThresholdRow
           label="koniec tury (kolejka gracza)"
           value={settings.endTurnApproval}
           onChange={(v) => onChange({ endTurnApproval: v })}
         />
       </View>
+
+      <Separator />
 
       <Text className="text-xs leading-5 text-muted">
         „Bez zgody” wykonuje akcję od razu. „Połowa / Większość / Wszyscy” wymaga zgody danej części
@@ -147,6 +157,10 @@ function SettingRow({
   );
 }
 
+function toIndex(value: number | number[]): number {
+  return Array.isArray(value) ? (value[0] ?? 0) : value;
+}
+
 function ThresholdRow({
   label,
   value,
@@ -156,30 +170,38 @@ function ThresholdRow({
   value: ApprovalThreshold;
   onChange: (value: ApprovalThreshold) => void;
 }) {
+  // Lokalny indeks suwaka dla płynnego przesuwania; zapis do backendu dopiero po puszczeniu.
+  const [idx, setIdx] = useState(() => Math.max(0, THRESHOLD_ORDER.indexOf(value)));
+  const current = THRESHOLD_ORDER[idx] ?? "off";
+
   return (
-    <View className="gap-1.5">
-      <Text className="text-sm text-foreground">{label}</Text>
-      <View className="flex-row flex-wrap gap-1.5">
-        {THRESHOLDS.map((opt) => {
-          const active = value === opt.id;
-          return (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ selected: active }}
-              className="rounded-full px-3 py-1.5"
-              key={opt.id}
-              onPress={() => onChange(opt.id)}
-              style={{ backgroundColor: active ? neon.purpleBright : "rgba(255,255,255,0.06)" }}
-            >
-              <Text
-                className="text-xs font-semibold"
-                style={{ color: active ? "#FFFFFF" : neon.textMuted }}
-              >
-                {opt.label}
-              </Text>
-            </Pressable>
-          );
-        })}
+    <View className="gap-2">
+      <View className="flex-row items-center justify-between">
+        <Text className="text-sm text-foreground">{label}</Text>
+        <Text className="text-xs font-bold" style={{ color: neon.purpleBright }}>
+          {THRESHOLD_LABEL[current]}
+        </Text>
+      </View>
+      <Slider
+        maxValue={THRESHOLD_ORDER.length - 1}
+        minValue={0}
+        onChange={(v) => setIdx(toIndex(v))}
+        onChangeEnd={(v) => {
+          const i = toIndex(v);
+          setIdx(i);
+          onChange(THRESHOLD_ORDER[i] ?? "off");
+        }}
+        step={1}
+        value={idx}
+      >
+        <Slider.Track>
+          <Slider.Fill />
+          <Slider.Thumb />
+        </Slider.Track>
+      </Slider>
+      <View className="flex-row justify-between">
+        <Text className="text-[10px] text-muted">Bez zgody</Text>
+        <Text className="text-[10px] text-muted">Wszyscy</Text>
       </View>
     </View>
   );
