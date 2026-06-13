@@ -1,9 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Text, View } from "react-native";
+import { Text, useWindowDimensions, View } from "react-native";
 
+import { useBurst } from "@/components/burst-overlay";
 import { GameCard } from "@/components/game-card";
 import { HowItWorks } from "@/components/how-it-works";
 import { NeonButton } from "@/components/neon-button";
+import { bursts } from "@/game/bursts";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 
@@ -15,10 +17,17 @@ function cardLabelFor(name: string | null, isSelf: boolean | undefined): string 
 }
 
 export function CirculatingView({ game }: { game: GameApi }) {
+  const fire = useBurst();
+  const { width, height } = useWindowDimensions();
   const spinning = game.phase === "spinning";
   const isLobby = game.phase === "lobby";
   const label = cardLabelFor(game.activePlayer?.name ?? null, game.activePlayer?.isSelf);
   const enoughPlayers = game.players.length >= 2;
+
+  const handleSpin = () => {
+    fire(bursts.spin, { x: width / 2, y: height * 0.38, size: 420 });
+    game.spin();
+  };
 
   return (
     <View className="gap-7">
@@ -44,7 +53,7 @@ export function CirculatingView({ game }: { game: GameApi }) {
             disabled={!game.canSpin}
             icon="sparkles"
             label="Losuj szczęśliwca"
-            onPress={game.spin}
+            onPress={handleSpin}
             variant="violet"
           />
           {!enoughPlayers ? (
@@ -62,7 +71,9 @@ export function CirculatingView({ game }: { game: GameApi }) {
       ) : isLobby ? (
         <View className="flex-row items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4">
           <Ionicons color={neon.textMuted} name="hourglass-outline" size={18} />
-          <Text className="text-sm font-medium text-muted">Czekajcie, aż host rozpocznie rundę</Text>
+          <Text className="text-sm font-medium text-muted">
+            Czekajcie, aż host rozpocznie rundę
+          </Text>
         </View>
       ) : null}
 

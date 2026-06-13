@@ -1,5 +1,6 @@
 import type { JSX } from "react";
 
+import { BurstProvider } from "@/components/burst-overlay";
 import { Screen } from "@/components/screen";
 import { useGame } from "@/game/use-game";
 import { ApprovalModal } from "@/screens/approval-modal";
@@ -13,16 +14,18 @@ export default function HomeScreen(): JSX.Element {
 
   return (
     <Screen>
-      {game.stage === "entry" ? (
-        <StartScreen game={game} />
-      ) : game.stage === "profile" ? (
-        <OnboardingScreen game={game} />
-      ) : (
-        <RoomScreen game={game} />
-      )}
+      <BurstProvider>
+        {game.stage === "entry" ? (
+          <StartScreen game={game} />
+        ) : game.stage === "profile" ? (
+          <OnboardingScreen game={game} />
+        ) : (
+          <RoomScreen game={game} />
+        )}
 
-      <SettingsSheet game={game} />
-      <ApprovalModal game={game} />
+        <SettingsSheet game={game} />
+        <ApprovalModal game={game} />
+      </BurstProvider>
     </Screen>
   );
 }

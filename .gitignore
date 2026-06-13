@@ -50,3 +50,6 @@ yarn-error.*
 
 # Zrodlo animacji maskotek (342MB) — uzyte avatary wyekstrahowane do assets/avatars/
 Animations/
+
+# Zrodlo animacji burst — uzyte wyekstrahowane do assets/bursts/
+burst_and_shapes/
