@@ -94,13 +94,28 @@ export function PlayerAvatar({
 }: PlayerAvatarProps) {
   return (
     <View className="items-center gap-1.5">
-      <AvatarVisual
-        active={active}
-        avatarId={player.avatarId}
-        colorId={player.colorId}
-        dimmed={dimmed}
-        size={size}
-      />
+      <View>
+        <AvatarVisual
+          active={active}
+          avatarId={player.avatarId}
+          colorId={player.colorId}
+          dimmed={dimmed}
+          size={size}
+        />
+        {player.isHost ? (
+          <View
+            style={{
+              position: "absolute",
+              top: -7,
+              right: -5,
+              transform: [{ rotate: "18deg" }],
+              opacity: dimmed ? 0.45 : 1,
+            }}
+          >
+            <Text style={{ fontSize: 16 }}>👑</Text>
+          </View>
+        ) : null}
+      </View>
       {showName ? (
         <Text
           numberOfLines={1}

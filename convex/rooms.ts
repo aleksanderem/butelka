@@ -383,6 +383,7 @@ export const gameState = query({
         avatarId: player.avatarId,
         colorId: player.colorId,
         isSelf: player.clientId === clientId,
+        isHost: player.clientId === room.hostClientId,
         approved: approvedClientIds.has(player.clientId),
       })),
       approval: room.pendingAction

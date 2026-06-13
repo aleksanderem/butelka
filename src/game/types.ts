@@ -30,6 +30,8 @@ export interface Player {
   colorId: PlayerColorId;
   /** Czy to lokalny gracz na tym urządzeniu („Ty”). */
   isSelf?: boolean;
+  /** Czy ten gracz jest hostem (twórcą pokoju). */
+  isHost?: boolean;
   /** Identyfikator urządzenia gracza (multiplayer). */
   clientId?: string;
   /** Czy gracz zaakceptował aktualnie głosowaną akcję. */

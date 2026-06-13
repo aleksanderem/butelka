@@ -68,11 +68,14 @@ export function useGame() {
         avatarId: p.avatarId as AvatarId,
         colorId: p.colorId as PlayerColorId,
         isSelf: p.isSelf,
+        isHost: p.isHost,
         clientId: p.clientId,
         approved: p.approved,
       })),
     [state]
   );
+
+  const amHost = players.some((p) => p.isSelf && p.isHost);
 
   const phase: Phase = state?.phase ?? "lobby";
   const settings: RoomSettings = state?.settings ?? defaultSettings;
@@ -85,6 +88,7 @@ export function useGame() {
   const luckyMatch = luckyClientId ? players.findIndex((p) => p.clientId === luckyClientId) : -1;
   const luckyIndex = luckyMatch >= 0 ? luckyMatch : null;
   const luckyPlayer = luckyIndex === null ? null : (players[luckyIndex] ?? null);
+  const amLucky = luckyPlayer?.isSelf ?? false;
 
   // Animacja krążenia karty (czysto kliencka): podczas „spinning” migamy graczami.
   // setState żyje wyłącznie w callbacku interwału, nie w ciele efektu.
@@ -272,6 +276,8 @@ export function useGame() {
     activePlayer,
     luckyIndex,
     luckyPlayer,
+    amHost,
+    amLucky,
     challengeType,
     challengeText,
     settings,
