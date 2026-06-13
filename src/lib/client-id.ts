@@ -17,6 +17,24 @@ function overrideFromUrl(): string | null {
   return param && param.length > 0 ? param : null;
 }
 
+// Dostęp do storage odporny na brak natywnego modułu (np. w Expo Go) —
+// nigdy nie rzuca, w najgorszym razie clientId żyje tylko w pamięci sesji.
+async function safeGet(key: string): Promise<string | null> {
+  try {
+    return await AsyncStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+async function safeSet(key: string, value: string): Promise<void> {
+  try {
+    await AsyncStorage.setItem(key, value);
+  } catch {
+    // storage niedostępny — pomijamy, identyfikator i tak zostanie wygenerowany
+  }
+}
+
 /**
  * Trwały identyfikator urządzenia. Pozwala backendowi rozpoznać, który rekord
  * gracza należy do tego telefonu („Ty”). Zwraca null, dopóki się nie wczyta.
@@ -31,10 +49,10 @@ export function useClientId(): string | null {
     }
     let active = true;
     (async () => {
-      let id = await AsyncStorage.getItem(STORAGE_KEY);
+      let id = await safeGet(STORAGE_KEY);
       if (!id) {
         id = generateId();
-        await AsyncStorage.setItem(STORAGE_KEY, id);
+        await safeSet(STORAGE_KEY, id);
       }
       if (active) {
         setClientId(id);
