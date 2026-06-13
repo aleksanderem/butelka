@@ -41,6 +41,7 @@ export interface Player {
 export interface ApprovalState {
   action: ApprovalAction;
   approved: number;
+  rejected: number;
   total: number;
   needed: number;
   myVote: boolean | null;

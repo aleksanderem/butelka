@@ -95,10 +95,14 @@ export function useGame() {
       }
       timer = setTimeout(() => void reload(code), 60);
     });
+    // Fallback: odpytuj stan co 2,5 s. Realtime bywa zawodny na natywie (WebSocket gubi się
+    // np. po Fast Refresh / w tle), a polling gwarantuje synchronizację między urządzeniami.
+    const poll = setInterval(() => void reload(code), 2500);
     return () => {
       if (timer) {
         clearTimeout(timer);
       }
+      clearInterval(poll);
       unsubscribe();
     };
   }, [stage, roomCode, reload]);
@@ -127,12 +131,21 @@ export function useGame() {
     if (resolvingRef.current) {
       return;
     }
+    const code = roomDoc.code;
     resolvingRef.current = true;
-    void roomApi.resolveVotes(roomDoc, playerDocs, voteDocs).finally(() => {
-      resolvingRef.current = false;
-    });
-    // Zapis (apply/cancel) wewnątrz resolveVotes wraca przez Realtime — bez ręcznego reload.
-  }, [roomDoc, playerDocs, voteDocs, clientId]);
+    void roomApi
+      .resolveVotes(roomDoc, playerDocs, voteDocs)
+      .then((acted) => {
+        // Host po realnym rozstrzygnięciu przeładowuje swój stan — nie czeka tylko na Realtime
+        // (inaczej jego własny dialog mógłby nie zniknąć). Reload tylko gdy coś zmieniono => brak pętli.
+        if (acted) {
+          return reload(code);
+        }
+      })
+      .finally(() => {
+        resolvingRef.current = false;
+      });
+  }, [clientId, playerDocs, reload, roomDoc, voteDocs]);
 
   const sortedPlayers = useMemo(
     () => [...playerDocs].sort((a, b) => a.joinedAt - b.joinedAt),
@@ -205,12 +218,14 @@ export function useGame() {
       return null;
     }
     const total = sortedPlayers.length;
+    const rejected = voteDocs.filter((v) => v.action === pendingApproval && !v.approved).length;
     const myVote = voteDocs.find(
       (v) => v.action === pendingApproval && v.clientId === effectiveClientId
     );
     return {
       action: pendingApproval,
       approved: approvedClientIds.size,
+      rejected,
       total,
       needed: Math.floor(total / 2) + 1,
       myVote: myVote ? myVote.approved : null,
@@ -444,6 +459,14 @@ export function useGame() {
     }
   }, [effectiveClientId, reload, roomDoc]);
 
+  /** Zamknięcie dialogu głosowania = anulowanie akcji (czyści pendingAction i głosy dla wszystkich). */
+  const cancelApproval = useCallback(() => {
+    if (roomDoc && roomDoc.pendingAction) {
+      const code = roomDoc.code;
+      void roomApi.cancelAction(code).then(() => reload(code));
+    }
+  }, [reload, roomDoc]);
+
   const updateSettings = useCallback(
     (patch: Partial<RoomSettings>) => {
       if (roomDoc) {
@@ -517,6 +540,7 @@ export function useGame() {
     passTurn,
     confirmApproval,
     rejectApproval,
+    cancelApproval,
     updateSettings,
   };
 }

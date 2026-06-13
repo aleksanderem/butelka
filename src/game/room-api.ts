@@ -362,15 +362,16 @@ export async function cancelAction(code: string): Promise<void> {
 /**
  * Host rozstrzyga głosowanie: gdy „za” osiągnie większość — wykonuje akcję;
  * gdy większość już niemożliwa — anuluje. Idempotentne dzięki sprawdzeniu pendingAction.
+ * Zwraca true, jeśli faktycznie coś zmienił (apply/cancel) — wtedy host przeładowuje stan.
  */
 export async function resolveVotes(
   room: RoomDoc,
   players: PlayerDoc[],
   votes: VoteDoc[]
-): Promise<void> {
+): Promise<boolean> {
   const action = room.pendingAction;
   if (!action) {
-    return;
+    return false;
   }
   const relevant = votes.filter((vote) => vote.action === action);
   const total = players.length;
@@ -383,12 +384,15 @@ export async function resolveVotes(
     const fresh = (await databases.getDocument(DB_ID, COL_ROOMS, room.code)) as unknown as RoomDoc;
     if (fresh.pendingAction === action) {
       await applyAction(room.code, action);
+      return true;
     }
-    return;
+    return false;
   }
   if (total - rejected < needed) {
     await cancelAction(room.code);
+    return true;
   }
+  return false;
 }
 
 export async function updateSettings(

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { Dialog } from "heroui-native";
+import { Dialog, Spinner } from "heroui-native";
 import { Pressable, Text, View } from "react-native";
 
 import { AvatarVisual } from "@/components/player-avatar";
@@ -27,14 +27,30 @@ export function ApprovalModal({ game }: { game: GameApi }) {
   const total = game.approval?.total ?? game.players.length;
   const approved = game.approval?.approved ?? 0;
   const needed = game.approval?.needed ?? Math.floor(total / 2) + 1;
+  const rejected = game.approval?.rejected ?? 0;
   const ratio = total > 0 ? approved / total : 0;
   const myVote = game.approval?.myVote ?? null;
 
+  // Wynik przesądzony: większość „za" (akceptacja) albo większość już niemożliwa (odrzucenie).
+  // Pokazujemy loader i czekamy, aż host wykona akcję i dialog sam zniknie.
+  const accepted = approved >= needed;
+  const declined = total - rejected < needed;
+  const resolving = accepted || declined;
+
   return (
-    <Dialog isOpen={action !== null} onOpenChange={() => undefined}>
+    <Dialog
+      isOpen={action !== null}
+      onOpenChange={(open) => {
+        // Zamknięcie (tap w tło / wstecz) anuluje głosowanie — dialog zawsze da się zamknąć.
+        if (!open) {
+          game.cancelApproval();
+        }
+      }}
+    >
       <Dialog.Portal>
         <Dialog.Overlay />
         <Dialog.Content className="items-center gap-4">
+          <Dialog.Close variant="tertiary" />
           <View
             style={{
               alignItems: "center",
@@ -90,27 +106,38 @@ export function ApprovalModal({ game }: { game: GameApi }) {
             </View>
           </View>
 
-          <View className="w-full flex-row gap-3">
-            <NeonButton
-              className="flex-1"
-              disabled={myVote !== null}
-              label="Odrzuć"
-              onPress={game.rejectApproval}
-              variant="ghost"
-            />
-            <NeonButton
-              className="flex-1"
-              disabled={myVote !== null}
-              label="Akceptuj"
-              onPress={game.confirmApproval}
-              variant="violet"
-            />
-          </View>
-          <Text className="text-center text-[11px] text-muted">
-            {myVote !== null
-              ? "Twój głos oddany. Dotknij innego gracza, aby zagłosować w jego imieniu (test)."
-              : `Wymagana zgoda ${needed} z ${total} graczy.`}
-          </Text>
+          {resolving ? (
+            <View className="w-full items-center gap-2 py-1">
+              <Spinner color={neon.purpleBright} size="sm" />
+              <Text className="text-center text-sm font-semibold text-foreground">
+                {accepted ? "Zaakceptowano — wykonuję…" : "Odrzucono — pomijam…"}
+              </Text>
+            </View>
+          ) : (
+            <>
+              <View className="w-full flex-row gap-3">
+                <NeonButton
+                  className="flex-1"
+                  disabled={myVote !== null}
+                  label="Odrzuć"
+                  onPress={game.rejectApproval}
+                  variant="ghost"
+                />
+                <NeonButton
+                  className="flex-1"
+                  disabled={myVote !== null}
+                  label="Akceptuj"
+                  onPress={game.confirmApproval}
+                  variant="violet"
+                />
+              </View>
+              <Text className="text-center text-[11px] text-muted">
+                {myVote !== null
+                  ? "Twój głos oddany. Dotknij innego gracza, aby zagłosować w jego imieniu (test)."
+                  : `Wymagana zgoda ${needed} z ${total} graczy.`}
+              </Text>
+            </>
+          )}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog>
