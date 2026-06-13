@@ -57,7 +57,7 @@ export function StartScreen({ game }: { game: GameApi }) {
                 <Ionicons color="#FFFFFF" name="people" size={28} />
               </View>
               <View className="flex-1">
-                <Text className="text-xl font-black uppercase tracking-wide text-white">
+                <Text className="text-xl font-extrabold uppercase tracking-wide text-white">
                   Utwórz pokój
                 </Text>
                 <Text className="mt-0.5 text-sm text-white/80">

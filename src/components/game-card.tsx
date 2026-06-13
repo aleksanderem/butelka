@@ -2,6 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, Text, View } from "react-native";
 
 import { gradients, neon } from "@/theme/colors";
+import { fonts } from "@/theme/fonts";
 
 /** Duża neonowa karta „Ty”, która krąży wśród graczy (ekran 3). */
 export function GameCard({ label, spinning = false }: { label: string; spinning?: boolean }) {
@@ -43,8 +44,9 @@ export function GameCard({ label, spinning = false }: { label: string; spinning?
             <Text
               style={{
                 color: "#FFFFFF",
+                fontFamily: fonts.extrabold,
                 fontSize: 52,
-                fontWeight: "900",
+                letterSpacing: 0.5,
                 textShadowColor: "rgba(0,0,0,0.25)",
                 textShadowOffset: { width: 0, height: 2 },
                 textShadowRadius: 6,

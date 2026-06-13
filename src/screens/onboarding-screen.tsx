@@ -39,7 +39,7 @@ export function OnboardingScreen({ game }: { game: GameApi }) {
       <View className="items-center gap-3">
         <AvatarVisual active avatarId={game.avatarId} colorId={game.colorId} size="xl" />
         <View className="items-center gap-1">
-          <Text className="text-2xl font-black text-foreground">Witaj w pokoju!</Text>
+          <Text className="text-2xl font-extrabold text-foreground">Witaj w pokoju!</Text>
           <Text className="text-sm text-muted">Zanim dołączysz, stwórz swoją postać</Text>
         </View>
       </View>

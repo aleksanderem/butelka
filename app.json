@@ -6,14 +6,17 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "butelka",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0A0712",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.butelka.game"
     },
     "android": {
+      "package": "com.butelka.game",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0A0712"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -24,7 +27,7 @@
         {
           "image": "./assets/images/splash-icon.png",
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#0A0712"
         }
       ],
       "expo-font"
