@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import { Dialog } from "heroui-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { NeonButton } from "@/components/neon-button";
 import { AvatarVisual } from "@/components/player-avatar";
@@ -13,7 +14,26 @@ export function PlayersSheet({ game }: { game: GameApi }) {
     <Dialog isOpen={game.playersOpen} onOpenChange={game.setPlayersOpen}>
       <Dialog.Portal unstable_accessibilityContainerViewIsModal>
         <Dialog.Overlay />
-        <Dialog.Content className="w-full max-w-xl gap-4 bg-surface">
+        <Dialog.Content
+          className="w-full max-w-xl gap-4 overflow-hidden"
+          style={{
+            backgroundColor: "rgba(13,10,24,0.72)",
+            borderColor: "rgba(255,255,255,0.08)",
+            borderWidth: 1,
+          }}
+        >
+          {/* Frosted glass: rozmycie tła pokoju + ciemniejsza, półprzezroczysta tafla. */}
+          <BlurView
+            intensity={40}
+            pointerEvents="none"
+            style={StyleSheet.absoluteFill}
+            tint="dark"
+          />
+          <View
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(6,4,14,0.3)" }]}
+          />
+
           <View className="flex-row items-center justify-between">
             <Dialog.Title>Gracze ({game.players.length})</Dialog.Title>
             <Dialog.Close
