@@ -12,7 +12,9 @@ import { neon } from "@/theme/colors";
 export function PlayersSheet({ game }: { game: GameApi }) {
   return (
     <Dialog isOpen={game.playersOpen} onOpenChange={game.setPlayersOpen}>
-      <Dialog.Portal unstable_accessibilityContainerViewIsModal>
+      {/* disableFullWindowOverlay: na iOS render w glownym oknie, nie w osobnym (RNScreens
+          FullWindowOverlay). Inaczej BlurView nie ma czego rozmywac (osobne okno) i blur znika. */}
+      <Dialog.Portal disableFullWindowOverlay>
         <Dialog.Overlay />
         <Dialog.Content
           className="w-full max-w-xl gap-4 overflow-hidden"
