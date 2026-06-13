@@ -73,9 +73,6 @@ export function StartScreen({ game }: { game: GameApi }) {
 
       <NeonCard className="items-center gap-5">
         <View className="items-center gap-2">
-          <View className="h-11 w-11 items-center justify-center rounded-xl bg-secondary">
-            <Ionicons color={neon.magenta} name="enter-outline" size={22} />
-          </View>
           <Text className="text-lg font-extrabold text-foreground">Dołącz do pokoju</Text>
           <Text className="text-center text-sm text-muted">Wpisz ID pokoju, aby dołączyć</Text>
         </View>

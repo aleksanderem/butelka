@@ -71,7 +71,7 @@ export function NeonButton({
             minimumFontScale={0.8}
             numberOfLines={1}
             style={{ color: tint, flexShrink: 1 }}
-            className="text-base font-extrabold uppercase"
+            className="text-base font-extrabold"
           >
             {label}
           </Text>
