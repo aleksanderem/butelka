@@ -81,21 +81,22 @@ export function StartScreen({ game }: { game: GameApi }) {
         </View>
 
         <InputOTP
+          className="w-full"
           inputMode="numeric"
           maxLength={6}
           onChange={(value) => game.setJoinCode(value.replace(/\D/g, ""))}
           value={game.joinCode}
         >
-          <InputOTP.Group>
-            <InputOTP.Slot index={0} />
-            <InputOTP.Slot index={1} />
-            <InputOTP.Slot index={2} />
+          <InputOTP.Group className="flex-1">
+            <InputOTP.Slot className="h-14 w-auto flex-1" index={0} />
+            <InputOTP.Slot className="h-14 w-auto flex-1" index={1} />
+            <InputOTP.Slot className="h-14 w-auto flex-1" index={2} />
           </InputOTP.Group>
           <InputOTP.Separator />
-          <InputOTP.Group>
-            <InputOTP.Slot index={3} />
-            <InputOTP.Slot index={4} />
-            <InputOTP.Slot index={5} />
+          <InputOTP.Group className="flex-1">
+            <InputOTP.Slot className="h-14 w-auto flex-1" index={3} />
+            <InputOTP.Slot className="h-14 w-auto flex-1" index={4} />
+            <InputOTP.Slot className="h-14 w-auto flex-1" index={5} />
           </InputOTP.Group>
         </InputOTP>
 
