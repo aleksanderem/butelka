@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { RoomHeader } from "@/components/room-header";
 import type { GameApi } from "@/game/use-game";
@@ -19,6 +20,7 @@ export function RoomScreen({ game }: { game: GameApi }) {
         ? game.luckyIndex
         : null;
 
+  const insets = useSafeAreaInsets();
   // Wysokość nagłówka, by treść zaczynała się pod nim (i przewijała się za jego rozmyciem).
   const [headerHeight, setHeaderHeight] = useState(0);
 
@@ -27,9 +29,9 @@ export function RoomScreen({ game }: { game: GameApi }) {
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
-          // Treść w całości pod nagłówkiem, z małym marginesem. Rozmycie widać, gdy treść
-          // przewija się pod półprzezroczysty pasek.
-          paddingTop: headerHeight + 10,
+          // Treść w całości pod nagłówkiem, z małym marginesem. Nagłówek wchodzi pod status bar
+          // (top: -insets.top), więc odejmujemy inset z jego zmierzonej wysokości.
+          paddingTop: Math.max(0, headerHeight - insets.top) + 10,
           paddingBottom: 28,
           paddingHorizontal: 20,
         }}
@@ -44,11 +46,17 @@ export function RoomScreen({ game }: { game: GameApi }) {
         )}
       </ScrollView>
 
-      {/* Frosted glass header: półprzezroczysty pasek z rozmyciem — treść przewija się pod nim. */}
+      {/* Frosted glass header: półprzezroczysty pasek z rozmyciem, rozciągnięty też pod status bar
+          (top: -insets.top), żeby notch nie był „innym fragmentem". Treść przewija się pod nim. */}
       <View
-        className="absolute left-0 right-0 top-0 overflow-hidden"
+        className="absolute left-0 right-0 overflow-hidden"
         onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
-        style={{ zIndex: 10, borderBottomColor: "rgba(255,255,255,0.07)", borderBottomWidth: 1 }}
+        style={{
+          top: -insets.top,
+          zIndex: 10,
+          borderBottomColor: "rgba(255,255,255,0.07)",
+          borderBottomWidth: 1,
+        }}
       >
         <BlurView intensity={55} pointerEvents="none" style={StyleSheet.absoluteFill} tint="dark" />
         <View
@@ -56,7 +64,7 @@ export function RoomScreen({ game }: { game: GameApi }) {
           style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(10,8,18,0.2)" }]}
         />
 
-        <View className="gap-3 px-5 pb-3 pt-3">
+        <View className="gap-3 px-5 pb-3" style={{ paddingTop: insets.top + 8 }}>
           <RoomHeader
             highlightIndex={highlightIndex}
             onBack={game.leaveRoom}
