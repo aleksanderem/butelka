@@ -15,15 +15,16 @@
     { "id": 11, "name": "screen7_approval_voting_modal", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
     { "id": 12, "name": "polish_diacritics_all_strings", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
     { "id": 13, "name": "verify_typecheck_lint_preview", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 14, "name": "multiplayer_backend", "status": "not_started", "created_session": "S0001", "last_updated_session": "S0001" }
+    { "id": 14, "name": "multiplayer_backend", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" }
   ],
-  "reason": "Front przepisany od zera pod 7 mockupow i zweryfikowany wizualnie. Multiplayer czeka na decyzje o backendzie.",
-  "thinking_process": "Fundament (paleta+struktura+hook+brand) -> 7 ekranow 1:1 -> weryfikacja w expo web. Wszystkie ekrany zgodne z mockupami. Stan w src/game/use-game.ts izolowany pod podmiane na backend. Szczegoly w tasks_progress_verbose.txt (handoff S0001).",
+  "reason": "Front przepisany od zera pod 7 mockupow oraz multiplayer na Convex - oba ukonczone i zweryfikowane.",
+  "thinking_process": "Fundament -> 7 ekranow 1:1 -> weryfikacja w expo web -> Convex (schema/functions) -> przepiecie use-game na useQuery/useMutation za niezmienionym GameApi -> weryfikacja przez convex run + UI multiplayer (3 graczy na zywo). Szczegoly w tasks_progress_verbose.txt.",
   "connected_tasks": [3, 14],
   "how_to_test": [
     { "id": 1, "name": "npx tsc --noEmit zwraca 0 bledow", "status": "done", "is_ok": "true", "data_for_next_step": [], "session_id": "S0001" },
     { "id": 2, "name": "npm run lint przechodzi", "status": "done", "is_ok": "true", "data_for_next_step": [], "session_id": "S0001" },
     { "id": 3, "name": "Kazdy z 7 ekranow zgodny wizualnie z mockupem (neon, korona, konfetti, karta, sidebar, glosowanie)", "status": "done", "is_ok": "true", "data_for_next_step": ["Zweryfikowane screenshotami w expo web na porcie 8090"], "session_id": "S0001" },
-    { "id": 4, "name": "Wszystkie polskie stringi z poprawna diakrytyka", "status": "done", "is_ok": "true", "data_for_next_step": [], "session_id": "S0001" }
+    { "id": 4, "name": "Wszystkie polskie stringi z poprawna diakrytyka", "status": "done", "is_ok": "true", "data_for_next_step": [], "session_id": "S0001" },
+    { "id": 5, "name": "Multiplayer: 2+ klientow w jednym pokoju widza siebie i akcje na zywo (Convex)", "status": "done", "is_ok": "true", "data_for_next_step": ["convex run: createRoom/joinRoom x2/spin/pickChallenge/requestAction/vote -> reset; UI: 3 graczy (alex+basia z CLI, webtest z UI) w pokoju H9L54A, spin->szczesliwiec"], "session_id": "S0001" }
   ]
 }

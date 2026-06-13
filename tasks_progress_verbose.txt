@@ -78,12 +78,51 @@ Znane placeholdery (swiadome):
 - Modal akceptacji: glosy zasymulowane (nie-self=tak, self decyduje) - single-device, do zastapienia realnymi glosami przy multiplayerze.
 - demoPlayers / "Dodaj gracza testowego" - znikna po multiplayerze.
 
-=== SESSION S0001 HANDOFF === 2026-06-13T08:45:00Z
-Status: paused (czeka na decyzje usera)
-Current state: Front 100% gotowy i zweryfikowany. tsc+lint zielone. Nie commitowano (user nie prosil).
-Immediate next action: Task #14 multiplayer - ustalic z userem backend (Convex rekomendowany dla real-time rooms/voting, alt. Supabase). Potem: schema (rooms, players, turns, votes), podmiana use-game.ts na warstwe backendowa (useQuery/useMutation), zachowac ten sam interfejs GameApi by ekrany sie nie zmienily.
-Open questions: Jaki backend? Czy avatary zostaja emoji czy docelowe ilustracje? Czy commitowac obecny stan?
-Warnings: Metro na porcie 8081 zajmuje inny projekt (sudoku-heroui) - uzywac 8090. CI=1 wylacza hot reload - preview_start uruchamia bez CI (watch dziala).
-Files modified: src/global.css, src/app/index.tsx, src/components/screen.tsx; usunieto src/components/glass.tsx; nowe: caly src/theme, src/game, wiekszosc src/components, caly src/screens; .claude/launch.json; pliki trackingu.
+S0001. Task #14 MULTIPLAYER (Convex) - passing:
+User wybral: Convex + commit. Convex 1.41 utworzyl LOKALNY deployment (port 3210)
+bez loginu/konta (anonymous:anonymous-butelka w .env.local, ktore jest gitignore).
+
+Nowe pliki:
+  convex/schema.ts   - rooms (phase, host, luckyClientId, spinSeed, challenge, settings, pendingAction),
+                       players (roomId, clientId, name, avatar, color), votes (roomId, action, clientId, approved)
+  convex/prompts.ts  - prompty PL + pickPrompt + makeRoomCode (serwer losuje)
+  convex/rooms.ts    - createRoom, joinRoom (upsert by clientId), leaveRoom (kasuje pusty pokoj),
+                       spin (phase spinning + scheduler.runAfter 3.2s -> finalizeSpin -> chosen),
+                       pickChallenge, rerollChallenge, rerollLucky, requestAction (auto-approve inicjatora),
+                       vote (resolveVotes: approved>=floor(n/2)+1 -> applyAction; brak wiekszosci -> cancel),
+                       updateSettings, gameState (reaktywne query z players+approval)
+  src/lib/client-id.ts - useClientId: AsyncStorage, override ?clientId= na webie (test multi-karta)
+  src/lib/convex.ts    - ConvexReactClient z EXPO_PUBLIC_CONVEX_URL
+Zmienione:
+  src/app/_layout.tsx        - ConvexProvider
+  src/game/use-game.ts       - PRZEPISANY na useQuery/useMutation, ten sam ksztalt GameApi (ekrany bez zmian)
+  src/game/types.ts          - Player +clientId/+approved, +ApprovalState
+  src/game/data.ts           - usuniete prompty/makeRoomCode/demoPlayers (przeniesione do convex)
+  src/screens/approval-modal.tsx - realne glosy (game.approval + player.approved) zamiast symulacji
+  eslint.config.js           - ignore convex/_generated
+
+Pulapki rozwiazane:
+  - react-hooks/set-state-in-effect (nowy plugin): client-id lazy useState initializer; krazenie karty
+    przez setSpinTick w callbacku interwalu + activeIndex liczony useMemo; reset pokoju przez setTimeout(0).
+  - preserve-manual-memoization: luckyIndex jako zwykle wyliczenie (React Compiler memoizuje).
+
+Weryfikacja:
+  - convex run: createRoom(alex) -> H9L54A, joinRoom alex+basia, gameState (alex widzi siebie isSelf
+    + basie), spin -> spinning+lucky, scheduler -> chosen, pickChallenge prawda -> task+tekst PL,
+    requestAction endTurn (alex auto-approved 1/2, basia myVote null), vote basia true -> 2/2 -> reset lobby.
+  - UI (expo web ?clientId=webtest): dolaczenie do H9L54A przez input -> pokoj z 3 graczami (Alex, Basia, Ty)
+    renderowany na zywo z Convex; klik Losuj -> spinning -> szczesliwiec Alex (korona+konfetti).
+  Uwaga: input heroui renderuje <input> tylko na niektorych ekranach/timingu - fill ID pokoju i imienia zadzialal.
+
+=== SESSION S0001 HANDOFF === 2026-06-13T09:00:00Z
+Status: completed
+Current state: Oba glowne zadania done. tsc+lint zielone. 3 commity na branchu feat/rewrite-ui-mockups
+  (front, tracking, multiplayer). Branch NIE zmergowany do main, NIE wypchniety (brak prosby).
+Jak uruchomic: terminal 1: `npx convex dev` (utrzymuje lokalny backend 3210). terminal 2: `npx expo start`
+  (lub --web --port 8090, bo 8081 zajmuje sudoku-heroui). Test multi: dwie karty ?clientId=A i ?clientId=B.
+Opcjonalne next (NIE zlecone): convex login + cloud deploy do produkcji (lokalny dziala tylko na tej maszynie);
+  docelowe ilustracje avatarow zamiast emoji; sekcje Dzwieki/Zarzadzanie graczami w ustawieniach;
+  persystencja roomCode/stage po reloadzie (teraz reload web -> wraca do entry).
+Warnings: .env.local (CONVEX_DEPLOYMENT lokalny) jest gitignore - inny dev musi odpalic `npx convex dev` sam.
 
 ---

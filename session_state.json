@@ -1,18 +1,18 @@
 {
   "session_id": "S0001",
   "started_at": "2026-06-13T07:49:00Z",
-  "last_updated": "2026-06-13T08:45:00Z",
-  "status": "active",
-  "focus": "Front przepisany 1:1 pod mockupy i zweryfikowany w przegladarce. Pozostaje multiplayer (backend do ustalenia z userem).",
+  "last_updated": "2026-06-13T09:00:00Z",
+  "status": "completed",
+  "focus": "Przepisanie frontu pod mockupy + real-time multiplayer na Convex — ukonczone i zweryfikowane.",
   "tasks_snapshot": {
     "total": 14,
-    "not_started": 1,
+    "not_started": 0,
     "in_progress": 0,
-    "passing": 13,
+    "passing": 14,
     "failing": 0,
     "blocked": 0
   },
-  "active_task_ids": [14],
-  "blockers": ["Task #14 multiplayer: czeka na decyzje usera o backendzie (Convex / Supabase / inny)"],
-  "notes": "FRONT GOTOWY: wszystkie 7 ekranow przepisane od zera pod mockupy (neon fiolet+magenta), rozbite na komponenty (src/theme, src/game, src/components, src/screens), poprawna polszczyzna, typecheck+lint zielone, zweryfikowane wizualnie w expo web (preview) - kazdy ekran zgodny z mockupem. Stan gry w izolowanym hooku src/game/use-game.ts gotowym do podmiany na backend. Drobny placeholder: avatary to emoji (do podmiany na ilustracje), glosowanie w modalu akceptacji zasymulowane (single-device). NEXT: multiplayer - zapytac usera o stack."
+  "active_task_ids": [],
+  "blockers": [],
+  "notes": "UKONCZONE: (1) Front przepisany od zera pod 7 mockupow (neon, ekrany 1:1, poprawna polszczyzna). (2) Multiplayer na Convex (lokalny deployment): pokoje, gracze, spin+scheduler, wyzwania, glosowanie wiekszosciowe; front przepiety na useQuery/useMutation za niezmienionym GameApi; identity przez clientId. Zweryfikowane przez convex run + UI (3 graczy CLI+UI na zywo). tsc+lint zielone. 3 commity na branchu feat/rewrite-ui-mockups. OPCJONALNE NEXT (nie zlecone): convex login + cloud deploy do produkcji; docelowe ilustracje avatarow zamiast emoji; ekran Dzwieki/Zarzadzanie graczami w ustawieniach; persystencja roomCode po reloadzie."
 }
