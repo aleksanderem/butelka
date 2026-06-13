@@ -19,21 +19,21 @@ export function PlayersSheet({ game }: { game: GameApi }) {
         <Dialog.Content
           className="w-full max-w-xl gap-4 overflow-hidden"
           style={{
-            backgroundColor: "rgba(13,10,24,0.72)",
-            borderColor: "rgba(255,255,255,0.08)",
+            backgroundColor: "rgba(13,10,24,0.38)",
+            borderColor: "rgba(255,255,255,0.1)",
             borderWidth: 1,
           }}
         >
-          {/* Frosted glass: rozmycie tła pokoju + ciemniejsza, półprzezroczysta tafla. */}
+          {/* Frosted glass: mocniejsze rozmycie + lżejsza tafla, by blur był wyraźnie widoczny. */}
           <BlurView
-            intensity={40}
+            intensity={55}
             pointerEvents="none"
             style={StyleSheet.absoluteFill}
             tint="dark"
           />
           <View
             pointerEvents="none"
-            style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(6,4,14,0.3)" }]}
+            style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(6,4,14,0.12)" }]}
           />
 
           <View className="flex-row items-center justify-between">
