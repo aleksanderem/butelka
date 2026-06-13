@@ -13,9 +13,10 @@ export const colorOrder: PlayerColorId[] = [
 ];
 
 export const defaultSettings: RoomSettings = {
-  requireEndTurnApproval: true,
-  requireNextTruthApproval: true,
-  requireNextDareApproval: false,
+  endTurnApproval: "majority",
+  nextTruthApproval: "majority",
+  nextDareApproval: "off",
+  autoStart: false,
 };
 
 /** ID pokoju: 6 cyfr (jak kod OTP). Generowane lokalnie, aby „Utwórz pokój”

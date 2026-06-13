@@ -19,6 +19,7 @@ export function CirculatingView({ game }: { game: GameApi }) {
   const isLobby = game.phase === "lobby";
   const label = cardLabelFor(game.activePlayer?.name ?? null, game.activePlayer?.isSelf);
   const enoughPlayers = game.players.length >= 2;
+  const autoStart = game.settings.autoStart;
 
   return (
     <View className="gap-7">
@@ -31,27 +32,42 @@ export function CirculatingView({ game }: { game: GameApi }) {
           <Text className="text-center text-sm font-medium" style={{ color: neon.textMuted }}>
             {spinning
               ? "Czekajcie, na kogo wskaże los"
-              : game.amHost
-                ? "Wylosuj, kto zostanie szczęśliwcem"
-                : "Host za chwilę rozpocznie rundę"}
+              : autoStart
+                ? "Runda zacznie się automatycznie"
+                : game.amHost
+                  ? "Wylosuj, kto zostanie szczęśliwcem"
+                  : "Host za chwilę rozpocznie rundę"}
           </Text>
         </View>
       </View>
 
       {isLobby && game.amHost ? (
         <View className="gap-3">
-          <NeonButton
-            disabled={!game.canSpin}
-            icon="sparkles"
-            label="Losuj szczęśliwca"
-            onPress={game.spin}
-            variant="violet"
-          />
-          {!enoughPlayers ? (
-            <Text className="text-center text-xs text-muted">
-              Potrzeba co najmniej 2 graczy, aby zacząć.
-            </Text>
-          ) : null}
+          {autoStart ? (
+            <View className="flex-row items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4">
+              <Ionicons color={neon.purpleBright} name="sparkles" size={18} />
+              <Text className="text-sm font-medium text-foreground">
+                {enoughPlayers
+                  ? "Runda zacznie się automatycznie…"
+                  : "Czekam na co najmniej 2 graczy…"}
+              </Text>
+            </View>
+          ) : (
+            <>
+              <NeonButton
+                disabled={!game.canSpin}
+                icon="sparkles"
+                label="Losuj szczęśliwca"
+                onPress={game.spin}
+                variant="violet"
+              />
+              {!enoughPlayers ? (
+                <Text className="text-center text-xs text-muted">
+                  Potrzeba co najmniej 2 graczy, aby zacząć.
+                </Text>
+              ) : null}
+            </>
+          )}
           <NeonButton
             icon="person-add-outline"
             label="Dodaj gracza testowego"
@@ -63,7 +79,7 @@ export function CirculatingView({ game }: { game: GameApi }) {
         <View className="flex-row items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4">
           <Ionicons color={neon.textMuted} name="hourglass-outline" size={18} />
           <Text className="text-sm font-medium text-muted">
-            Czekajcie, aż host rozpocznie rundę
+            {autoStart ? "Runda zacznie się automatycznie…" : "Czekajcie, aż host rozpocznie rundę"}
           </Text>
         </View>
       ) : null}

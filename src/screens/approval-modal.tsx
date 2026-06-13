@@ -28,7 +28,7 @@ export function ApprovalModal({ game }: { game: GameApi }) {
   const approved = game.approval?.approved ?? 0;
   const needed = game.approval?.needed ?? Math.floor(total / 2) + 1;
   const rejected = game.approval?.rejected ?? 0;
-  const ratio = total > 0 ? approved / total : 0;
+  const ratio = needed > 0 ? Math.min(1, approved / needed) : 1;
   const myVote = game.approval?.myVote ?? null;
 
   // Wynik przesądzony: większość „za" (akceptacja) albo większość już niemożliwa (odrzucenie).
@@ -99,9 +99,9 @@ export function ApprovalModal({ game }: { game: GameApi }) {
               />
             </View>
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-muted">Potrzeba większości do akceptacji</Text>
+              <Text className="text-xs text-muted">Akceptacje</Text>
               <Text className="text-xs font-bold text-foreground">
-                {approved} / {total}
+                {approved} / {needed}
               </Text>
             </View>
           </View>

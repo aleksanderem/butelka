@@ -3,11 +3,18 @@ import { Dialog, Switch } from "heroui-native";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
-import type { RoomSettings } from "@/game/types";
+import type { ApprovalThreshold, RoomSettings } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 
 type TabId = "general" | "gameplay" | "sounds";
+
+const THRESHOLDS: { id: ApprovalThreshold; label: string }[] = [
+  { id: "off", label: "Bez zgody" },
+  { id: "half", label: "Połowa" },
+  { id: "majority", label: "Większość" },
+  { id: "all", label: "Wszyscy" },
+];
 
 const TABS: { id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
   { id: "general", icon: "settings-outline", label: "Ogólne" },
@@ -84,25 +91,38 @@ function GameplayTab({
   onChange: (patch: Partial<RoomSettings>) => void;
 }) {
   return (
-    <View className="gap-4">
-      <Text className="text-base font-bold text-foreground">Rozgrywka</Text>
-      <SettingRow
-        label="Zakończenie tury wymaga akceptacji przez innych graczy (większość)"
-        value={settings.requireEndTurnApproval}
-        onChange={(v) => onChange({ requireEndTurnApproval: v })}
-      />
-      <SettingRow
-        label="Wybranie następnego pytania wymaga akceptacji przez innych graczy (większość)"
-        value={settings.requireNextTruthApproval}
-        onChange={(v) => onChange({ requireNextTruthApproval: v })}
-      />
-      <SettingRow
-        label="Wybranie następnego wyzwania wymaga akceptacji przez innych graczy (większość)"
-        value={settings.requireNextDareApproval}
-        onChange={(v) => onChange({ requireNextDareApproval: v })}
-      />
+    <View className="gap-5">
+      <View className="gap-3">
+        <Text className="text-base font-bold text-foreground">Start rundy</Text>
+        <SettingRow
+          label="Runda startuje automatycznie (bez losowania przez hosta)"
+          value={settings.autoStart}
+          onChange={(v) => onChange({ autoStart: v })}
+        />
+      </View>
+
+      <View className="gap-3">
+        <Text className="text-base font-bold text-foreground">Ile osób musi się zgodzić na…</Text>
+        <ThresholdRow
+          label="zmianę pytania"
+          value={settings.nextTruthApproval}
+          onChange={(v) => onChange({ nextTruthApproval: v })}
+        />
+        <ThresholdRow
+          label="zmianę wyzwania"
+          value={settings.nextDareApproval}
+          onChange={(v) => onChange({ nextDareApproval: v })}
+        />
+        <ThresholdRow
+          label="koniec tury (kolejka gracza)"
+          value={settings.endTurnApproval}
+          onChange={(v) => onChange({ endTurnApproval: v })}
+        />
+      </View>
+
       <Text className="text-xs leading-5 text-muted">
-        Jeśli opcja jest włączona, większość graczy musi zaakceptować akcję, aby została wykonana.
+        „Bez zgody” wykonuje akcję od razu. „Połowa / Większość / Wszyscy” wymaga zgody danej części
+        graczy w głosowaniu.
       </Text>
     </View>
   );
@@ -121,6 +141,44 @@ function SettingRow({
     <View className="flex-row items-start gap-3">
       <Text className="flex-1 text-sm leading-5 text-foreground">{label}</Text>
       <Switch isSelected={value} onSelectedChange={onChange} />
+    </View>
+  );
+}
+
+function ThresholdRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: ApprovalThreshold;
+  onChange: (value: ApprovalThreshold) => void;
+}) {
+  return (
+    <View className="gap-1.5">
+      <Text className="text-sm text-foreground">{label}</Text>
+      <View className="flex-row flex-wrap gap-1.5">
+        {THRESHOLDS.map((opt) => {
+          const active = value === opt.id;
+          return (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              className="rounded-full px-3 py-1.5"
+              key={opt.id}
+              onPress={() => onChange(opt.id)}
+              style={{ backgroundColor: active ? neon.purpleBright : "rgba(255,255,255,0.06)" }}
+            >
+              <Text
+                className="text-xs font-semibold"
+                style={{ color: active ? "#FFFFFF" : neon.textMuted }}
+              >
+                {opt.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }

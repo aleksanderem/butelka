@@ -47,10 +47,18 @@ export interface ApprovalState {
   myVote: boolean | null;
 }
 
+/** Próg zgody na akcję: brak głosowania, połowa, większość albo wszyscy gracze. */
+export type ApprovalThreshold = "off" | "half" | "majority" | "all";
+
 export interface RoomSettings {
-  requireEndTurnApproval: boolean;
-  requireNextTruthApproval: boolean;
-  requireNextDareApproval: boolean;
+  /** Próg zgody na zakończenie tury (kolejka gracza). */
+  endTurnApproval: ApprovalThreshold;
+  /** Próg zgody na zmianę pytania (następna prawda). */
+  nextTruthApproval: ApprovalThreshold;
+  /** Próg zgody na zmianę wyzwania (następne wyzwanie). */
+  nextDareApproval: ApprovalThreshold;
+  /** Czy runda startuje automatycznie (bez losowania przez hosta). */
+  autoStart: boolean;
 }
 
 /** Stan głosowania w modalu akceptacji (ekran 7). */

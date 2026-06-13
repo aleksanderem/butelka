@@ -5,7 +5,7 @@
 import { Query } from "@/lib/appwrite-sdk";
 import { COL_PLAYERS, COL_ROOMS, COL_VOTES, DB_ID, databases } from "@/lib/appwrite";
 import { pickPrompt } from "@/game/prompts";
-import type { ApprovalAction, ChallengeType, Phase } from "@/game/types";
+import type { ApprovalAction, ApprovalThreshold, ChallengeType, Phase } from "@/game/types";
 
 /** Ile trwa animacja krążenia karty, zanim host ujawni szczęśliwca. */
 export const SPIN_MS = 3200;
@@ -22,11 +22,35 @@ export interface RoomDoc {
   spinStartedAt: number | null;
   challengeType: ChallengeType | null;
   challengeText: string | null;
-  requireEndTurnApproval: boolean;
-  requireNextTruthApproval: boolean;
-  requireNextDareApproval: boolean;
+  // Progi zgody (opcjonalne — starsze pokoje mogą ich nie mieć; czytane z domyślną wartością).
+  endTurnApproval?: ApprovalThreshold;
+  nextTruthApproval?: ApprovalThreshold;
+  nextDareApproval?: ApprovalThreshold;
+  autoStart?: boolean;
   pendingAction: ApprovalAction | null;
   createdAt: number;
+}
+
+/** Ilu graczy musi się zgodzić dla danego progu (0 = bez głosowania). */
+export function neededForThreshold(mode: ApprovalThreshold, total: number): number {
+  switch (mode) {
+    case "off":
+      return 0;
+    case "half":
+      return Math.max(1, Math.ceil(total / 2));
+    case "all":
+      return total;
+    case "majority":
+    default:
+      return Math.floor(total / 2) + 1;
+  }
+}
+
+/** Próg zgody dla akcji (z domyślnymi wartościami dla starszych pokoi). */
+export function thresholdForAction(room: RoomDoc, action: ApprovalAction): ApprovalThreshold {
+  if (action === "endTurn") return room.endTurnApproval ?? "majority";
+  if (action === "nextTruth") return room.nextTruthApproval ?? "majority";
+  return room.nextDareApproval ?? "off";
 }
 
 export interface PlayerDoc {
@@ -156,9 +180,10 @@ export async function enterRoom({
       spinStartedAt: null,
       challengeType: null,
       challengeText: null,
-      requireEndTurnApproval: true,
-      requireNextTruthApproval: true,
-      requireNextDareApproval: false,
+      endTurnApproval: "majority",
+      nextTruthApproval: "majority",
+      nextDareApproval: "off",
+      autoStart: false,
       pendingAction: null,
       createdAt: Date.now(),
     });
@@ -315,9 +340,7 @@ export async function rerollChallenge(room: RoomDoc): Promise<void> {
 }
 
 function settingRequiresApproval(room: RoomDoc, action: ApprovalAction): boolean {
-  if (action === "endTurn") return room.requireEndTurnApproval;
-  if (action === "nextTruth") return room.requireNextTruthApproval;
-  return room.requireNextDareApproval;
+  return thresholdForAction(room, action) !== "off";
 }
 
 /** Wykonuje akcję (koniec tury / następna prawda / następne wyzwanie) i czyści głosy. */
@@ -375,7 +398,7 @@ export async function resolveVotes(
   }
   const relevant = votes.filter((vote) => vote.action === action);
   const total = players.length;
-  const needed = Math.floor(total / 2) + 1;
+  const needed = neededForThreshold(thresholdForAction(room, action), total);
   const approved = relevant.filter((vote) => vote.approved).length;
   const rejected = relevant.filter((vote) => !vote.approved).length;
 
@@ -398,9 +421,10 @@ export async function resolveVotes(
 export async function updateSettings(
   code: string,
   settings: {
-    requireEndTurnApproval: boolean;
-    requireNextTruthApproval: boolean;
-    requireNextDareApproval: boolean;
+    endTurnApproval: ApprovalThreshold;
+    nextTruthApproval: ApprovalThreshold;
+    nextDareApproval: ApprovalThreshold;
+    autoStart: boolean;
   }
 ): Promise<void> {
   await updateRoom(code, settings);

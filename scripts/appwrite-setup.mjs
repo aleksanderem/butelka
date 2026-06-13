@@ -140,12 +140,18 @@ async function main() {
   await boolAttr("rooms", "requireEndTurnApproval", false, true);
   await boolAttr("rooms", "requireNextTruthApproval", false, true);
   await boolAttr("rooms", "requireNextDareApproval", false, false);
+  // Progi zgody (string enum) + auto-start.
+  await strAttr("rooms", "endTurnApproval", 16, false, "majority");
+  await strAttr("rooms", "nextTruthApproval", 16, false, "majority");
+  await strAttr("rooms", "nextDareApproval", 16, false, "off");
+  await boolAttr("rooms", "autoStart", false, false);
   await strAttr("rooms", "pendingAction", 16, false);
   await intAttr("rooms", "createdAt", true);
   await waitForAttributes("rooms", [
     "code", "phase", "hostClientId", "luckyClientId", "spinSeed", "spinStartedAt",
     "challengeType", "challengeText", "requireEndTurnApproval", "requireNextTruthApproval",
-    "requireNextDareApproval", "pendingAction", "createdAt",
+    "requireNextDareApproval", "endTurnApproval", "nextTruthApproval", "nextDareApproval",
+    "autoStart", "pendingAction", "createdAt",
   ]);
 
   // players

@@ -21,6 +21,8 @@ import type { PlayerColorId } from "@/theme/colors";
 export type Stage = "entry" | "profile" | "room";
 
 const SPIN_TICK_MS = 110;
+/** Odliczanie przed automatycznym losowaniem (gdy włączony auto-start). */
+const AUTO_START_MS = 2500;
 
 function botClientId(): string {
   return `bot_${Math.random().toString(36).slice(2, 9)}`;
@@ -203,15 +205,39 @@ export function useGame() {
     () =>
       roomDoc
         ? {
-            requireEndTurnApproval: roomDoc.requireEndTurnApproval,
-            requireNextTruthApproval: roomDoc.requireNextTruthApproval,
-            requireNextDareApproval: roomDoc.requireNextDareApproval,
+            endTurnApproval: roomDoc.endTurnApproval ?? "majority",
+            nextTruthApproval: roomDoc.nextTruthApproval ?? "majority",
+            nextDareApproval: roomDoc.nextDareApproval ?? "off",
+            autoStart: roomDoc.autoStart ?? false,
           }
         : defaultSettings,
     [roomDoc]
   );
   const challengeType = (roomDoc?.challengeType ?? null) as ChallengeType | null;
   const challengeText = roomDoc?.challengeText ?? null;
+
+  // Auto-start: host losuje automatycznie po krótkim odliczaniu, gdy włączone i są ≥2 gracze.
+  // Refy (synchronizowane w efekcie), żeby polling (reload co 2,5 s) nie resetował timera —
+  // deps efektu to stabilne prymitywy.
+  const roomDocRef = useRef(roomDoc);
+  const playerDocsRef = useRef(playerDocs);
+  useEffect(() => {
+    roomDocRef.current = roomDoc;
+    playerDocsRef.current = playerDocs;
+  });
+  const isHostDevice = !!roomDoc && roomDoc.hostClientId === clientId;
+  useEffect(() => {
+    if (!isHostDevice || !settings.autoStart || phase !== "lobby" || players.length < 2) {
+      return;
+    }
+    const id = setTimeout(() => {
+      const rd = roomDocRef.current;
+      if (rd) {
+        void roomApi.startSpin(rd, playerDocsRef.current).then(() => reload(rd.code));
+      }
+    }, AUTO_START_MS);
+    return () => clearTimeout(id);
+  }, [isHostDevice, settings.autoStart, phase, players.length, reload]);
 
   const approval: ApprovalState | null = useMemo(() => {
     if (!pendingApproval) {
@@ -222,15 +248,28 @@ export function useGame() {
     const myVote = voteDocs.find(
       (v) => v.action === pendingApproval && v.clientId === effectiveClientId
     );
+    const mode =
+      pendingApproval === "endTurn"
+        ? settings.endTurnApproval
+        : pendingApproval === "nextTruth"
+          ? settings.nextTruthApproval
+          : settings.nextDareApproval;
     return {
       action: pendingApproval,
       approved: approvedClientIds.size,
       rejected,
       total,
-      needed: Math.floor(total / 2) + 1,
+      needed: roomApi.neededForThreshold(mode, total),
       myVote: myVote ? myVote.approved : null,
     };
-  }, [pendingApproval, sortedPlayers.length, voteDocs, effectiveClientId, approvedClientIds]);
+  }, [
+    pendingApproval,
+    sortedPlayers.length,
+    voteDocs,
+    effectiveClientId,
+    approvedClientIds,
+    settings,
+  ]);
 
   const luckyClientId = roomDoc?.luckyClientId ?? null;
   const luckyMatch = luckyClientId ? players.findIndex((p) => p.clientId === luckyClientId) : -1;
@@ -297,11 +336,9 @@ export function useGame() {
 
   const approvalCount = useMemo(
     () =>
-      [
-        settings.requireEndTurnApproval,
-        settings.requireNextTruthApproval,
-        settings.requireNextDareApproval,
-      ].filter(Boolean).length,
+      [settings.endTurnApproval, settings.nextTruthApproval, settings.nextDareApproval].filter(
+        (mode) => mode !== "off"
+      ).length,
     [settings]
   );
 
@@ -472,9 +509,10 @@ export function useGame() {
       if (roomDoc) {
         const code = roomDoc.code;
         const merged = {
-          requireEndTurnApproval: settings.requireEndTurnApproval,
-          requireNextTruthApproval: settings.requireNextTruthApproval,
-          requireNextDareApproval: settings.requireNextDareApproval,
+          endTurnApproval: settings.endTurnApproval,
+          nextTruthApproval: settings.nextTruthApproval,
+          nextDareApproval: settings.nextDareApproval,
+          autoStart: settings.autoStart,
           ...patch,
         };
         void roomApi.updateSettings(code, merged).then(() => reload(code));
