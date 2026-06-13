@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "convex/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { api } from "../../convex/_generated/api";
 import { avatarOrder } from "@/game/avatars";
@@ -115,6 +115,25 @@ export function useGame() {
   const luckyIndex = luckyMatch >= 0 ? luckyMatch : null;
   const luckyPlayer = luckyIndex === null ? null : (players[luckyIndex] ?? null);
   const amLucky = luckyPlayer?.isSelf ?? false;
+
+  // Test na jednym urządzeniu: gdy zaczyna się głosowanie, zapamiętaj widok, którym
+  // sterujesz (np. szczęśliwiec klikający „Następne”). Po zakończeniu głosowania
+  // wróć do niego — żeby znów widzieć jego przyciski, a nie zostać „jako” ostatni głosujący.
+  const viewBeforeApprovalRef = useRef<string | null>(null);
+  const prevPendingRef = useRef<typeof pendingApproval>(pendingApproval);
+  useEffect(() => {
+    const prev = prevPendingRef.current;
+    prevPendingRef.current = pendingApproval;
+    if (prev === null && pendingApproval !== null) {
+      viewBeforeApprovalRef.current = actingClientId;
+      return;
+    }
+    if (prev !== null && pendingApproval === null) {
+      const restore = viewBeforeApprovalRef.current;
+      const id = setTimeout(() => setActingClientId(restore), 0);
+      return () => clearTimeout(id);
+    }
+  }, [pendingApproval, actingClientId]);
 
   // Animacja krążenia karty (czysto kliencka): podczas „spinning” migamy graczami.
   // setState żyje wyłącznie w callbacku interwału, nie w ciele efektu.
