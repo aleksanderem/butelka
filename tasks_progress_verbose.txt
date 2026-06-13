@@ -245,3 +245,18 @@ Naprawione (commit e96d28b):
   4. POLLING fallback co 2,5s w efekcie subskrypcji (obok Realtime) -> sync na natywie.
 Weryfikacja end-to-end na iPhone 16e (przez REST + polling, bez taps): ustawiono glosowanie 1/3 -> symulator sam pokazal modal (polling dziala) z przyciskiem X; dodano 2. glos 2/3 -> host-sim rozstrzygnal, przeladowal, dialog SAM sie zamknal, pojawila sie nowa prawda. DB potwierdzil phase=task, pending=null. tsc+lint zielone.
 Sprzatniete: pokoj 619027 -> lobby; .gitignore -> .expo-*.log.
+
+=== SESSION S0002 FOLLOWUP2 === 2026-06-13T23:40:00Z
+Feature (prosba uzytkownika): konfigurowalny prog zgody + auto-start. Commit c566371.
+1. RoomSettings: 3x boolean -> 3x ApprovalThreshold ("off"|"half"|"majority"|"all") + autoStart:boolean.
+   neededForThreshold(mode,total): off=0, half=ceil(n/2), majority=floor(n/2)+1, all=n. thresholdForAction() z domyslnymi dla starych pokoi.
+   Panel ustawien (Rozgrywka): przelacznik auto-startu + 3 selektory pigulkowe (zmiana pytania/wyzwania/koniec tury). Domyslne: pytanie=majority, wyzwanie=off, tura=majority.
+2. Auto-start: host-effect, gdy autoStart && lobby && >=2 graczy -> setTimeout(startSpin, 2500ms). Refy (sync w efekcie) by polling nie resetowal timera; deps stabilne prymitywy.
+   circulating-view: gdy autoStart -> 'Runda zacznie sie automatycznie...' zamiast przycisku losowania.
+3. Modal akceptacji: pasek/etykiety wzgledem progu (approved/needed, ratio=approved/needed).
+4. Appwrite: nowe atrybuty endTurnApproval/nextTruthApproval/nextDareApproval (string16) + autoStart(bool); provisioning zaktualizowany i odpalony (17 atrybutow rooms).
+Weryfikacja:
+  - Natyw (iPhone 16e przez REST): autoStart=true + 3 graczy -> host-sim SAM wylosowal (DB phase=chosen, lucky=host), ekran 'Szczesliwiec! To Ty!' bez klikania.
+  - Web preview: panel Rozgrywka renderuje sie czysto (pigulki zawijaja sie 2x2, aktywna podswietlona); klik 'Wszyscy' dla zmiany pytania -> przelaczyl sie (zapis do Appwrite dziala).
+  - tsc + lint zielone.
+Uwaga kompatybilnosci: stare pokoje (bez nowych atrybutow) czytane z domyslnymi progami — dziala wstecznie.
