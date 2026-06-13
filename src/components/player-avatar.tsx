@@ -22,6 +22,8 @@ type AvatarVisualProps = {
   dimmed?: boolean;
   /** Czy odtwarzać animację (domyślnie tylko aktywny lub duży podgląd — oszczędza CPU). */
   animate?: boolean;
+  /** Kolor tła kółka (domyślnie ciemna powierzchnia; na karcie ustawiamy fiolet karty). */
+  backgroundColor?: string;
 };
 
 /** Animowany avatar-maskotka (Lottie) w kolorowym kółku z ringiem. */
@@ -32,6 +34,7 @@ export function AvatarVisual({
   active = false,
   dimmed = false,
   animate,
+  backgroundColor,
 }: AvatarVisualProps) {
   const { box, ring } = dims[size];
   const color = playerPalette[colorId];
@@ -43,7 +46,7 @@ export function AvatarVisual({
       style={[
         {
           alignItems: "center",
-          backgroundColor: neon.surfaceRaised,
+          backgroundColor: backgroundColor ?? neon.surfaceRaised,
           borderColor: active ? color : `${color}66`,
           borderRadius: box / 2,
           borderWidth: active ? ring + 1 : ring,

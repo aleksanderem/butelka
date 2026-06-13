@@ -1,112 +1,105 @@
 import { useEffect } from "react";
 import { View } from "react-native";
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
-  ZoomIn,
+  withTiming,
 } from "react-native-reanimated";
 
 import { GameCard } from "@/components/game-card";
 import type { Player } from "@/game/types";
 
-/** Maks. liczba kart w wachlarzu — powyżej i tak pokazujemy 5. */
 const MAX = 5;
-const ANGLE = 10; // stopnie rotacji na pozycję od środka
-const X_STEP = 34; // px przesunięcia poziomego
-const Y_STEP = 11; // px obniżenia kart bocznych (łuk)
 const CARD_W = 160;
 const CARD_H = 220;
-const SPRING = { damping: 15, mass: 0.9, stiffness: 150 };
-
-const CONTAINER_W = CARD_W + (MAX - 1) * X_STEP + 36;
-const CONTAINER_H = CARD_H + Math.floor(MAX / 2) * Y_STEP + 80;
+const CONTAINER_W = 344;
+const CONTAINER_H = 272;
 const LEFT = (CONTAINER_W - CARD_W) / 2;
 const TOP = (CONTAINER_H - CARD_H) / 2;
+const TIMING = { duration: 240, easing: Easing.out(Easing.cubic) };
 
-/** Wachlarz kart graczy (po jednej karcie na gracza, do 5). Nowa karta „wskakuje”,
- *  a pozostałe spring-em przesuwają się na nowe pozycje. */
+/** Rozstaw kart zależny od liczby: mniej graczy = szerzej (widać więcej avatara i nazwy). */
+function xStepFor(count: number): number {
+  if (count <= 3) return 92;
+  if (count === 4) return 62;
+  return 50;
+}
+
+/** Wachlarz kart graczy (do 5). Karta „Ty” (tego telefonu) zawsze w środku i na wierzchu,
+ *  reszta układa się symetrycznie wokół. Wachlarz jest zawsze wyśrodkowany. */
 export function CardFan({ players }: { players: Player[] }) {
-  const shown = players.slice(0, MAX);
-  const total = shown.length;
-  const frontIndex = Math.round((total - 1) / 2);
+  const self = players.find((p) => p.isSelf);
+  const others = players.filter((p) => !p.isSelf);
+  const shownOthers = others.slice(0, self ? MAX - 1 : MAX);
+  const list = self ? [self, ...shownOthers] : shownOthers;
+  const xStep = xStepFor(list.length);
+
+  // Sloty: środek = 0 (karta „Ty”), reszta naprzemiennie +1,-1,+2,-2 → wachlarz wyśrodkowany.
+  const cards = list.map((player, i) => ({
+    player,
+    slot: i === 0 ? 0 : i % 2 === 1 ? Math.ceil(i / 2) : -Math.ceil(i / 2),
+    prominent: self ? player.isSelf === true : i === 0,
+  }));
 
   return (
     <View style={{ height: CONTAINER_H, width: CONTAINER_W }}>
-      {shown.map((player, index) => (
-        <FanCard
-          index={index}
-          key={player.id}
-          player={player}
-          prominent={index === frontIndex}
-          total={total}
-        />
+      {cards.map(({ player, slot, prominent }) => (
+        <FanCard key={player.id} player={player} prominent={prominent} slot={slot} xStep={xStep} />
       ))}
     </View>
   );
 }
 
 function FanCard({
-  index,
-  total,
   player,
+  slot,
   prominent,
+  xStep,
 }: {
-  index: number;
-  total: number;
   player: Player;
+  slot: number;
   prominent: boolean;
+  xStep: number;
 }) {
-  const center = (total - 1) / 2;
-  const offset = index - center;
-  const depth = Math.abs(offset);
-  const targetRot = offset * ANGLE;
-  const targetX = offset * X_STEP;
-  const targetY = depth * Y_STEP;
-  const targetScale = prominent ? 1 : Math.max(0.76, 1 - depth * 0.11);
-  const zIndex = MAX - Math.round(depth * 2);
+  const depth = Math.abs(slot);
+  const targetX = slot * xStep;
+  const targetScale = prominent ? 1 : Math.max(0.8, 1 - depth * 0.09);
+  // Karta „Ty” zawsze na samej górze; reszta według głębi.
+  const zIndex = prominent ? 100 : MAX - depth;
+  // Głębia: blur i przyciemnienie głównie na skrajnych (depth ≈ 2); środkowe ostre.
+  const blur = prominent ? 0 : Math.round(Math.max(0, depth - 1) * 30);
+  const dim = prominent ? 0 : Math.min(0.34, depth * 0.12);
 
-  // Głębia: tylne karty mniejsze, ciemniejsze i rozmyte; przednia (prominent) ostra.
-  const blur = prominent ? 0 : Math.min(46, Math.round(depth * 18));
-  const dim = prominent ? 0 : Math.min(0.45, depth * 0.2);
-
-  const rot = useSharedValue(targetRot);
+  // Init na wartości docelowe -> zawsze poprawna pozycja/skala (nie gubi się przy przejściach).
   const tx = useSharedValue(targetX);
-  const ty = useSharedValue(targetY);
   const sc = useSharedValue(targetScale);
+  const entered = useSharedValue(0);
 
   useEffect(() => {
-    rot.value = withSpring(targetRot, SPRING);
-    tx.value = withSpring(targetX, SPRING);
-    ty.value = withSpring(targetY, SPRING);
-    sc.value = withSpring(targetScale, SPRING);
-  }, [targetRot, targetX, targetY, targetScale, rot, tx, ty, sc]);
+    tx.value = withTiming(targetX, TIMING);
+    sc.value = withTiming(targetScale, TIMING);
+  }, [targetX, targetScale, tx, sc]);
+
+  // Lekkie „wskakiwanie” (floor skali 0.88 — nawet bez ukończonej animacji karta ma dobrą wielkość).
+  useEffect(() => {
+    entered.value = withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) });
+  }, [entered]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: tx.value },
-      { translateY: ty.value },
-      { rotateZ: `${rot.value}deg` },
-      { scale: sc.value },
-    ],
+    transform: [{ translateX: tx.value }, { scale: sc.value * (0.88 + 0.12 * entered.value) }],
   }));
 
   return (
-    // Zewnętrzny View = entering (wskakiwanie nowej karty); wewnętrzny = transform (układ wachlarza).
-    <Animated.View
-      entering={ZoomIn.springify().damping(13).stiffness(170)}
-      style={{ left: LEFT, position: "absolute", top: TOP, zIndex }}
-    >
-      <Animated.View style={animatedStyle}>
-        <GameCard
-          animate={prominent}
-          avatarId={player.avatarId}
-          blur={blur}
-          colorId={player.colorId}
-          dim={dim}
-          label={player.isSelf ? "Ty" : player.name}
-        />
-      </Animated.View>
+    <Animated.View style={[{ left: LEFT, position: "absolute", top: TOP, zIndex }, animatedStyle]}>
+      <GameCard
+        animate={prominent}
+        avatarId={player.avatarId}
+        blur={blur}
+        colorId={player.colorId}
+        dim={dim}
+        label={player.isSelf ? "Ty" : player.name}
+      />
     </Animated.View>
   );
 }

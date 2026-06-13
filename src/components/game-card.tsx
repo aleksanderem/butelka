@@ -119,7 +119,13 @@ export function GameCard({
           style={[StyleSheet.absoluteFill, { gap: 12, paddingHorizontal: 10 }]}
         >
           {hasAvatar ? (
-            <AvatarVisual animate={animate} avatarId={avatarId} colorId={colorId} size="lg" />
+            <AvatarVisual
+              animate={animate}
+              avatarId={avatarId}
+              backgroundColor={neon.purpleDeepest}
+              colorId={colorId}
+              size="lg"
+            />
           ) : null}
           {label ? (
             <Text
