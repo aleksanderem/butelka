@@ -5,7 +5,7 @@ import { useGame } from "@/game/use-game";
 import { ApprovalModal } from "@/screens/approval-modal";
 import { OnboardingScreen } from "@/screens/onboarding-screen";
 import { RoomScreen } from "@/screens/room-screen";
-import { SettingsSheet } from "@/screens/settings-sheet";
+import { SettingsScreen } from "@/screens/settings-screen";
 import { StartScreen } from "@/screens/start-screen";
 
 export default function HomeScreen(): JSX.Element {
@@ -17,11 +17,12 @@ export default function HomeScreen(): JSX.Element {
         <StartScreen game={game} />
       ) : game.stage === "profile" ? (
         <OnboardingScreen game={game} />
+      ) : game.settingsOpen ? (
+        <SettingsScreen game={game} />
       ) : (
         <RoomScreen game={game} />
       )}
 
-      <SettingsSheet game={game} />
       <ApprovalModal game={game} />
     </Screen>
   );
