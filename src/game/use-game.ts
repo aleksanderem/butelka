@@ -1,15 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import {
-  avatarPresets,
-  colorOrder,
-  defaultSettings,
-  demoPlayers,
-  makeRoomCode,
-  pickPrompt,
-} from "@/game/data";
+import { api } from "../../convex/_generated/api";
+import { avatarPresets, colorOrder, defaultSettings } from "@/game/data";
 import type {
-  ApprovalAction,
+  ApprovalState,
   AvatarId,
   ChallengeType,
   Phase,
@@ -17,57 +12,118 @@ import type {
   RoomSettings,
   RoomTab,
 } from "@/game/types";
+import { useClientId } from "@/lib/client-id";
+import type { PlayerColorId } from "@/theme/colors";
 
 export type Stage = "entry" | "profile" | "room";
 
-const SPIN_INTERVAL_MS = 420;
+const SPIN_TICK_MS = 110;
 
-function makeId(): string {
-  return `p_${Math.random().toString(36).slice(2, 9)}`;
+function botClientId(): string {
+  return `bot_${Math.random().toString(36).slice(2, 9)}`;
 }
 
 /**
- * Cały stan i logika gry „Butelka” w jednym hooku. To jedyna warstwa, którą
- * podmienimy przy wpinaniu multiplayera — ekrany konsumują tylko ten interfejs.
+ * Cały stan i logika gry „Butelka”. Profil i nawigacja są lokalne, a stan pokoju
+ * pochodzi z reaktywnego query Convex — ekrany konsumują niezmieniony interfejs GameApi.
  */
 export function useGame() {
+  const clientId = useClientId();
+
+  // Lokalny stan profilu i nawigacji (zanim gracz dołączy do pokoju).
   const [stage, setStage] = useState<Stage>("entry");
   const [roomTab, setRoomTab] = useState<RoomTab>("create");
   const [roomCode, setRoomCode] = useState("");
   const [joinCode, setJoinCode] = useState("");
-
   const [playerName, setPlayerName] = useState("");
   const [avatarId, setAvatarId] = useState<AvatarId>(avatarPresets[0].id);
-  const [colorId, setColorId] = useState(colorOrder[0]);
-
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [phase, setPhase] = useState<Phase>("lobby");
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [luckyIndex, setLuckyIndex] = useState<number | null>(null);
-  const [challengeType, setChallengeType] = useState<ChallengeType | null>(null);
-  const [challengeText, setChallengeText] = useState<string | null>(null);
-
-  const [settings, setSettings] = useState<RoomSettings>(defaultSettings);
+  const [colorId, setColorId] = useState<PlayerColorId>(colorOrder[0]);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [pendingApproval, setPendingApproval] = useState<ApprovalAction | null>(null);
+  const [spinTick, setSpinTick] = useState(0);
 
-  const spinTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Mutacje backendu.
+  const createRoomMut = useMutation(api.rooms.createRoom);
+  const joinRoomMut = useMutation(api.rooms.joinRoom);
+  const leaveRoomMut = useMutation(api.rooms.leaveRoom);
+  const spinMut = useMutation(api.rooms.spin);
+  const pickChallengeMut = useMutation(api.rooms.pickChallenge);
+  const rerollChallengeMut = useMutation(api.rooms.rerollChallenge);
+  const rerollLuckyMut = useMutation(api.rooms.rerollLucky);
+  const requestActionMut = useMutation(api.rooms.requestAction);
+  const voteMut = useMutation(api.rooms.vote);
+  const updateSettingsMut = useMutation(api.rooms.updateSettings);
 
+  // Reaktywny stan pokoju.
+  const inRoom = stage === "room" && roomCode.length > 0 && clientId !== null;
+  const state = useQuery(
+    api.rooms.gameState,
+    inRoom ? { code: roomCode, clientId: clientId! } : "skip"
+  );
+
+  const players: Player[] = useMemo(
+    () =>
+      (state?.players ?? []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        avatarId: p.avatarId as AvatarId,
+        colorId: p.colorId as PlayerColorId,
+        isSelf: p.isSelf,
+        clientId: p.clientId,
+        approved: p.approved,
+      })),
+    [state]
+  );
+
+  const phase: Phase = state?.phase ?? "lobby";
+  const settings: RoomSettings = state?.settings ?? defaultSettings;
+  const challengeType = (state?.challengeType ?? null) as ChallengeType | null;
+  const challengeText = state?.challengeText ?? null;
+  const pendingApproval = state?.pendingAction ?? null;
+  const approval: ApprovalState | null = state?.approval ?? null;
+
+  const luckyClientId = state?.luckyClientId ?? null;
+  const luckyMatch = luckyClientId ? players.findIndex((p) => p.clientId === luckyClientId) : -1;
+  const luckyIndex = luckyMatch >= 0 ? luckyMatch : null;
+  const luckyPlayer = luckyIndex === null ? null : (players[luckyIndex] ?? null);
+
+  // Animacja krążenia karty (czysto kliencka): podczas „spinning” migamy graczami.
+  // setState żyje wyłącznie w callbacku interwału, nie w ciele efektu.
   useEffect(() => {
-    return () => {
-      if (spinTimerRef.current) {
-        clearTimeout(spinTimerRef.current);
-      }
-    };
-  }, []);
+    if (phase !== "spinning" || players.length === 0) {
+      return;
+    }
+    const id = setInterval(() => setSpinTick((tick) => tick + 1), SPIN_TICK_MS);
+    return () => clearInterval(id);
+  }, [phase, players.length]);
+
+  const activeIndex = useMemo(() => {
+    if (phase === "spinning" && players.length > 0) {
+      return spinTick % players.length;
+    }
+    if (phase === "chosen" || phase === "task") {
+      return luckyIndex;
+    }
+    return null;
+  }, [phase, players.length, spinTick, luckyIndex]);
+
+  const activePlayer = activeIndex === null ? null : (players[activeIndex] ?? null);
+
+  // Jeśli pokój zniknął (wszyscy wyszli) — wróć do ekranu startowego (poza ciałem efektu).
+  useEffect(() => {
+    if (!(inRoom && state === null)) {
+      return;
+    }
+    const id = setTimeout(() => {
+      setStage("entry");
+      setRoomCode("");
+    }, 0);
+    return () => clearTimeout(id);
+  }, [inRoom, state]);
 
   const normalizedName = playerName.trim();
   const normalizedJoinCode = joinCode.trim().toUpperCase();
   const canEnterRoom = normalizedName.length >= 2;
   const canSpin = phase === "lobby" && players.length >= 2;
-
-  const luckyPlayer = luckyIndex === null ? null : (players[luckyIndex] ?? null);
-  const activePlayer = activeIndex === null ? null : (players[activeIndex] ?? null);
 
   const approvalCount = useMemo(
     () =>
@@ -79,23 +135,15 @@ export function useGame() {
     [settings]
   );
 
-  const resetRound = useCallback(() => {
-    if (spinTimerRef.current) {
-      clearTimeout(spinTimerRef.current);
-      spinTimerRef.current = null;
+  const createRoom = useCallback(async () => {
+    if (!clientId) {
+      return;
     }
-    setPhase("lobby");
-    setActiveIndex(null);
-    setLuckyIndex(null);
-    setChallengeType(null);
-    setChallengeText(null);
-  }, []);
-
-  const createRoom = useCallback(() => {
-    setRoomCode(makeRoomCode());
+    const { code } = await createRoomMut({ clientId });
+    setRoomCode(code);
     setRoomTab("create");
     setStage("profile");
-  }, []);
+  }, [clientId, createRoomMut]);
 
   const joinRoom = useCallback(() => {
     if (normalizedJoinCode.length < 4) {
@@ -106,155 +154,103 @@ export function useGame() {
     setStage("profile");
   }, [normalizedJoinCode]);
 
-  const leaveRoom = useCallback(() => {
-    resetRound();
+  const completeProfile = useCallback(async () => {
+    if (!canEnterRoom || !clientId || !roomCode) {
+      return;
+    }
+    await joinRoomMut({ code: roomCode, clientId, name: normalizedName, avatarId, colorId });
+    setStage("room");
+  }, [avatarId, canEnterRoom, clientId, colorId, joinRoomMut, normalizedName, roomCode]);
+
+  const leaveRoom = useCallback(async () => {
+    if (roomCode && clientId) {
+      await leaveRoomMut({ code: roomCode, clientId });
+    }
     setStage("entry");
     setRoomCode("");
     setJoinCode("");
-    setPlayers([]);
     setPlayerName("");
-  }, [resetRound]);
-
-  const completeProfile = useCallback(() => {
-    if (!canEnterRoom) {
-      return;
-    }
-    const self: Player = {
-      id: makeId(),
-      name: normalizedName,
-      avatarId,
-      colorId,
-      isSelf: true,
-    };
-    const others: Player[] = demoPlayers.map((p) => ({ ...p, id: makeId() }));
-    setPlayers([self, ...others]);
-    setStage("room");
-  }, [avatarId, canEnterRoom, colorId, normalizedName]);
+  }, [clientId, leaveRoomMut, roomCode]);
 
   const addDemoPlayer = useCallback(() => {
-    setPlayers((current) => {
-      const preset = avatarPresets[current.length % avatarPresets.length];
-      return [
-        ...current,
-        {
-          id: makeId(),
-          name: `Gracz ${current.length + 1}`,
-          avatarId: preset.id,
-          colorId: colorOrder[current.length % colorOrder.length],
-        },
-      ];
-    });
-  }, []);
-
-  const spin = useCallback(() => {
-    setPlayers((current) => {
-      if (current.length < 2) {
-        return current;
-      }
-      if (spinTimerRef.current) {
-        clearTimeout(spinTimerRef.current);
-      }
-
-      const targetIndex = Math.floor(Math.random() * current.length);
-      const rounds = current.length * 2 + targetIndex + 1;
-      let step = 0;
-
-      setPhase("spinning");
-      setLuckyIndex(null);
-      setChallengeType(null);
-      setChallengeText(null);
-      setActiveIndex(0);
-
-      const tick = () => {
-        step += 1;
-        setActiveIndex(step % current.length);
-        if (step >= rounds) {
-          setActiveIndex(targetIndex);
-          setLuckyIndex(targetIndex);
-          setPhase("chosen");
-          return;
-        }
-        spinTimerRef.current = setTimeout(tick, SPIN_INTERVAL_MS);
-      };
-      spinTimerRef.current = setTimeout(tick, SPIN_INTERVAL_MS);
-      return current;
-    });
-  }, []);
-
-  const pickChallenge = useCallback((type: ChallengeType) => {
-    setChallengeType(type);
-    setChallengeText(pickPrompt(type));
-    setPhase("task");
-  }, []);
-
-  const rerollLucky = useCallback(() => {
-    resetRound();
-    // pozwól stanowi się wyczyścić, potem losuj od nowa
-    setTimeout(spin, 0);
-  }, [resetRound, spin]);
-
-  const rerollChallenge = useCallback(() => {
-    setChallengeText((current) => {
-      if (!challengeType) {
-        return current;
-      }
-      return pickPrompt(challengeType, current ?? undefined);
-    });
-  }, [challengeType]);
-
-  const performNextChallenge = useCallback((type: ChallengeType) => {
-    setChallengeType(type);
-    setChallengeText(pickPrompt(type));
-    setPhase("task");
-  }, []);
-
-  const requestApprovalOrRun = useCallback(
-    (action: ApprovalAction, run: () => void) => {
-      const requires =
-        (action === "endTurn" && settings.requireEndTurnApproval) ||
-        (action === "nextTruth" && settings.requireNextTruthApproval) ||
-        (action === "nextDare" && settings.requireNextDareApproval);
-      if (requires) {
-        setPendingApproval(action);
-        return;
-      }
-      run();
-    },
-    [settings]
-  );
-
-  const nextChallenge = useCallback(() => {
-    if (!challengeType) {
+    if (!roomCode) {
       return;
     }
-    requestApprovalOrRun(challengeType === "prawda" ? "nextTruth" : "nextDare", () =>
-      performNextChallenge(challengeType)
-    );
-  }, [challengeType, performNextChallenge, requestApprovalOrRun]);
+    const i = players.length;
+    const preset = avatarPresets[i % avatarPresets.length];
+    void joinRoomMut({
+      code: roomCode,
+      clientId: botClientId(),
+      name: `Gracz ${i + 1}`,
+      avatarId: preset.id,
+      colorId: colorOrder[i % colorOrder.length],
+    });
+  }, [joinRoomMut, players.length, roomCode]);
+
+  const spin = useCallback(() => {
+    if (roomCode) {
+      void spinMut({ code: roomCode });
+    }
+  }, [roomCode, spinMut]);
+
+  const pickChallenge = useCallback(
+    (type: ChallengeType) => {
+      if (roomCode) {
+        void pickChallengeMut({ code: roomCode, type });
+      }
+    },
+    [pickChallengeMut, roomCode]
+  );
+
+  const rerollChallenge = useCallback(() => {
+    if (roomCode) {
+      void rerollChallengeMut({ code: roomCode });
+    }
+  }, [rerollChallengeMut, roomCode]);
+
+  const rerollLucky = useCallback(() => {
+    if (roomCode) {
+      void rerollLuckyMut({ code: roomCode });
+    }
+  }, [rerollLuckyMut, roomCode]);
+
+  const nextChallenge = useCallback(() => {
+    if (!roomCode || !clientId || !challengeType) {
+      return;
+    }
+    void requestActionMut({
+      code: roomCode,
+      clientId,
+      action: challengeType === "prawda" ? "nextTruth" : "nextDare",
+    });
+  }, [challengeType, clientId, requestActionMut, roomCode]);
 
   const passTurn = useCallback(() => {
-    requestApprovalOrRun("endTurn", resetRound);
-  }, [requestApprovalOrRun, resetRound]);
+    if (roomCode && clientId) {
+      void requestActionMut({ code: roomCode, clientId, action: "endTurn" });
+    }
+  }, [clientId, requestActionMut, roomCode]);
 
   const confirmApproval = useCallback(() => {
-    const action = pendingApproval;
-    setPendingApproval(null);
-    if (action === "endTurn") {
-      resetRound();
-    } else if (action === "nextTruth") {
-      performNextChallenge("prawda");
-    } else if (action === "nextDare") {
-      performNextChallenge("wyzwanie");
+    if (roomCode && clientId) {
+      void voteMut({ code: roomCode, clientId, approved: true });
     }
-  }, [pendingApproval, performNextChallenge, resetRound]);
+  }, [clientId, roomCode, voteMut]);
 
   const rejectApproval = useCallback(() => {
-    setPendingApproval(null);
-  }, []);
+    if (roomCode && clientId) {
+      void voteMut({ code: roomCode, clientId, approved: false });
+    }
+  }, [clientId, roomCode, voteMut]);
 
-  const updateSettings = useCallback((patch: Partial<RoomSettings>) => {
-    setSettings((current) => ({ ...current, ...patch }));
-  }, []);
+  const updateSettings = useCallback(
+    (patch: Partial<RoomSettings>) => {
+      if (roomCode) {
+        void updateSettingsMut({ code: roomCode, settings: { ...settings, ...patch } });
+      }
+    },
+    [roomCode, settings, updateSettingsMut]
+  );
 
   return {
     // stan
@@ -276,6 +272,7 @@ export function useGame() {
     settings,
     settingsOpen,
     pendingApproval,
+    approval,
     approvalCount,
     canEnterRoom,
     canSpin,

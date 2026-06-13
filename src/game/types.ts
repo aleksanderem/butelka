@@ -6,15 +6,7 @@ export type RoomTab = "join" | "create";
 export type ApprovalAction = "endTurn" | "nextTruth" | "nextDare";
 
 /** Identyfikator presetu avatara (8 twarzy z mockupu onboardingu). */
-export type AvatarId =
-  | "kuba"
-  | "ola"
-  | "bartek"
-  | "zuzia"
-  | "michal"
-  | "kasia"
-  | "filip"
-  | "nina";
+export type AvatarId = "kuba" | "ola" | "bartek" | "zuzia" | "michal" | "kasia" | "filip" | "nina";
 
 export interface Player {
   id: string;
@@ -23,6 +15,18 @@ export interface Player {
   colorId: PlayerColorId;
   /** Czy to lokalny gracz na tym urządzeniu („Ty”). */
   isSelf?: boolean;
+  /** Identyfikator urządzenia gracza (multiplayer). */
+  clientId?: string;
+  /** Czy gracz zaakceptował aktualnie głosowaną akcję. */
+  approved?: boolean;
+}
+
+export interface ApprovalState {
+  action: ApprovalAction;
+  approved: number;
+  total: number;
+  needed: number;
+  myVote: boolean | null;
 }
 
 export interface RoomSettings {

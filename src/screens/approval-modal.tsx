@@ -23,15 +23,15 @@ export function ApprovalModal({ game }: { game: GameApi }) {
   const info = action ? copy[action] : null;
   const initiator = game.luckyPlayer?.isSelf ? "Ty" : (game.luckyPlayer?.name ?? "Gracz");
 
-  // Wizualizacja głosów: pozostali gracze już zaakceptowali (symulacja single-device),
-  // lokalny gracz decyduje przyciskiem. Po podpięciu multiplayera to zastąpią realne głosy.
-  const total = game.players.length;
-  const approved = Math.max(0, total - 1);
-  const needed = Math.floor(total / 2) + 1;
+  // Realne głosy z backendu: każdy gracz głosuje na swoim urządzeniu.
+  const total = game.approval?.total ?? game.players.length;
+  const approved = game.approval?.approved ?? 0;
+  const needed = game.approval?.needed ?? Math.floor(total / 2) + 1;
   const ratio = total > 0 ? approved / total : 0;
+  const myVote = game.approval?.myVote ?? null;
 
   return (
-    <Dialog isOpen={action !== null} onOpenChange={(open) => !open && game.rejectApproval()}>
+    <Dialog isOpen={action !== null} onOpenChange={() => undefined}>
       <Dialog.Portal>
         <Dialog.Overlay />
         <Dialog.Content className="items-center gap-4">
@@ -57,7 +57,7 @@ export function ApprovalModal({ game }: { game: GameApi }) {
 
           <View className="flex-row flex-wrap items-start justify-center gap-3 py-1">
             {game.players.map((player) => (
-              <VoteAvatar key={player.id} player={player} voted={!player.isSelf} />
+              <VoteAvatar key={player.id} player={player} voted={!!player.approved} />
             ))}
           </View>
 
@@ -88,19 +88,23 @@ export function ApprovalModal({ game }: { game: GameApi }) {
           <View className="w-full flex-row gap-3">
             <NeonButton
               className="flex-1"
+              disabled={myVote !== null}
               label="Odrzuć"
               onPress={game.rejectApproval}
               variant="ghost"
             />
             <NeonButton
               className="flex-1"
+              disabled={myVote !== null}
               label="Akceptuj"
               onPress={game.confirmApproval}
               variant="violet"
             />
           </View>
           <Text className="text-[11px] text-muted">
-            Wymagana zgoda {needed} z {total} graczy.
+            {myVote !== null
+              ? "Twój głos został oddany. Czekamy na pozostałych graczy."
+              : `Wymagana zgoda ${needed} z ${total} graczy.`}
           </Text>
         </Dialog.Content>
       </Dialog.Portal>
