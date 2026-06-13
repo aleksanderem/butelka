@@ -1,5 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { BlurView } from "expo-blur";
+import { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { RoomHeader } from "@/components/room-header";
 import type { GameApi } from "@/game/use-game";
@@ -17,24 +19,20 @@ export function RoomScreen({ game }: { game: GameApi }) {
         ? game.luckyIndex
         : null;
 
+  // Wysokość nagłówka, by treść zaczynała się pod nim (i przewijała się za jego rozmyciem).
+  const [headerHeight, setHeaderHeight] = useState(0);
+
   return (
-    <View className="flex-1 gap-4 px-5 pt-4">
-      <View style={{ zIndex: 10 }}>
-        <RoomHeader
-          highlightIndex={highlightIndex}
-          onBack={game.leaveRoom}
-          onPlayers={() => game.setPlayersOpen(true)}
-          onSettings={() => game.setSettingsOpen(true)}
-          players={game.players}
-          roomCode={game.roomCode}
-        />
-
-        {game.isImpersonating ? <ImpersonationBanner game={game} /> : null}
-      </View>
-
+    <View className="flex-1">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 28 }}
+        contentContainerStyle={{
+          // Treść w całości pod nagłówkiem, z małym marginesem. Rozmycie widać, gdy treść
+          // przewija się pod półprzezroczysty pasek.
+          paddingTop: headerHeight + 10,
+          paddingBottom: 28,
+          paddingHorizontal: 20,
+        }}
         showsVerticalScrollIndicator={false}
       >
         {game.phase === "chosen" ? (
@@ -45,6 +43,32 @@ export function RoomScreen({ game }: { game: GameApi }) {
           <CirculatingView game={game} />
         )}
       </ScrollView>
+
+      {/* Frosted glass header: półprzezroczysty pasek z rozmyciem — treść przewija się pod nim. */}
+      <View
+        className="absolute left-0 right-0 top-0 overflow-hidden"
+        onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+        style={{ zIndex: 10, borderBottomColor: "rgba(255,255,255,0.07)", borderBottomWidth: 1 }}
+      >
+        <BlurView intensity={55} pointerEvents="none" style={StyleSheet.absoluteFill} tint="dark" />
+        <View
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(10,8,18,0.2)" }]}
+        />
+
+        <View className="gap-3 px-5 pb-3 pt-3">
+          <RoomHeader
+            highlightIndex={highlightIndex}
+            onBack={game.leaveRoom}
+            onPlayers={() => game.setPlayersOpen(true)}
+            onSettings={() => game.setSettingsOpen(true)}
+            players={game.players}
+            roomCode={game.roomCode}
+          />
+
+          {game.isImpersonating ? <ImpersonationBanner game={game} /> : null}
+        </View>
+      </View>
 
       <PlayersSheet game={game} />
     </View>
