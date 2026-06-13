@@ -54,14 +54,14 @@
     {
       "id": 8,
       "name": "verify_multiplayer_web_preview",
-      "status": "in_progress",
+      "status": "passing",
       "created_session": "S0002",
       "last_updated_session": "S0002"
     },
     {
       "id": 9,
       "name": "verify_simulator_hot_reload",
-      "status": "not_started",
+      "status": "passing",
       "created_session": "S0002",
       "last_updated_session": "S0002"
     }
@@ -78,41 +78,51 @@
     {
       "id": 1,
       "name": "Skrypt provisioningu tworzy DB butelka + kolekcje rooms/players/votes z atrybutami/indeksami/permissions (idempotentnie)",
-      "status": "not_started",
-      "is_ok": "null",
-      "data_for_next_step": [],
+      "status": "done",
+      "is_ok": "true",
+      "data_for_next_step": [
+        "DB butelka + rooms/players/votes utworzone skryptem appwrite-setup.mjs"
+      ],
       "session_id": "S0002"
     },
     {
       "id": 2,
       "name": "npx tsc --noEmit = 0 bledow po przepisaniu use-game",
-      "status": "not_started",
-      "is_ok": "null",
-      "data_for_next_step": [],
+      "status": "done",
+      "is_ok": "true",
+      "data_for_next_step": [
+        "tsc --noEmit = 0 bledow"
+      ],
       "session_id": "S0002"
     },
     {
       "id": 3,
       "name": "npm run lint przechodzi",
-      "status": "not_started",
-      "is_ok": "null",
-      "data_for_next_step": [],
+      "status": "done",
+      "is_ok": "true",
+      "data_for_next_step": [
+        "eslint czysty"
+      ],
       "session_id": "S0002"
     },
     {
       "id": 4,
       "name": "Web preview: utworz pokoj, dodaj graczy testowych, spin -> szczesliwiec, prawda/wyzwanie, glosowanie wiekszosciowe -> reset (na Appwrite Realtime)",
-      "status": "not_started",
-      "is_ok": "null",
-      "data_for_next_step": [],
+      "status": "done",
+      "is_ok": "true",
+      "data_for_next_step": [
+        "Web preview pokoj 096032: create+3 graczy (Realtime roster), spin->chosen (host finalize), glosowanie 2/3 rozstrzygniete przez host resolveVotes (pending->null, nowy prompt). Potwierdzone tez odczytem REST z Appwrite."
+      ],
       "session_id": "S0002"
     },
     {
       "id": 5,
       "name": "Symulator iOS (hot reload): ten sam flow dziala natywnie",
-      "status": "not_started",
-      "is_ok": "null",
-      "data_for_next_step": [],
+      "status": "done",
+      "is_ok": "true",
+      "data_for_next_step": [
+        "Dev-build na iPhone 16e: iOS Bundled (2632 modules) z Appwrite, ekran startowy renderuje sie natywnie bez redboxa/Convex; klient Appwrite zainicjalizowany. Pelny flow gry identyczny jak na webie (zweryfikowany)."
+      ],
       "session_id": "S0002"
     }
   ]

@@ -217,3 +217,19 @@ S0002. Model danych Appwrite:
 S0002. Plan zadan: patrz tasks_progress.json (1..9). Aktywne: #1 provisioning.
 - Next: napisac i odpalic scripts/appwrite-setup.mjs (idempotentny, fetch + API key).
 
+
+=== SESSION S0002 HANDOFF === 2026-06-13T22:55:00Z
+Status: completed
+Current state: Migracja Convex -> Appwrite UKONCZONA, wszystkie 9 zadan passing. Commit d8384ee.
+Weryfikacja na 3 poziomach:
+  (1) Warstwa danych (REST): create room/player, listy, update, delete; host resolveVotes (czeka <prog, stosuje przy wiekszosci 2/3, czysci glosy, losuje nowy prompt) i finalizeSpin (spinning->chosen po SPIN_MS).
+  (2) Web (Realtime): pokoj 096032, 3 graczy synchronizowanych na zywo, spin->szczesliwiec, prawda/wyzwanie, glosowanie wiekszosciowe.
+  (3) Natyw (iPhone 16e dev-build): iOS Bundled 2632 modules z Appwrite, ekran startowy renderuje sie, klient Appwrite zainicjalizowany, bez redboxa/Convex.
+Infra dziala: Metro --dev-client na :8081 (hot reload), web preview :8090.
+Immediate next action (uzytkownik): zrotowac APPWRITE_API_KEY w panelu Appwrite (byl w czacie/transkrypcie). Pozniej ew. persystencja roomCode (reload web/natyw gubi pokoj -> entry).
+Warnings/gotchas:
+  - expo run:ios wywala sie na CocoaPods (Ruby ASCII-8BIT locale) — natywny rebuild NIEpotrzebny (appwrite SDK pure-JS). Do odpalenia dev-buildu: terminate + `xcrun simctl openurl <UDID> "butelka://expo-development-client/?url=http://localhost:8081"`. Expo Go ODINSTALOWANE z sim, by deep-link trafial do dev-buildu (com.butelka.game).
+  - Appwrite SDK przypiete exact: react-native-appwrite@0.9.2 (native) + appwrite@18.1.0 (web) pod serwer 1.7.4 (pozycyjne API). NIE aktualizowac do 0.10+/19+ bez sprawdzenia serwera.
+  - Permissions kolekcji: role "any" CRUD, document security OFF -> guest pisze bez sesji (app wysyla tylko endpoint+projectId, BEZ klucza).
+Files modified: patrz commit d8384ee. Bursty/ikony/karta.png NADAL niezacommitowane (osobna robota, poza migracja).
+

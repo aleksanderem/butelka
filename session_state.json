@@ -1,18 +1,18 @@
 {
   "session_id": "S0002",
   "started_at": "2026-06-13T20:00:00Z",
-  "last_updated": "2026-06-13T20:00:00Z",
-  "status": "active",
+  "last_updated": "2026-06-13T22:55:00Z",
+  "status": "completed",
   "focus": "Migracja backendu z Convex (hosted, zablokowany przez limit wydatkow) na self-hosted Appwrite 1.7.4 (Databases + Realtime), logika client-driven, GameApi bez zmian.",
   "tasks_snapshot": {
     "total": 9,
-    "not_started": 8,
-    "in_progress": 1,
-    "passing": 0,
+    "not_started": 0,
+    "in_progress": 0,
+    "passing": 9,
     "failing": 0,
     "blocked": 0
   },
-  "active_task_ids": [1],
+  "active_task_ids": [],
   "blockers": [],
-  "notes": "Appwrite: https://appwrite.c.helloalex.pl/v1 project 6a2db5940014ceaf8711 (klucz API w .env.local jako APPWRITE_API_KEY, NIE bundlowany, do rotacji przez uzytkownika). Strategia: zachowac dokladnie interfejs GameApi z use-game.ts (zaden ekran sie nie zmienia), przepisac tylko wnetrze hooka. Resolution authority = host (realne urzadzenie): spin finalize i resolveVotes tylko na hoscie. Pozycyjne API SDK (react-native-appwrite@0.7 + appwrite@17) pod serwer 1.7.4. Karta sunburst SVG juz zacommitowana (67229ae+1)."
+  "notes": "MIGRACJA UKONCZONA i zweryfikowana na 3 poziomach: (1) warstwa danych — wszystkie operacje Appwrite + host resolveVotes/finalizeSpin (REST), (2) web — pelny flow gry na Appwrite Realtime, (3) natyw — dev-build iPhone 16e: iOS Bundled (2632 modules), ekran startowy renderuje sie, klient Appwrite zainicjalizowany. Commit d8384ee. Metro dev-client dziala na :8081 (hot reload gotowy), web preview na :8090. DO ZROBIENIA PRZEZ UZYTKOWNIKA: zrotowac APPWRITE_API_KEY (byl w czacie). Uwaga: expo run:ios wywala sie na CocoaPods (locale Ruby ASCII-8BIT) — natywny rebuild zbedny; do odpalania dev-buildu: simctl openurl butelka://expo-development-client/?url=http://localhost:8081 (Expo Go odinstalowane z sim by deep-link trafial do dev-buildu)."
 }
