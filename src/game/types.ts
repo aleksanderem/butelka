@@ -5,8 +5,23 @@ export type ChallengeType = "prawda" | "wyzwanie";
 export type RoomTab = "join" | "create";
 export type ApprovalAction = "endTurn" | "nextTruth" | "nextDare";
 
-/** Identyfikator presetu avatara (8 twarzy z mockupu onboardingu). */
-export type AvatarId = "kuba" | "ola" | "bartek" | "zuzia" | "michal" | "kasia" | "filip" | "nina";
+/** Identyfikator animowanej maskotki (avatary Lottie z assets/avatars). */
+export type AvatarId =
+  | "star"
+  | "heart"
+  | "planet"
+  | "money"
+  | "gear"
+  | "cloud"
+  | "wallet"
+  | "shield"
+  | "mail"
+  | "message"
+  | "phone"
+  | "search"
+  | "paper"
+  | "pencil"
+  | "folder";
 
 export interface Player {
   id: string;

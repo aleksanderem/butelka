@@ -47,3 +47,6 @@ yarn-error.*
 
 # Local preview server log
 .expo-web.log
+
+# Zrodlo animacji maskotek (342MB) — uzyte avatary wyekstrahowane do assets/avatars/
+Animations/

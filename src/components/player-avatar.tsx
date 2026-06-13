@@ -1,21 +1,18 @@
+import LottieView from "lottie-react-native";
 import { Text, View } from "react-native";
 
-import { avatarPresets } from "@/game/data";
+import { avatarSources } from "@/game/avatars";
 import type { AvatarId, Player } from "@/game/types";
 import { neon, playerPalette, type PlayerColorId } from "@/theme/colors";
 
 type Size = "sm" | "md" | "lg" | "xl";
 
-const dims: Record<Size, { box: number; ring: number; font: number }> = {
-  sm: { box: 48, ring: 2, font: 24 },
-  md: { box: 64, ring: 2.5, font: 32 },
-  lg: { box: 72, ring: 3, font: 36 },
-  xl: { box: 96, ring: 3.5, font: 48 },
+const dims: Record<Size, { box: number; ring: number }> = {
+  sm: { box: 48, ring: 2 },
+  md: { box: 64, ring: 2.5 },
+  lg: { box: 72, ring: 3 },
+  xl: { box: 96, ring: 3.5 },
 };
-
-function faceFor(avatarId: AvatarId): string {
-  return avatarPresets.find((preset) => preset.id === avatarId)?.face ?? "🙂";
-}
 
 type AvatarVisualProps = {
   avatarId: AvatarId;
@@ -23,18 +20,23 @@ type AvatarVisualProps = {
   size?: Size;
   active?: boolean;
   dimmed?: boolean;
+  /** Czy odtwarzać animację (domyślnie tylko aktywny lub duży podgląd — oszczędza CPU). */
+  animate?: boolean;
 };
 
-/** Czysto wizualny avatar (emoji-twarz w kolorowym kółku z ringiem). */
+/** Animowany avatar-maskotka (Lottie) w kolorowym kółku z ringiem. */
 export function AvatarVisual({
   avatarId,
   colorId,
   size = "md",
   active = false,
   dimmed = false,
+  animate,
 }: AvatarVisualProps) {
-  const { box, ring, font } = dims[size];
+  const { box, ring } = dims[size];
   const color = playerPalette[colorId];
+  const playing = animate ?? (active || size === "xl");
+  const inner = box - ring * 2;
 
   return (
     <View
@@ -48,6 +50,7 @@ export function AvatarVisual({
           height: box,
           justifyContent: "center",
           opacity: dimmed ? 0.45 : 1,
+          overflow: "hidden",
           width: box,
         },
         active
@@ -61,7 +64,13 @@ export function AvatarVisual({
           : null,
       ]}
     >
-      <Text style={{ fontSize: font }}>{faceFor(avatarId)}</Text>
+      <LottieView
+        autoPlay={playing}
+        loop={playing}
+        resizeMode="cover"
+        source={avatarSources[avatarId]}
+        style={{ height: inner * 1.15, width: inner * 1.15 }}
+      />
     </View>
   );
 }

@@ -6,7 +6,8 @@ import { ColorDot } from "@/components/color-dot";
 import { NeonButton } from "@/components/neon-button";
 import { AvatarVisual } from "@/components/player-avatar";
 import { SelectableAvatar } from "@/components/selectable-avatar";
-import { avatarPresets, colorOrder } from "@/game/data";
+import { avatarOrder } from "@/game/avatars";
+import { colorOrder } from "@/game/data";
 import type { GameApi } from "@/game/use-game";
 import { neon, playerPalette } from "@/theme/colors";
 
@@ -64,14 +65,14 @@ export function OnboardingScreen({ game }: { game: GameApi }) {
 
       <View className="gap-3">
         <Text className="text-base font-bold text-foreground">2. Wybierz avatar</Text>
-        <View className="flex-row flex-wrap justify-between gap-y-4">
-          {avatarPresets.map((preset) => (
+        <View className="flex-row flex-wrap gap-3">
+          {avatarOrder.map((id) => (
             <SelectableAvatar
-              key={preset.id}
-              avatarId={preset.id}
+              key={id}
+              avatarId={id}
               colorId={game.colorId}
-              selected={game.avatarId === preset.id}
-              onPress={() => game.setAvatarId(preset.id)}
+              onPress={() => game.setAvatarId(id)}
+              selected={game.avatarId === id}
             />
           ))}
         </View>

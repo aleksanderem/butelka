@@ -2,7 +2,8 @@ import { useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { api } from "../../convex/_generated/api";
-import { avatarPresets, colorOrder, defaultSettings } from "@/game/data";
+import { avatarOrder } from "@/game/avatars";
+import { colorOrder, defaultSettings } from "@/game/data";
 import type {
   ApprovalState,
   AvatarId,
@@ -36,7 +37,7 @@ export function useGame() {
   const [roomCode, setRoomCode] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [playerName, setPlayerName] = useState("");
-  const [avatarId, setAvatarId] = useState<AvatarId>(avatarPresets[0].id);
+  const [avatarId, setAvatarId] = useState<AvatarId>(avatarOrder[0]);
   const [colorId, setColorId] = useState<PlayerColorId>(colorOrder[0]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [spinTick, setSpinTick] = useState(0);
@@ -177,12 +178,11 @@ export function useGame() {
       return;
     }
     const i = players.length;
-    const preset = avatarPresets[i % avatarPresets.length];
     void joinRoomMut({
       code: roomCode,
       clientId: botClientId(),
       name: `Gracz ${i + 1}`,
-      avatarId: preset.id,
+      avatarId: avatarOrder[i % avatarOrder.length],
       colorId: colorOrder[i % colorOrder.length],
     });
   }, [joinRoomMut, players.length, roomCode]);
