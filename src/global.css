@@ -6,3 +6,113 @@
 /* End-user path: heroui-native lives in the project's node_modules, one
    level up from this src/global.css file. */
 @source '../node_modules/heroui-native/lib';
+
+input:focus {
+  outline: none;
+}
+
+input[aria-label^="One-time passcode input"] {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  caret-color: transparent;
+  color: transparent;
+  opacity: 0;
+  outline: none;
+}
+
+/*
+  Butelka — neonowy motyw "PRAWDA czy WYZWANIE".
+  Fiolet (primary/accent) + magenta-róż (challenge) na głębokiej czerni z odcieniem fioletu.
+  Apka jest dark-only, więc warianty light i dark są identyczne.
+  Surowe hexy do gradientów i poświaty (glow) trzymamy w src/theme/colors.ts.
+*/
+@layer theme {
+  :root {
+    @variant light {
+      --background: hsl(260 40% 5%);
+      --foreground: hsl(260 22% 96%);
+
+      --surface: hsl(258 30% 9%);
+      --surface-foreground: var(--foreground);
+      --surface-secondary: hsl(258 28% 13%);
+      --surface-secondary-foreground: var(--foreground);
+      --surface-tertiary: hsl(258 26% 18%);
+      --surface-tertiary-foreground: var(--foreground);
+
+      --overlay: hsl(258 32% 10%);
+      --overlay-foreground: var(--foreground);
+      --backdrop: hsl(260 50% 2% / 72%);
+
+      --muted: hsl(258 14% 66%);
+      --default: var(--surface-tertiary);
+      --default-foreground: var(--foreground);
+
+      --accent: hsl(258 90% 66%);
+      --accent-foreground: hsl(260 40% 98%);
+
+      --success: hsl(150 72% 47%);
+      --success-foreground: hsl(150 60% 6%);
+      --warning: hsl(43 96% 56%);
+      --warning-foreground: hsl(36 60% 8%);
+      --danger: hsl(340 85% 60%);
+      --danger-foreground: hsl(340 70% 97%);
+
+      --segment: hsl(258 26% 16%);
+      --segment-foreground: var(--foreground);
+
+      --border: hsl(260 60% 92% / 12%);
+      --separator: hsl(260 60% 92% / 8%);
+      --focus: var(--accent);
+      --link: var(--accent);
+
+      --field-background: hsl(258 30% 11%);
+      --field-foreground: var(--foreground);
+      --field-placeholder: hsl(258 12% 55%);
+      --field-border: hsl(260 60% 92% / 14%);
+    }
+
+    @variant dark {
+      --background: hsl(260 40% 5%);
+      --foreground: hsl(260 22% 96%);
+
+      --surface: hsl(258 30% 9%);
+      --surface-foreground: var(--foreground);
+      --surface-secondary: hsl(258 28% 13%);
+      --surface-secondary-foreground: var(--foreground);
+      --surface-tertiary: hsl(258 26% 18%);
+      --surface-tertiary-foreground: var(--foreground);
+
+      --overlay: hsl(258 32% 10%);
+      --overlay-foreground: var(--foreground);
+      --backdrop: hsl(260 50% 2% / 72%);
+
+      --muted: hsl(258 14% 66%);
+      --default: var(--surface-tertiary);
+      --default-foreground: var(--foreground);
+
+      --accent: hsl(258 90% 66%);
+      --accent-foreground: hsl(260 40% 98%);
+
+      --success: hsl(150 72% 47%);
+      --success-foreground: hsl(150 60% 6%);
+      --warning: hsl(43 96% 56%);
+      --warning-foreground: hsl(36 60% 8%);
+      --danger: hsl(340 85% 60%);
+      --danger-foreground: hsl(340 70% 97%);
+
+      --segment: hsl(258 26% 16%);
+      --segment-foreground: var(--foreground);
+
+      --border: hsl(260 60% 92% / 12%);
+      --separator: hsl(260 60% 92% / 8%);
+      --focus: var(--accent);
+      --link: var(--accent);
+
+      --field-background: hsl(258 30% 11%);
+      --field-foreground: var(--foreground);
+      --field-placeholder: hsl(258 12% 55%);
+      --field-border: hsl(260 60% 92% / 14%);
+    }
+  }
+}

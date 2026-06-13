@@ -42,3 +42,8 @@ yarn-error.*
 # Generated native folders
 /ios
 /android
+# heroui-agents-md
+.heroui-docs/
+
+# Local preview server log
+.expo-web.log
