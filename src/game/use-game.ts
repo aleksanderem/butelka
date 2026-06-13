@@ -1,9 +1,10 @@
-import { useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { api } from "../../convex/_generated/api";
 import { avatarOrder } from "@/game/avatars";
 import { colorOrder, defaultSettings, makeRoomCode } from "@/game/data";
+import * as roomApi from "@/game/room-api";
+import { SPIN_MS } from "@/game/room-api";
+import type { PlayerDoc, RoomDoc, VoteDoc } from "@/game/room-api";
 import type {
   ApprovalState,
   AvatarId,
@@ -13,6 +14,7 @@ import type {
   RoomSettings,
   RoomTab,
 } from "@/game/types";
+import { appwriteClient, playersChannel, roomChannel, votesChannel } from "@/lib/appwrite";
 import { useClientId } from "@/lib/client-id";
 import type { PlayerColorId } from "@/theme/colors";
 
@@ -26,7 +28,8 @@ function botClientId(): string {
 
 /**
  * Cały stan i logika gry „Butelka”. Profil i nawigacja są lokalne, a stan pokoju
- * pochodzi z reaktywnego query Convex — ekrany konsumują niezmieniony interfejs GameApi.
+ * pochodzi z Appwrite (Realtime) — ekrany konsumują niezmieniony interfejs GameApi.
+ * Rozstrzygnięcia (spin finalize, liczenie głosów) wykonuje wyłącznie host.
  */
 export function useGame() {
   const clientId = useClientId();
@@ -46,46 +49,125 @@ export function useGame() {
   // null = realne urządzenie; inaczej clientId wybranego gracza testowego.
   const [actingClientId, setActingClientId] = useState<string | null>(null);
 
-  // Mutacje backendu.
-  const enterRoomMut = useMutation(api.rooms.createOrJoinRoom);
-  const leaveRoomMut = useMutation(api.rooms.leaveRoom);
-  const kickPlayerMut = useMutation(api.rooms.kickPlayer);
-  const spinMut = useMutation(api.rooms.spin);
-  const pickChallengeMut = useMutation(api.rooms.pickChallenge);
-  const rerollChallengeMut = useMutation(api.rooms.rerollChallenge);
-  const rerollLuckyMut = useMutation(api.rooms.rerollLucky);
-  const requestActionMut = useMutation(api.rooms.requestAction);
-  const voteMut = useMutation(api.rooms.vote);
-  const updateSettingsMut = useMutation(api.rooms.updateSettings);
+  // Surowy stan pokoju z Appwrite: undefined = ładowanie, null = pokój nie istnieje.
+  const [roomDoc, setRoomDoc] = useState<RoomDoc | null | undefined>(undefined);
+  const [playerDocs, setPlayerDocs] = useState<PlayerDoc[]>([]);
+  const [voteDocs, setVoteDocs] = useState<VoteDoc[]>([]);
 
-  // Tożsamość, którą backend traktuje jako „Ty” (umożliwia podgląd jako gracz testowy).
+  // Tożsamość, którą traktujemy jako „Ty” (umożliwia podgląd jako gracz testowy).
   const effectiveClientId = actingClientId ?? clientId;
 
-  // Reaktywny stan pokoju.
-  const inRoom = stage === "room" && roomCode.length > 0 && effectiveClientId !== null;
-  const state = useQuery(
-    api.rooms.gameState,
-    inRoom ? { code: roomCode, clientId: effectiveClientId! } : "skip"
+  // Pełne przeładowanie stanu pokoju (po evencie Realtime albo własnej akcji).
+  const reload = useCallback(async (code: string) => {
+    try {
+      const next = await roomApi.loadRoomState(code);
+      if (next === null) {
+        setRoomDoc(null);
+        setPlayerDocs([]);
+        setVoteDocs([]);
+      } else {
+        setRoomDoc(next.room);
+        setPlayerDocs(next.players);
+        setVoteDocs(next.votes);
+      }
+    } catch {
+      // Przejściowy błąd sieci — zostaw poprzedni stan; Realtime ponowi.
+    }
+  }, []);
+
+  // Subskrypcja Realtime: po wejściu do pokoju wczytaj i nasłuchuj zmian (pokój/gracze/głosy).
+  useEffect(() => {
+    if (stage !== "room" || roomCode.length === 0) {
+      return;
+    }
+    const code = roomCode;
+    // Pierwsze wczytanie odraczamy (setState poza ciałem efektu).
+    let timer: ReturnType<typeof setTimeout> | undefined = setTimeout(() => void reload(code), 0);
+    const channels = [roomChannel(code), playersChannel(), votesChannel()];
+    const unsubscribe = appwriteClient.subscribe(channels, (event) => {
+      const payload = (event as { payload?: { roomCode?: string } }).payload;
+      // Eventy z kolekcji players/votes filtrujemy do tego pokoju (room channel jest już wąski).
+      if (payload && payload.roomCode && payload.roomCode !== code) {
+        return;
+      }
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(() => void reload(code), 60);
+    });
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      unsubscribe();
+    };
+  }, [stage, roomCode, reload]);
+
+  // Host: po SPIN_MS ujawnia szczęśliwca (spinning -> chosen) na podstawie spinStartedAt.
+  useEffect(() => {
+    if (!roomDoc || roomDoc.phase !== "spinning" || roomDoc.hostClientId !== clientId) {
+      return;
+    }
+    const code = roomDoc.code;
+    const seed = roomDoc.spinSeed;
+    const startedAt = roomDoc.spinStartedAt ?? Date.now();
+    const remaining = Math.max(0, SPIN_MS - (Date.now() - startedAt));
+    const id = setTimeout(() => {
+      void roomApi.finalizeSpin(code, seed).then(() => reload(code));
+    }, remaining);
+    return () => clearTimeout(id);
+  }, [roomDoc, clientId, reload]);
+
+  // Host: rozstrzyga głosowanie, gdy pojawiają się głosy. Ref chroni przed nakładaniem się.
+  const resolvingRef = useRef(false);
+  useEffect(() => {
+    if (!roomDoc || !roomDoc.pendingAction || roomDoc.hostClientId !== clientId) {
+      return;
+    }
+    if (resolvingRef.current) {
+      return;
+    }
+    resolvingRef.current = true;
+    void roomApi.resolveVotes(roomDoc, playerDocs, voteDocs).finally(() => {
+      resolvingRef.current = false;
+    });
+    // Zapis (apply/cancel) wewnątrz resolveVotes wraca przez Realtime — bez ręcznego reload.
+  }, [roomDoc, playerDocs, voteDocs, clientId]);
+
+  const sortedPlayers = useMemo(
+    () => [...playerDocs].sort((a, b) => a.joinedAt - b.joinedAt),
+    [playerDocs]
   );
+
+  const pendingApproval = roomDoc?.pendingAction ?? null;
+
+  const approvedClientIds = useMemo(() => {
+    if (!pendingApproval) {
+      return new Set<string>();
+    }
+    return new Set(
+      voteDocs.filter((v) => v.action === pendingApproval && v.approved).map((v) => v.clientId)
+    );
+  }, [voteDocs, pendingApproval]);
 
   const players: Player[] = useMemo(
     () =>
-      (state?.players ?? []).map((p) => ({
-        id: p.id,
+      sortedPlayers.map((p) => ({
+        id: p.$id,
         name: p.name,
         avatarId: p.avatarId as AvatarId,
         colorId: p.colorId as PlayerColorId,
-        isSelf: p.isSelf,
-        isHost: p.isHost,
+        isSelf: p.clientId === effectiveClientId,
+        isHost: p.clientId === roomDoc?.hostClientId,
         clientId: p.clientId,
-        approved: p.approved,
+        approved: approvedClientIds.has(p.clientId),
       })),
-    [state]
+    [sortedPlayers, effectiveClientId, roomDoc, approvedClientIds]
   );
 
   const amHost = players.some((p) => p.isSelf && p.isHost);
 
-  // Podgląd jako gracz testowy: kogo aktualnie oglądamy i czy to ktoś inny niż my.
+  // Podgląd jako gracz testowy: kogo oglądamy i czy to ktoś inny niż my.
   const viewAsPlayer = players.find((p) => p.isSelf) ?? null;
   const isImpersonating =
     actingClientId !== null &&
@@ -103,22 +185,46 @@ export function useGame() {
     }
   }, [actingClientId, players]);
 
-  const phase: Phase = state?.phase ?? "lobby";
-  const settings: RoomSettings = state?.settings ?? defaultSettings;
-  const challengeType = (state?.challengeType ?? null) as ChallengeType | null;
-  const challengeText = state?.challengeText ?? null;
-  const pendingApproval = state?.pendingAction ?? null;
-  const approval: ApprovalState | null = state?.approval ?? null;
+  const phase: Phase = roomDoc?.phase ?? "lobby";
+  const settings: RoomSettings = useMemo(
+    () =>
+      roomDoc
+        ? {
+            requireEndTurnApproval: roomDoc.requireEndTurnApproval,
+            requireNextTruthApproval: roomDoc.requireNextTruthApproval,
+            requireNextDareApproval: roomDoc.requireNextDareApproval,
+          }
+        : defaultSettings,
+    [roomDoc]
+  );
+  const challengeType = (roomDoc?.challengeType ?? null) as ChallengeType | null;
+  const challengeText = roomDoc?.challengeText ?? null;
 
-  const luckyClientId = state?.luckyClientId ?? null;
+  const approval: ApprovalState | null = useMemo(() => {
+    if (!pendingApproval) {
+      return null;
+    }
+    const total = sortedPlayers.length;
+    const myVote = voteDocs.find(
+      (v) => v.action === pendingApproval && v.clientId === effectiveClientId
+    );
+    return {
+      action: pendingApproval,
+      approved: approvedClientIds.size,
+      total,
+      needed: Math.floor(total / 2) + 1,
+      myVote: myVote ? myVote.approved : null,
+    };
+  }, [pendingApproval, sortedPlayers.length, voteDocs, effectiveClientId, approvedClientIds]);
+
+  const luckyClientId = roomDoc?.luckyClientId ?? null;
   const luckyMatch = luckyClientId ? players.findIndex((p) => p.clientId === luckyClientId) : -1;
   const luckyIndex = luckyMatch >= 0 ? luckyMatch : null;
   const luckyPlayer = luckyIndex === null ? null : (players[luckyIndex] ?? null);
   const amLucky = luckyPlayer?.isSelf ?? false;
 
   // Test na jednym urządzeniu: gdy zaczyna się głosowanie, zapamiętaj widok, którym
-  // sterujesz (np. szczęśliwiec klikający „Następne”). Po zakończeniu głosowania
-  // wróć do niego — żeby znów widzieć jego przyciski, a nie zostać „jako” ostatni głosujący.
+  // sterujesz (np. szczęśliwiec klikający „Następne”). Po zakończeniu głosowania wróć do niego.
   const viewBeforeApprovalRef = useRef<string | null>(null);
   const prevPendingRef = useRef<typeof pendingApproval>(pendingApproval);
   useEffect(() => {
@@ -136,7 +242,6 @@ export function useGame() {
   }, [pendingApproval, actingClientId]);
 
   // Animacja krążenia karty (czysto kliencka): podczas „spinning” migamy graczami.
-  // setState żyje wyłącznie w callbacku interwału, nie w ciele efektu.
   useEffect(() => {
     if (phase !== "spinning" || players.length === 0) {
       return;
@@ -158,8 +263,9 @@ export function useGame() {
   const activePlayer = activeIndex === null ? null : (players[activeIndex] ?? null);
 
   // Jeśli pokój zniknął (wszyscy wyszli) — wróć do ekranu startowego (poza ciałem efektu).
+  const roomMissing = stage === "room" && roomCode.length > 0 && roomDoc === null;
   useEffect(() => {
-    if (!(inRoom && state === null)) {
+    if (!roomMissing) {
       return;
     }
     const id = setTimeout(() => {
@@ -167,7 +273,7 @@ export function useGame() {
       setRoomCode("");
     }, 0);
     return () => clearTimeout(id);
-  }, [inRoom, state]);
+  }, [roomMissing]);
 
   const normalizedName = playerName.trim();
   const normalizedJoinCode = joinCode.replace(/\D/g, "");
@@ -185,8 +291,8 @@ export function useGame() {
   );
 
   const createRoom = useCallback(() => {
-    // Kod generujemy lokalnie — przejscie do onboardingu jest natychmiastowe,
-    // a pokoj powstaje w backendzie dopiero przy wejsciu do gry (completeProfile).
+    // Kod generujemy lokalnie — przejście do onboardingu jest natychmiastowe,
+    // a pokój powstaje w backendzie dopiero przy wejściu do gry (completeProfile).
     setRoomCode(makeRoomCode());
     setRoomTab("create");
     setStage("profile");
@@ -205,7 +311,7 @@ export function useGame() {
     if (!canEnterRoom || !clientId || !roomCode) {
       return;
     }
-    await enterRoomMut({
+    await roomApi.enterRoom({
       code: roomCode,
       asHost: roomTab === "create",
       clientId,
@@ -213,13 +319,16 @@ export function useGame() {
       avatarId,
       colorId,
     });
+    setRoomDoc(undefined);
+    setPlayerDocs([]);
+    setVoteDocs([]);
     setStage("room");
-  }, [avatarId, canEnterRoom, clientId, colorId, enterRoomMut, normalizedName, roomCode, roomTab]);
+  }, [avatarId, canEnterRoom, clientId, colorId, normalizedName, roomCode, roomTab]);
 
   const leaveRoom = useCallback(async () => {
     // Wychodzimy zawsze jako realne urządzenie, nie jako podglądany gracz testowy.
     if (roomCode && clientId) {
-      await leaveRoomMut({ code: roomCode, clientId });
+      await roomApi.leaveRoom(roomCode, clientId);
     }
     setActingClientId(null);
     setPlayersOpen(false);
@@ -228,7 +337,10 @@ export function useGame() {
     setRoomCode("");
     setJoinCode("");
     setPlayerName("");
-  }, [clientId, leaveRoomMut, roomCode]);
+    setRoomDoc(undefined);
+    setPlayerDocs([]);
+    setVoteDocs([]);
+  }, [clientId, roomCode]);
 
   /** Podgląd jako wybrany gracz (null = wróć do własnego widoku). */
   const setActingAs = useCallback(
@@ -240,91 +352,112 @@ export function useGame() {
 
   const kickPlayer = useCallback(
     (targetClientId: string) => {
-      if (roomCode && effectiveClientId) {
-        void kickPlayerMut({ code: roomCode, hostClientId: effectiveClientId, targetClientId });
+      if (roomDoc && effectiveClientId) {
+        const code = roomDoc.code;
+        void roomApi
+          .kickPlayer(roomDoc, effectiveClientId, targetClientId)
+          .then(() => reload(code));
       }
     },
-    [effectiveClientId, kickPlayerMut, roomCode]
+    [effectiveClientId, reload, roomDoc]
   );
 
   const addDemoPlayer = useCallback(() => {
     if (!roomCode) {
       return;
     }
-    const i = players.length;
-    void enterRoomMut({
-      code: roomCode,
-      asHost: false,
-      clientId: botClientId(),
-      name: `Gracz ${i + 1}`,
-      avatarId: avatarOrder[i % avatarOrder.length],
-      colorId: colorOrder[i % colorOrder.length],
-    });
-  }, [enterRoomMut, players.length, roomCode]);
+    const i = playerDocs.length;
+    void roomApi
+      .enterRoom({
+        code: roomCode,
+        asHost: false,
+        clientId: botClientId(),
+        name: `Gracz ${i + 1}`,
+        avatarId: avatarOrder[i % avatarOrder.length],
+        colorId: colorOrder[i % colorOrder.length],
+      })
+      .then(() => reload(roomCode));
+  }, [playerDocs.length, reload, roomCode]);
 
   const spin = useCallback(() => {
-    if (roomCode) {
-      void spinMut({ code: roomCode });
+    if (roomDoc) {
+      const code = roomDoc.code;
+      void roomApi.startSpin(roomDoc, playerDocs).then(() => reload(code));
     }
-  }, [roomCode, spinMut]);
+  }, [playerDocs, reload, roomDoc]);
 
   const pickChallenge = useCallback(
     (type: ChallengeType) => {
-      if (roomCode) {
-        void pickChallengeMut({ code: roomCode, type });
+      if (roomDoc) {
+        const code = roomDoc.code;
+        void roomApi.pickChallenge(roomDoc, type).then(() => reload(code));
       }
     },
-    [pickChallengeMut, roomCode]
+    [reload, roomDoc]
   );
 
   const rerollChallenge = useCallback(() => {
-    if (roomCode) {
-      void rerollChallengeMut({ code: roomCode });
+    if (roomDoc) {
+      const code = roomDoc.code;
+      void roomApi.rerollChallenge(roomDoc).then(() => reload(code));
     }
-  }, [rerollChallengeMut, roomCode]);
+  }, [reload, roomDoc]);
 
   const rerollLucky = useCallback(() => {
-    if (roomCode) {
-      void rerollLuckyMut({ code: roomCode });
+    if (roomDoc) {
+      const code = roomDoc.code;
+      void roomApi.rerollLucky(roomDoc, playerDocs).then(() => reload(code));
     }
-  }, [rerollLuckyMut, roomCode]);
+  }, [playerDocs, reload, roomDoc]);
 
   const nextChallenge = useCallback(() => {
-    if (!roomCode || !effectiveClientId || !challengeType) {
+    if (!roomDoc || !effectiveClientId || !challengeType) {
       return;
     }
-    void requestActionMut({
-      code: roomCode,
-      clientId: effectiveClientId,
-      action: challengeType === "prawda" ? "nextTruth" : "nextDare",
-    });
-  }, [challengeType, effectiveClientId, requestActionMut, roomCode]);
+    const code = roomDoc.code;
+    const action = challengeType === "prawda" ? "nextTruth" : "nextDare";
+    void roomApi.requestAction(roomDoc, effectiveClientId, action).then(() => reload(code));
+  }, [challengeType, effectiveClientId, reload, roomDoc]);
 
   const passTurn = useCallback(() => {
-    if (roomCode && effectiveClientId) {
-      void requestActionMut({ code: roomCode, clientId: effectiveClientId, action: "endTurn" });
+    if (roomDoc && effectiveClientId) {
+      const code = roomDoc.code;
+      void roomApi.requestAction(roomDoc, effectiveClientId, "endTurn").then(() => reload(code));
     }
-  }, [effectiveClientId, requestActionMut, roomCode]);
+  }, [effectiveClientId, reload, roomDoc]);
 
   const confirmApproval = useCallback(() => {
-    if (roomCode && effectiveClientId) {
-      void voteMut({ code: roomCode, clientId: effectiveClientId, approved: true });
+    if (roomDoc && roomDoc.pendingAction && effectiveClientId) {
+      const code = roomDoc.code;
+      void roomApi
+        .upsertVote(code, roomDoc.pendingAction, effectiveClientId, true)
+        .then(() => reload(code));
     }
-  }, [effectiveClientId, roomCode, voteMut]);
+  }, [effectiveClientId, reload, roomDoc]);
 
   const rejectApproval = useCallback(() => {
-    if (roomCode && effectiveClientId) {
-      void voteMut({ code: roomCode, clientId: effectiveClientId, approved: false });
+    if (roomDoc && roomDoc.pendingAction && effectiveClientId) {
+      const code = roomDoc.code;
+      void roomApi
+        .upsertVote(code, roomDoc.pendingAction, effectiveClientId, false)
+        .then(() => reload(code));
     }
-  }, [effectiveClientId, roomCode, voteMut]);
+  }, [effectiveClientId, reload, roomDoc]);
 
   const updateSettings = useCallback(
     (patch: Partial<RoomSettings>) => {
-      if (roomCode) {
-        void updateSettingsMut({ code: roomCode, settings: { ...settings, ...patch } });
+      if (roomDoc) {
+        const code = roomDoc.code;
+        const merged = {
+          requireEndTurnApproval: settings.requireEndTurnApproval,
+          requireNextTruthApproval: settings.requireNextTruthApproval,
+          requireNextDareApproval: settings.requireNextDareApproval,
+          ...patch,
+        };
+        void roomApi.updateSettings(code, merged).then(() => reload(code));
       }
     },
-    [roomCode, settings, updateSettingsMut]
+    [reload, roomDoc, settings]
   );
 
   return {

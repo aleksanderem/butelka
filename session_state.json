@@ -1,18 +1,18 @@
 {
-  "session_id": "S0001",
-  "started_at": "2026-06-13T07:49:00Z",
-  "last_updated": "2026-06-13T15:15:00Z",
-  "status": "completed",
-  "focus": "Front pod mockupy + multiplayer Convex + animowane avatary Lottie — ukonczone i zweryfikowane.",
+  "session_id": "S0002",
+  "started_at": "2026-06-13T20:00:00Z",
+  "last_updated": "2026-06-13T20:00:00Z",
+  "status": "active",
+  "focus": "Migracja backendu z Convex (hosted, zablokowany przez limit wydatkow) na self-hosted Appwrite 1.7.4 (Databases + Realtime), logika client-driven, GameApi bez zmian.",
   "tasks_snapshot": {
-    "total": 15,
-    "not_started": 0,
-    "in_progress": 0,
-    "passing": 15,
+    "total": 9,
+    "not_started": 8,
+    "in_progress": 1,
+    "passing": 0,
     "failing": 0,
     "blocked": 0
   },
-  "active_task_ids": [],
+  "active_task_ids": [1],
   "blockers": [],
-  "notes": "UKONCZONE: (1) Front przepisany od zera pod 7 mockupow (neon, ekrany 1:1, poprawna polszczyzna). (2) Multiplayer na Convex (lokalny deployment): pokoje, gracze, spin+scheduler, wyzwania, glosowanie wiekszosciowe; front na useQuery/useMutation za niezmienionym GameApi; identity przez clientId. (3) Avatary = 15 animowanych maskotek Lottie z paczki Animations (zamiast emoji); zrodlo Animations/ w gitignore, wyekstrahowane do assets/avatars; lottie-react-native + dotlottie-react(web). Wszystkie 15 avatarow spojne (cloud poprawiony na Cloud_Upload z przezroczystym tlem). Zweryfikowane w expo web + convex run. tsc+lint zielone. 7 commitow na branchu feat/rewrite-ui-mockups. NAPRAWIONE: 'Utworz pokoj' (optymistyczne przejscie, nie czeka na backend) + CLOUD DEPLOY zrobiony (Convex cloud dev: exciting-sheep-101.convex.cloud, projekt butelka/team aleksander-3191c) - gra dziala zdalnie bez lokalnego convex dev. DODANE: font Plus Jakarta Sans (globalny), role-based visibility (host losuje / szczesliwiec wybiera / reszta widzi tresc; korona hosta), iOS dev build z hot reload (npm run ios, iPhone 16e, Metro 8092), craft polish (dark splash/UI, spacing, font spojnosc), TESTING.md (multi-device). OPCJONALNE NEXT: `npx convex deploy` PROD przy release; pixel-audyt settings/approval/room-header; sekcje Dzwieki/Zarzadzanie graczami; persystencja roomCode; expo-system-ui dla native bg."
+  "notes": "Appwrite: https://appwrite.c.helloalex.pl/v1 project 6a2db5940014ceaf8711 (klucz API w .env.local jako APPWRITE_API_KEY, NIE bundlowany, do rotacji przez uzytkownika). Strategia: zachowac dokladnie interfejs GameApi z use-game.ts (zaden ekran sie nie zmienia), przepisac tylko wnetrze hooka. Resolution authority = host (realne urzadzenie): spin finalize i resolveVotes tylko na hoscie. Pozycyjne API SDK (react-native-appwrite@0.7 + appwrite@17) pod serwer 1.7.4. Karta sunburst SVG juz zacommitowana (67229ae+1)."
 }

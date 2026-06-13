@@ -188,3 +188,32 @@ Opcjonalne next (NIE zlecone): convex login + cloud deploy do produkcji (lokalny
 Warnings: .env.local (CONVEX_DEPLOYMENT lokalny) jest gitignore - inny dev musi odpalic `npx convex dev` sam.
 
 ---
+
+=== SESSION S0002 START === 2026-06-13T20:00:00Z
+Focus: Migracja backendu Convex -> self-hosted Appwrite (Databases + Realtime), client-driven.
+Continuing from: S0001 (completed). Nowa sesja, bo zmiana fokusu + Convex hosted padl na limicie wydatkow.
+
+---
+
+S0002. Kontekst / dlaczego:
+- Convex cloud dev (exciting-sheep-101) zwraca "You have exceeded your spending limits, so your deployments have been disabled" -> createOrJoinRoom rzuca, multiplayer martwy. (To bylo zrodlo wczesniejszej "flakiness" na webie.)
+- Uzytkownik ma self-hosted Appwrite 1.7.4 (https://appwrite.c.helloalex.pl/v1, project 6a2db5940014ceaf8711) i wybral migracje (opcja "Migracja na Appwrite", client-driven, bez Functions).
+- Polaczenie/klucz zweryfikowane: GET /health/version -> 1.7.4; GET /databases z kluczem -> 200, total 0.
+
+S0002. Architektura docelowa:
+- Appwrite Databases = synced store; Realtime (client.subscribe) = reaktywnosc zamiast convex useQuery.
+- Logika gry (spin random, pickPrompt, liczenie glosow) przeniesiona na klienta do use-game.ts.
+- AUTHORITY = host (realne urzadzenie, realClientId === room.hostClientId): tylko host robi spin finalize (spinning->chosen po SPIN_MS z spinStartedAt) i resolveVotes (apply/cancel). Reszta tylko zapisuje swoje akcje/glosy. Zapobiega podwojnemu wykonaniu.
+- GameApi z use-game.ts ZACHOWANY 1:1 -> zaden ekran sie nie zmienia. Przepisuje tylko wnetrze hooka + buduje obiekt `state` w ksztalcie starego gameState.
+- SDK: pozycyjne API pod serwer 1.7.4 -> react-native-appwrite@^0.7 (native) + appwrite@^17 (web), platform-split przez appwrite-sdk.native.ts / .web.ts. Klient appwrite nie wymaga Provider (singleton).
+- Bezpieczenstwo: APP nie zawiera klucza API. Klucz tylko do provisioningu (scripts/appwrite-setup.mjs, czyta APPWRITE_API_KEY z .env.local ktory jest w .gitignore). Kolekcje: permission role "any" create/read/update/delete, document security OFF -> guest (bez sesji) moze pisac. App wysyla tylko endpoint+projectId (jawne, OK w bundlu).
+
+S0002. Model danych Appwrite:
+- DB id: butelka. Kolekcje (custom id): rooms, players, votes.
+- rooms (docId = kod pokoju 6 cyfr): code, phase, hostClientId, luckyClientId?, spinSeed?, spinStartedAt?, challengeType?, challengeText?, requireEndTurnApproval, requireNextTruthApproval, requireNextDareApproval, pendingAction?, createdAt.
+- players (docId unique): roomCode, clientId, name, avatarId, colorId, joinedAt. index by_room(roomCode).
+- votes (docId = `${roomCode}_${clientId}` dla upsertu): roomCode, action, clientId, approved. index by_room(roomCode).
+
+S0002. Plan zadan: patrz tasks_progress.json (1..9). Aktywne: #1 provisioning.
+- Next: napisac i odpalic scripts/appwrite-setup.mjs (idempotentny, fetch + API key).
+

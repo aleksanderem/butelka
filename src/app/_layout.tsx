@@ -1,4 +1,3 @@
-import { ConvexProvider } from "convex/react";
 import {
   PlusJakartaSans_400Regular,
   PlusJakartaSans_500Medium,
@@ -13,8 +12,6 @@ import { HeroUINativeProvider } from "heroui-native";
 import type { JSX } from "react";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
-import { convexClient } from "@/lib/convex";
 
 import "../global.css";
 
@@ -44,12 +41,10 @@ export default function RootLayout(): JSX.Element | null {
   }
 
   return (
-    <ConvexProvider client={convexClient}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <HeroUINativeProvider>
-          <Stack screenOptions={{ headerShown: false }} />
-        </HeroUINativeProvider>
-      </GestureHandlerRootView>
-    </ConvexProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <HeroUINativeProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </HeroUINativeProvider>
+    </GestureHandlerRootView>
   );
 }

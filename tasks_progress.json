@@ -1,32 +1,119 @@
 {
-  "session_id": "S0001",
+  "session_id": "S0002",
   "date": "2026-06-13",
   "tasks": [
-    { "id": 1, "name": "design_system_neon_palette", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 2, "name": "file_structure_split_monolith", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 3, "name": "game_state_hook_and_data", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 4, "name": "logo_and_brand_components", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 5, "name": "screen1_start", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 6, "name": "screen2_onboarding_avatars_colors", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 7, "name": "screen3_card_circulating_animation", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 8, "name": "screen4_lucky_crown_confetti", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 9, "name": "screen5_truth_or_dare", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 10, "name": "screen6_settings_panel_sidebar", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 11, "name": "screen7_approval_voting_modal", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 12, "name": "polish_diacritics_all_strings", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 13, "name": "verify_typecheck_lint_preview", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 14, "name": "multiplayer_backend", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" },
-    { "id": 15, "name": "animated_lottie_avatars", "status": "passing", "created_session": "S0001", "last_updated_session": "S0001" }
+    {
+      "id": 1,
+      "name": "provision_appwrite_backend_script",
+      "status": "passing",
+      "created_session": "S0002",
+      "last_updated_session": "S0002"
+    },
+    {
+      "id": 2,
+      "name": "install_appwrite_sdks",
+      "status": "passing",
+      "created_session": "S0002",
+      "last_updated_session": "S0002"
+    },
+    {
+      "id": 3,
+      "name": "appwrite_client_lib_platform_split",
+      "status": "passing",
+      "created_session": "S0002",
+      "last_updated_session": "S0002"
+    },
+    {
+      "id": 4,
+      "name": "port_prompts_to_client",
+      "status": "passing",
+      "created_session": "S0002",
+      "last_updated_session": "S0002"
+    },
+    {
+      "id": 5,
+      "name": "rewrite_use_game_appwrite_client_driven",
+      "status": "passing",
+      "created_session": "S0002",
+      "last_updated_session": "S0002"
+    },
+    {
+      "id": 6,
+      "name": "swap_provider_env_remove_convex",
+      "status": "passing",
+      "created_session": "S0002",
+      "last_updated_session": "S0002"
+    },
+    {
+      "id": 7,
+      "name": "typecheck_lint_green",
+      "status": "passing",
+      "created_session": "S0002",
+      "last_updated_session": "S0002"
+    },
+    {
+      "id": 8,
+      "name": "verify_multiplayer_web_preview",
+      "status": "in_progress",
+      "created_session": "S0002",
+      "last_updated_session": "S0002"
+    },
+    {
+      "id": 9,
+      "name": "verify_simulator_hot_reload",
+      "status": "not_started",
+      "created_session": "S0002",
+      "last_updated_session": "S0002"
+    }
   ],
-  "reason": "Front przepisany od zera pod 7 mockupow oraz multiplayer na Convex - oba ukonczone i zweryfikowane.",
-  "thinking_process": "Fundament -> 7 ekranow 1:1 -> weryfikacja w expo web -> Convex (schema/functions) -> przepiecie use-game na useQuery/useMutation za niezmienionym GameApi -> weryfikacja przez convex run + UI multiplayer (3 graczy na zywo). Szczegoly w tasks_progress_verbose.txt.",
-  "connected_tasks": [3, 14],
+  "reason": "Convex hosted (exciting-sheep-101) zablokowany przez limit wydatkow -> multiplayer nie dziala. Uzytkownik wybral migracje na wlasny self-hosted Appwrite (bez limitow).",
+  "thinking_process": "Convex byl server-authoritative (spin random, liczenie glosow, scheduler finalizeSpin). Appwrite client-driven: Databases jako synced store + Realtime jako reaktywnosc. Authority -> host. Zachowac GameApi 1:1. Szczegoly w tasks_progress_verbose.txt.",
+  "connected_tasks": [
+    1,
+    3,
+    5,
+    6
+  ],
   "how_to_test": [
-    { "id": 1, "name": "npx tsc --noEmit zwraca 0 bledow", "status": "done", "is_ok": "true", "data_for_next_step": [], "session_id": "S0001" },
-    { "id": 2, "name": "npm run lint przechodzi", "status": "done", "is_ok": "true", "data_for_next_step": [], "session_id": "S0001" },
-    { "id": 3, "name": "Kazdy z 7 ekranow zgodny wizualnie z mockupem (neon, korona, konfetti, karta, sidebar, glosowanie)", "status": "done", "is_ok": "true", "data_for_next_step": ["Zweryfikowane screenshotami w expo web na porcie 8090"], "session_id": "S0001" },
-    { "id": 4, "name": "Wszystkie polskie stringi z poprawna diakrytyka", "status": "done", "is_ok": "true", "data_for_next_step": [], "session_id": "S0001" },
-    { "id": 5, "name": "Multiplayer: 2+ klientow w jednym pokoju widza siebie i akcje na zywo (Convex)", "status": "done", "is_ok": "true", "data_for_next_step": ["convex run: createRoom/joinRoom x2/spin/pickChallenge/requestAction/vote -> reset; UI: 3 graczy (alex+basia z CLI, webtest z UI) w pokoju H9L54A, spin->szczesliwiec"], "session_id": "S0001" },
-    { "id": 6, "name": "Animowane avatary Lottie renderuja sie i animuja (15 maskotek)", "status": "done", "is_ok": "true", "data_for_next_step": ["expo web onboarding: 15 maskotek w siatce, wybrana animuje sie z ringiem; wymaga @lottiefiles/dotlottie-react na web"], "session_id": "S0001" }
+    {
+      "id": 1,
+      "name": "Skrypt provisioningu tworzy DB butelka + kolekcje rooms/players/votes z atrybutami/indeksami/permissions (idempotentnie)",
+      "status": "not_started",
+      "is_ok": "null",
+      "data_for_next_step": [],
+      "session_id": "S0002"
+    },
+    {
+      "id": 2,
+      "name": "npx tsc --noEmit = 0 bledow po przepisaniu use-game",
+      "status": "not_started",
+      "is_ok": "null",
+      "data_for_next_step": [],
+      "session_id": "S0002"
+    },
+    {
+      "id": 3,
+      "name": "npm run lint przechodzi",
+      "status": "not_started",
+      "is_ok": "null",
+      "data_for_next_step": [],
+      "session_id": "S0002"
+    },
+    {
+      "id": 4,
+      "name": "Web preview: utworz pokoj, dodaj graczy testowych, spin -> szczesliwiec, prawda/wyzwanie, glosowanie wiekszosciowe -> reset (na Appwrite Realtime)",
+      "status": "not_started",
+      "is_ok": "null",
+      "data_for_next_step": [],
+      "session_id": "S0002"
+    },
+    {
+      "id": 5,
+      "name": "Symulator iOS (hot reload): ten sam flow dziala natywnie",
+      "status": "not_started",
+      "is_ok": "null",
+      "data_for_next_step": [],
+      "session_id": "S0002"
+    }
   ]
 }

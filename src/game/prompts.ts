@@ -1,5 +1,7 @@
-// Treści gry po stronie serwera (losowanie pytań/wyzwań i kodu pokoju dzieje się
-// w mutacjach Convex). Listy są zsynchronizowane z src/game/data.ts.
+// Treści gry po stronie klienta (losowanie pytań/wyzwań). Backend (Appwrite) jest
+// czystym store'em, więc logika wyboru promptu żyje tutaj.
+
+import type { ChallengeType } from "@/game/types";
 
 export const truthPrompts: string[] = [
   "Jaka jest najbardziej żenująca rzecz, jaką kiedykolwiek zrobiłeś/aś?",
@@ -31,7 +33,8 @@ export const darePrompts: string[] = [
   "Oddaj telefon sąsiadowi — niech wyśle dowolne emoji w twoim imieniu.",
 ];
 
-export function pickPrompt(type: "prawda" | "wyzwanie", exclude?: string | null): string {
+/** Losuje prompt danego typu; `exclude` pozwala uniknąć powtórki przy „Losuj ponownie”. */
+export function pickPrompt(type: ChallengeType, exclude?: string | null): string {
   const prompts = type === "prawda" ? truthPrompts : darePrompts;
   const pool = exclude ? prompts.filter((p) => p !== exclude) : prompts;
   const source = pool.length > 0 ? pool : prompts;
