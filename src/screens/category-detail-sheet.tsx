@@ -24,8 +24,8 @@ export function CategoryDetailSheet({
   }
 
   const image: ImageSourcePropType | undefined = CATEGORY_IMAGES[category.key];
-  const subs = bundle ? bundle.categories.filter((c) => c.modeKey === category.key) : [];
-  const cardCount = bundle ? bundle.cards.filter((c) => c.modeKey === category.key).length : null;
+  const subs = bundle ? bundle.categories.filter((c) => c.modeGroup === category.key) : [];
+  const cardCount = bundle ? bundle.cards.filter((c) => c.modeGroup === category.key).length : null;
 
   return (
     <View style={[StyleSheet.absoluteFill, { zIndex: 60, backgroundColor: "rgba(4,2,10,0.6)" }]}>
@@ -123,7 +123,7 @@ export function CategoryDetailSheet({
                   {subs.map((sub) => (
                     <View
                       className="rounded-full px-3 py-1.5"
-                      key={sub.categoryKey}
+                      key={sub.categoryId}
                       style={{
                         backgroundColor: "rgba(255,255,255,0.08)",
                         borderColor: "rgba(255,255,255,0.08)",

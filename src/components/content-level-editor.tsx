@@ -30,7 +30,7 @@ export function ContentLevelEditor({
 }) {
   const poolCount = bundle
     ? bundle.cards.filter((card) => {
-        const level = (selection[card.modeKey] ?? 0) as ContentLevel;
+        const level = (selection[card.modeGroup] ?? 0) as ContentLevel;
         return level > 0 && card.intensity <= intensityCapForLevel(level);
       }).length
     : null;
@@ -41,7 +41,7 @@ export function ContentLevelEditor({
         {MAIN_CATEGORIES.map((cat, i) => {
           const level = (selection[cat.key] ?? 0) as ContentLevel;
           const count = bundle
-            ? bundle.categories.filter((c) => c.modeKey === cat.key).length
+            ? bundle.categories.filter((c) => c.modeGroup === cat.key).length
             : null;
           return (
             <View key={cat.key}>

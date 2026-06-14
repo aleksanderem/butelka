@@ -35,6 +35,16 @@ export function intensityCapForLevel(level: ContentLevel): number {
 
 export type ContentSelection = Record<string, ContentLevel>;
 
+/** Poprawne klucze trybów V3 — żeby odrzucić stare dobory z kluczami V1 (np. „couples"). */
+const VALID_MODE_GROUPS: ReadonlySet<string> = new Set([
+  "teen",
+  "classic",
+  "party",
+  "group_hot",
+  "couple",
+  "couple_hot",
+]);
+
 /** Domyślny dobór nowego pokoju: Classic w pełni. */
 export const DEFAULT_SELECTION: ContentSelection = { classic: 3 };
 
@@ -52,6 +62,7 @@ export function parseSelection(json: string | undefined | null): ContentSelectio
     const raw = JSON.parse(json) as Record<string, unknown>;
     const out: ContentSelection = {};
     for (const [key, value] of Object.entries(raw)) {
+      if (!VALID_MODE_GROUPS.has(key)) continue; // odrzuć stare/nieznane klucze (V1)
       const level = clampLevel(value);
       if (level > 0) out[key] = level;
     }
@@ -74,7 +85,7 @@ export function enabledModeKeys(selection: ContentSelection): string[] {
 
 const TYPE_MAP: Record<ChallengeType, CardType[]> = {
   prawda: ["truth"],
-  wyzwanie: ["challenge", "choice"],
+  wyzwanie: ["dare", "choice"],
 };
 
 /**
@@ -92,9 +103,9 @@ export function pickCardText(
   const selection = parseSelection(selectionJson);
   const wantTypes = TYPE_MAP[type];
   const pool = bundle.cards.filter((card) => {
-    const level = selection[card.modeKey] ?? 0;
+    const level = selection[card.modeGroup] ?? 0;
     if (level === 0) return false;
-    if (!wantTypes.includes(card.type)) return false;
+    if (!wantTypes.includes(card.cardType)) return false;
     return card.intensity <= intensityCapForLevel(level);
   });
 

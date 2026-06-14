@@ -10,7 +10,7 @@ const API =
   process.env.EXPO_PUBLIC_CONTENT_API ??
   "https://butelka-admin.aleksander-kolabogroup.workers.dev/api/v1";
 
-const CACHE_KEY = "butelka.content.bundle.v1";
+const CACHE_KEY = "butelka.content.bundle.v3";
 
 let memo: ContentBundle | null = null;
 let inflight: Promise<ContentBundle | null> | null = null;
