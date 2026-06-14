@@ -9,7 +9,7 @@ import { neon } from "@/theme/colors";
 /** Sekcja w lobby: jakie kategorie treści są aktywne w pokoju (host może zmienić). */
 export function ContentSummary({ game }: { game: GameApi }) {
   const selection = game.contentSelection;
-  const active = MAIN_CATEGORIES.filter((cat) => (selection[cat.key] ?? 0) > 0);
+  const active = MAIN_CATEGORIES.filter((cat) => (selection.levels[cat.key] ?? 0) > 0);
 
   return (
     <View className="gap-3 rounded-2xl border border-border bg-surface px-4 py-3.5">
@@ -36,17 +36,14 @@ export function ContentSummary({ game }: { game: GameApi }) {
       {active.length > 0 ? (
         <View className="flex-row flex-wrap gap-2">
           {active.map((cat) => {
-            const level = (selection[cat.key] ?? 0) as ContentLevel;
+            const level = (selection.levels[cat.key] ?? 0) as ContentLevel;
             return (
               <View
                 className="flex-row items-center gap-1.5 rounded-full px-2.5 py-1"
                 key={cat.key}
                 style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
               >
-                <View
-                  className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: cat.accent }}
-                />
+                <View className="h-2 w-2 rounded-full" style={{ backgroundColor: cat.accent }} />
                 <Text className="text-xs font-semibold text-foreground">{cat.namePl}</Text>
                 <Text className="text-[10px] text-muted">· {LEVEL_LABELS[level]}</Text>
               </View>

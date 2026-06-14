@@ -104,8 +104,14 @@ function ContentTab({ game }: { game: GameApi }) {
       </View>
 
       <ContentLevelEditor
+        acceptedCategories={game.acceptedCategories}
+        ageVerified={game.ageVerified}
         bundle={game.contentBundle}
+        onAcceptCategory={game.acceptCategory}
+        onSetCategoryEnabled={game.setRoomCategoryEnabled}
+        onSetFilter={game.setRoomFilter}
         onSetLevel={game.setContentLevel}
+        onVerifyAge={game.verifyAge}
         selection={game.contentSelection}
       />
     </View>

@@ -6,6 +6,10 @@ import { ensureContent } from "@/game/content-client";
 import {
   parseSelection,
   serializeSelection,
+  withCategoryEnabled,
+  withFilter,
+  withLevel,
+  type ContentFilterId,
   type ContentLevel,
   type ContentSelection,
 } from "@/game/content-selection";
@@ -665,23 +669,33 @@ export function useGame() {
     [reload, roomDoc, settings]
   );
 
-  /** Ustawia poziom doboru dla głównej kategorii (0 = wyłączona). Zapisuje na pokoju. */
-  const setContentLevel = useCallback(
-    (modeKey: string, level: ContentLevel) => {
+  // --- Dobór treści POKOJU (host zapisuje na roomDoc.contentSelection) ---
+  const mutateRoomSelection = useCallback(
+    (fn: (sel: ContentSelection) => ContentSelection) => {
       if (!roomDoc) return;
       const code = roomDoc.code;
-      const next: ContentSelection = parseSelection(roomDoc.contentSelection);
-      if (level <= 0) {
-        delete next[modeKey];
-      } else {
-        next[modeKey] = level;
-      }
+      const next = fn(parseSelection(roomDoc.contentSelection));
       void roomApi.updateContentSelection(code, serializeSelection(next)).then(() => reload(code));
     },
     [reload, roomDoc]
   );
+  const setContentLevel = useCallback(
+    (modeGroup: string, level: ContentLevel) =>
+      mutateRoomSelection((s) => withLevel(s, modeGroup, level)),
+    [mutateRoomSelection]
+  );
+  const setRoomCategoryEnabled = useCallback(
+    (categoryId: string, enabled: boolean) =>
+      mutateRoomSelection((s) => withCategoryEnabled(s, categoryId, enabled)),
+    [mutateRoomSelection]
+  );
+  const setRoomFilter = useCallback(
+    (filterId: ContentFilterId, on: boolean) =>
+      mutateRoomSelection((s) => withFilter(s, filterId, on)),
+    [mutateRoomSelection]
+  );
 
-  /** Aktualizuje globalne ustawienia (imię/avatar/kolor) i zapisuje na dysk. */
+  /** Aktualizuje globalne ustawienia (imię/avatar/kolor/wiek) i zapisuje na dysk. */
   const updateGlobalSettings = useCallback((patch: Partial<GlobalSettings>) => {
     setGlobalSettings((prev) => {
       const next = { ...prev, ...patch };
@@ -690,16 +704,39 @@ export function useGame() {
     });
   }, []);
 
-  /** Ustawia poziom domyślnego doboru treści dla głównej kategorii (globalnie). */
-  const setGlobalContentLevel = useCallback((modeKey: string, level: ContentLevel) => {
+  // --- Domyślny dobór treści GLOBALNY (urządzeniowy; stosowany przy zakładaniu pokoju) ---
+  const mutateGlobalSelection = useCallback((fn: (sel: ContentSelection) => ContentSelection) => {
     setGlobalSettings((prev) => {
-      const nextSelection: ContentSelection = { ...prev.contentSelection };
-      if (level <= 0) {
-        delete nextSelection[modeKey];
-      } else {
-        nextSelection[modeKey] = level;
-      }
-      const next = { ...prev, contentSelection: nextSelection };
+      const next = { ...prev, contentSelection: fn(prev.contentSelection) };
+      void saveGlobalSettings(next);
+      return next;
+    });
+  }, []);
+  const setGlobalContentLevel = useCallback(
+    (modeGroup: string, level: ContentLevel) =>
+      mutateGlobalSelection((s) => withLevel(s, modeGroup, level)),
+    [mutateGlobalSelection]
+  );
+  const setGlobalCategoryEnabled = useCallback(
+    (categoryId: string, enabled: boolean) =>
+      mutateGlobalSelection((s) => withCategoryEnabled(s, categoryId, enabled)),
+    [mutateGlobalSelection]
+  );
+  const setGlobalFilter = useCallback(
+    (filterId: ContentFilterId, on: boolean) =>
+      mutateGlobalSelection((s) => withFilter(s, filterId, on)),
+    [mutateGlobalSelection]
+  );
+
+  // --- Bramka wieku + akceptacje kategorii (per-urządzenie) ---
+  const verifyAge = useCallback(
+    () => updateGlobalSettings({ ageVerified: true }),
+    [updateGlobalSettings]
+  );
+  const acceptCategory = useCallback((categoryId: string) => {
+    setGlobalSettings((prev) => {
+      if (prev.acceptedCategories.includes(categoryId)) return prev;
+      const next = { ...prev, acceptedCategories: [...prev.acceptedCategories, categoryId] };
       void saveGlobalSettings(next);
       return next;
     });
@@ -730,6 +767,8 @@ export function useGame() {
     globalSettings,
     globalSettingsOpen,
     testMode: globalSettings.testMode,
+    ageVerified: globalSettings.ageVerified,
+    acceptedCategories: globalSettings.acceptedCategories,
     settingsOpen,
     pendingApproval,
     approval,
@@ -778,8 +817,14 @@ export function useGame() {
     cancelApproval,
     updateSettings,
     setContentLevel,
+    setRoomCategoryEnabled,
+    setRoomFilter,
     updateGlobalSettings,
     setGlobalContentLevel,
+    setGlobalCategoryEnabled,
+    setGlobalFilter,
+    verifyAge,
+    acceptCategory,
   };
 }
 

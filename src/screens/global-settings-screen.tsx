@@ -158,8 +158,14 @@ function ContentDefaultsTab({ game }: { game: GameApi }) {
       </View>
 
       <ContentLevelEditor
+        acceptedCategories={game.acceptedCategories}
+        ageVerified={game.ageVerified}
         bundle={game.contentBundle}
+        onAcceptCategory={game.acceptCategory}
+        onSetCategoryEnabled={game.setGlobalCategoryEnabled}
+        onSetFilter={game.setGlobalFilter}
         onSetLevel={game.setGlobalContentLevel}
+        onVerifyAge={game.verifyAge}
         selection={game.globalSettings.contentSelection}
       />
     </View>

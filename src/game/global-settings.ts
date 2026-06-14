@@ -13,34 +13,52 @@ export interface GlobalSettings {
   avatarId: AvatarId | null;
   colorId: PlayerColorId | null;
   contentSelection: ContentSelection;
+  /** Bramka wieku 18+ potwierdzona na tym urządzeniu. */
+  ageVerified: boolean;
+  /** Zapamiętane akceptacje kategorii (categoryId) z disclaimerów. */
+  acceptedCategories: string[];
   /** Ukryty tryb testowy (odblokowywany kodem pokoju) — pokazuje funkcje deweloperskie. */
   testMode: boolean;
 }
 
 const KEY = "butelka.globalSettings.v1";
 
+function defaultContentSelection(): ContentSelection {
+  return {
+    levels: { ...DEFAULT_SELECTION.levels },
+    disabledCategories: [],
+    filters: {},
+  };
+}
+
 export const EMPTY_GLOBAL_SETTINGS: GlobalSettings = {
   name: "",
   avatarId: null,
   colorId: null,
-  contentSelection: { ...DEFAULT_SELECTION },
+  contentSelection: defaultContentSelection(),
+  ageVerified: false,
+  acceptedCategories: [],
   testMode: false,
 };
 
 export async function loadGlobalSettings(): Promise<GlobalSettings> {
   try {
     const raw = await AsyncStorage.getItem(KEY);
-    if (!raw) return { ...EMPTY_GLOBAL_SETTINGS };
+    if (!raw) return { ...EMPTY_GLOBAL_SETTINGS, contentSelection: defaultContentSelection() };
     const obj = JSON.parse(raw) as Record<string, unknown>;
     return {
       name: typeof obj.name === "string" ? obj.name : "",
       avatarId: (obj.avatarId as AvatarId | null) ?? null,
       colorId: (obj.colorId as PlayerColorId | null) ?? null,
       contentSelection: parseSelection(JSON.stringify(obj.contentSelection ?? {})),
+      ageVerified: obj.ageVerified === true,
+      acceptedCategories: Array.isArray(obj.acceptedCategories)
+        ? obj.acceptedCategories.filter((x): x is string => typeof x === "string")
+        : [],
       testMode: obj.testMode === true,
     };
   } catch {
-    return { ...EMPTY_GLOBAL_SETTINGS };
+    return { ...EMPTY_GLOBAL_SETTINGS, contentSelection: defaultContentSelection() };
   }
 }
 
