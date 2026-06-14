@@ -10,7 +10,10 @@
     "backgroundColor": "#0A0712",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.butelka.game"
+      "bundleIdentifier": "com.butelka.game",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.butelka.game",
