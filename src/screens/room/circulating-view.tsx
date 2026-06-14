@@ -74,12 +74,14 @@ export function CirculatingView({ game }: { game: GameApi }) {
               ) : null}
             </>
           )}
-          <NeonButton
-            icon="person-add-outline"
-            label="Dodaj gracza testowego"
-            onPress={game.addDemoPlayer}
-            variant="ghost"
-          />
+          {game.testMode ? (
+            <NeonButton
+              icon="person-add-outline"
+              label="Dodaj gracza testowego"
+              onPress={game.addDemoPlayer}
+              variant="ghost"
+            />
+          ) : null}
         </View>
       ) : isLobby ? (
         <View className="flex-row items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4">

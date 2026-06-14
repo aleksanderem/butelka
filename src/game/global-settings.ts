@@ -13,6 +13,8 @@ export interface GlobalSettings {
   avatarId: AvatarId | null;
   colorId: PlayerColorId | null;
   contentSelection: ContentSelection;
+  /** Ukryty tryb testowy (odblokowywany kodem pokoju) — pokazuje funkcje deweloperskie. */
+  testMode: boolean;
 }
 
 const KEY = "butelka.globalSettings.v1";
@@ -22,6 +24,7 @@ export const EMPTY_GLOBAL_SETTINGS: GlobalSettings = {
   avatarId: null,
   colorId: null,
   contentSelection: { ...DEFAULT_SELECTION },
+  testMode: false,
 };
 
 export async function loadGlobalSettings(): Promise<GlobalSettings> {
@@ -34,6 +37,7 @@ export async function loadGlobalSettings(): Promise<GlobalSettings> {
       avatarId: (obj.avatarId as AvatarId | null) ?? null,
       colorId: (obj.colorId as PlayerColorId | null) ?? null,
       contentSelection: parseSelection(JSON.stringify(obj.contentSelection ?? {})),
+      testMode: obj.testMode === true,
     };
   } catch {
     return { ...EMPTY_GLOBAL_SETTINGS };

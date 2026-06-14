@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Alert } from "react-native";
 
 import { avatarOrder } from "@/game/avatars";
 import { ensureContent } from "@/game/content-client";
@@ -37,6 +38,8 @@ export type Stage = "entry" | "profile" | "room";
 const SPIN_TICK_MS = 110;
 /** Odliczanie przed automatycznym losowaniem (gdy włączony auto-start). */
 const AUTO_START_MS = 2500;
+/** Ukryty kod w polu „numer pokoju”, który przełącza tryb testowy (funkcje deweloperskie). */
+const TEST_MODE_CODE = "100704";
 
 function botClientId(): string {
   return `bot_${Math.random().toString(36).slice(2, 9)}`;
@@ -412,6 +415,21 @@ export function useGame() {
   }, [seedProfileFromGlobals]);
 
   const joinRoom = useCallback(() => {
+    // Ukryty przełącznik trybu testowego — kod „100704” nie dołącza do pokoju, tylko przełącza tryb.
+    if (normalizedJoinCode === TEST_MODE_CODE) {
+      const next = !globalSettings.testMode;
+      setGlobalSettings((prev) => {
+        const updated = { ...prev, testMode: next };
+        void saveGlobalSettings(updated);
+        return updated;
+      });
+      setJoinCode("");
+      Alert.alert(
+        "Tryb testowy",
+        next ? "Włączony — funkcje testowe są teraz dostępne." : "Wyłączony."
+      );
+      return;
+    }
     if (normalizedJoinCode.length < 6) {
       return;
     }
@@ -419,7 +437,7 @@ export function useGame() {
     setRoomTab("join");
     seedProfileFromGlobals();
     setStage("profile");
-  }, [normalizedJoinCode, seedProfileFromGlobals]);
+  }, [globalSettings.testMode, normalizedJoinCode, seedProfileFromGlobals]);
 
   const completeProfile = useCallback(async () => {
     if (!canEnterRoom || !clientId || !roomCode) {
@@ -695,6 +713,7 @@ export function useGame() {
     contentSelection,
     globalSettings,
     globalSettingsOpen,
+    testMode: globalSettings.testMode,
     settingsOpen,
     pendingApproval,
     approval,

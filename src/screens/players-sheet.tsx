@@ -45,9 +45,11 @@ export function PlayersSheet({ game }: { game: GameApi }) {
             />
           </View>
 
-          <Text className="text-xs leading-5 text-muted">
-            Dotknij gracza, aby oglądać grę z jego perspektywy (test na jednym urządzeniu).
-          </Text>
+          {game.testMode ? (
+            <Text className="text-xs leading-5 text-muted">
+              Dotknij gracza, aby oglądać grę z jego perspektywy (test na jednym urządzeniu).
+            </Text>
+          ) : null}
 
           <ScrollView
             className="max-h-80"
@@ -58,6 +60,7 @@ export function PlayersSheet({ game }: { game: GameApi }) {
               <PlayerRow
                 key={player.id}
                 player={player}
+                canImpersonate={game.testMode}
                 canKick={game.amHost && !player.isHost && !player.isSelf}
                 onView={() => game.setActingAs(player.clientId ?? null)}
                 onKick={() => player.clientId && game.kickPlayer(player.clientId)}
@@ -65,7 +68,7 @@ export function PlayersSheet({ game }: { game: GameApi }) {
             ))}
           </ScrollView>
 
-          {game.amHost ? (
+          {game.amHost && game.testMode ? (
             <NeonButton
               icon="person-add-outline"
               label="Dodaj gracza testowego"
@@ -94,36 +97,28 @@ export function PlayersSheet({ game }: { game: GameApi }) {
 function PlayerRow({
   player,
   canKick,
+  canImpersonate,
   onView,
   onKick,
 }: {
   player: Player;
   canKick: boolean;
+  canImpersonate: boolean;
   onView: () => void;
   onKick: () => void;
 }) {
-  return (
-    <View
-      className="flex-row items-center gap-3 rounded-2xl px-3 py-2.5"
-      style={{
-        backgroundColor: player.isSelf ? "rgba(139,92,246,0.16)" : "rgba(255,255,255,0.04)",
-      }}
-    >
-      <Pressable
-        accessibilityLabel={`Pokaż widok: ${player.name}`}
-        accessibilityRole="button"
-        className="flex-1 flex-row items-center gap-3"
-        onPress={onView}
-      >
-        <AvatarVisual avatarId={player.avatarId} colorId={player.colorId} size="sm" />
-        <View className="flex-1">
-          <View className="flex-row items-center gap-1.5">
-            <Text numberOfLines={1} className="text-base font-bold text-foreground">
-              {player.name}
-            </Text>
-            {player.isHost ? <Text style={{ fontSize: 13 }}>👑</Text> : null}
-          </View>
-          {player.isSelf ? (
+  const info = (
+    <>
+      <AvatarVisual avatarId={player.avatarId} colorId={player.colorId} size="sm" />
+      <View className="flex-1">
+        <View className="flex-row items-center gap-1.5">
+          <Text numberOfLines={1} className="text-base font-bold text-foreground">
+            {player.name}
+          </Text>
+          {player.isHost ? <Text style={{ fontSize: 13 }}>👑</Text> : null}
+        </View>
+        {canImpersonate ? (
+          player.isSelf ? (
             <View className="mt-0.5 flex-row items-center gap-1">
               <Ionicons color={neon.green} name="eye" size={13} />
               <Text className="text-xs font-semibold" style={{ color: neon.green }}>
@@ -132,9 +127,31 @@ function PlayerRow({
             </View>
           ) : (
             <Text className="mt-0.5 text-xs text-muted">Dotknij, aby zobaczyć jego widok</Text>
-          )}
-        </View>
-      </Pressable>
+          )
+        ) : null}
+      </View>
+    </>
+  );
+
+  return (
+    <View
+      className="flex-row items-center gap-3 rounded-2xl px-3 py-2.5"
+      style={{
+        backgroundColor: player.isSelf ? "rgba(139,92,246,0.16)" : "rgba(255,255,255,0.04)",
+      }}
+    >
+      {canImpersonate ? (
+        <Pressable
+          accessibilityLabel={`Pokaż widok: ${player.name}`}
+          accessibilityRole="button"
+          className="flex-1 flex-row items-center gap-3"
+          onPress={onView}
+        >
+          {info}
+        </Pressable>
+      ) : (
+        <View className="flex-1 flex-row items-center gap-3">{info}</View>
+      )}
 
       {canKick ? (
         <Pressable
