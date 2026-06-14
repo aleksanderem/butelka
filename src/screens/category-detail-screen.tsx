@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useMemo, useState } from "react";
 import type { ImageSourcePropType } from "react-native";
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { NeonButton } from "@/components/neon-button";
 import { CATEGORY_IMAGES } from "@/game/category-images";
@@ -107,7 +107,10 @@ export function CategoryDetailScreen({
         </Pressable>
         <View className="absolute inset-x-0 bottom-0 flex-row items-center gap-2 px-5 pb-3">
           <Text className="text-2xl font-extrabold text-white">{category.namePl}</Text>
-          <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: "rgba(5,3,12,0.6)" }}>
+          <View
+            className="rounded-full px-2 py-0.5"
+            style={{ backgroundColor: "rgba(5,3,12,0.6)" }}
+          >
             <Text className="text-[11px] font-bold" style={{ color: category.accent }}>
               {ageBadge(category.ageGate)}
             </Text>
@@ -266,48 +269,49 @@ function SubcategorySelect({
   };
 
   return (
-    <>
+    <View>
       <Pressable
         accessibilityRole="button"
         className="flex-row items-center justify-between rounded-2xl px-3.5 py-3"
-        onPress={() => setOpen(true)}
+        onPress={() => setOpen((v) => !v)}
         style={{ backgroundColor: "rgba(255,255,255,0.06)", borderColor: accent, borderWidth: 1 }}
       >
         <Text className="text-sm font-semibold text-foreground" numberOfLines={1}>
           {selectedName}
         </Text>
-        <Ionicons color={accent} name="chevron-down" size={16} />
+        <Ionicons color={accent} name={open ? "chevron-up" : "chevron-down"} size={16} />
       </Pressable>
 
-      <Modal animationType="fade" onRequestClose={() => setOpen(false)} transparent visible={open}>
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(4,2,10,0.62)" }]}>
-          <Pressable onPress={() => setOpen(false)} style={StyleSheet.absoluteFill} />
-          <View
-            className="mt-auto gap-1 rounded-t-3xl px-4 pb-6 pt-4"
-            style={{ backgroundColor: neon.surface, maxHeight: "70%" }}
-          >
-            <Text className="px-2 pb-2 text-base font-extrabold text-foreground">Podkategoria</Text>
-            <ScrollView contentContainerStyle={{ gap: 4 }}>
+      {open ? (
+        <View
+          className="mt-1 overflow-hidden rounded-2xl"
+          style={{
+            backgroundColor: neon.surfaceRaised,
+            borderColor: "rgba(255,255,255,0.1)",
+            borderWidth: 1,
+            maxHeight: 260,
+          }}
+        >
+          <ScrollView nestedScrollEnabled showsVerticalScrollIndicator={false}>
+            <SelectOption
+              accent={accent}
+              label="Wszystkie podkategorie"
+              onPress={() => choose(null)}
+              selected={selectedSub === null}
+            />
+            {subs.map((sub) => (
               <SelectOption
                 accent={accent}
-                label="Wszystkie podkategorie"
-                onPress={() => choose(null)}
-                selected={selectedSub === null}
+                key={sub.categoryId}
+                label={sub.namePl}
+                onPress={() => choose(sub.categoryId)}
+                selected={selectedSub === sub.categoryId}
               />
-              {subs.map((sub) => (
-                <SelectOption
-                  accent={accent}
-                  key={sub.categoryId}
-                  label={sub.namePl}
-                  onPress={() => choose(sub.categoryId)}
-                  selected={selectedSub === sub.categoryId}
-                />
-              ))}
-            </ScrollView>
-          </View>
+            ))}
+          </ScrollView>
         </View>
-      </Modal>
-    </>
+      ) : null}
+    </View>
   );
 }
 
