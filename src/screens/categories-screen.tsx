@@ -5,16 +5,20 @@ import { Pressable, ScrollView, Text, useWindowDimensions, View } from "react-na
 import { CategoryCard } from "@/components/category-card";
 import { MAIN_CATEGORIES, type MainCategory } from "@/game/main-categories";
 import type { GameApi } from "@/game/use-game";
-import { CategoryDetailSheet } from "@/screens/category-detail-sheet";
+import { CategoryDetailScreen } from "@/screens/category-detail-screen";
 import { neon } from "@/theme/colors";
 
 const H_PADDING = 20;
 const GAP = 12;
 
-/** Pełnoekranowa zakładka „Kategorie": grid 2-kolumnowy kart + podgląd treści po dotknięciu. */
+/** Zakładka „Kategorie": grid 2-kolumnowy; dotknięcie -> osobny pełnoekranowy widok szczegółów. */
 export function CategoriesScreen({ game }: { game: GameApi }) {
   const { width } = useWindowDimensions();
   const [detail, setDetail] = useState<MainCategory | null>(null);
+
+  if (detail) {
+    return <CategoryDetailScreen category={detail} game={game} onBack={() => setDetail(null)} />;
+  }
 
   const cardW = Math.floor((width - H_PADDING * 2 - GAP) / 2);
   const cardH = Math.round(cardW * 1.34);
@@ -54,15 +58,6 @@ export function CategoriesScreen({ game }: { game: GameApi }) {
           ))}
         </View>
       </ScrollView>
-
-      <CategoryDetailSheet
-        ageVerified={game.ageVerified}
-        bundle={game.contentBundle}
-        category={detail}
-        key={detail?.key ?? "none"}
-        onClose={() => setDetail(null)}
-        onVerifyAge={game.verifyAge}
-      />
     </View>
   );
 }
