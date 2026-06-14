@@ -29,7 +29,6 @@ import type {
   RoomSettings,
   RoomTab,
 } from "@/game/types";
-import { appwriteClient, playersChannel, roomChannel, votesChannel } from "@/lib/appwrite";
 import { useClientId } from "@/lib/client-id";
 import type { PlayerColorId } from "@/theme/colors";
 
@@ -136,35 +135,22 @@ export function useGame() {
     }
   }, []);
 
-  // Subskrypcja Realtime: po wejściu do pokoju wczytaj i nasłuchuj zmian (pokój/gracze/głosy).
+  // Synchronizacja stanu pokoju przez polling (co 2,5 s) po wejściu do pokoju.
+  // Świadomie NIE używamy Appwrite Realtime: na natywie WebSocket nie dostarcza eventów,
+  // a po opuszczeniu pokoju SDK nie czyści heartbeatu — osierocony ping (socket.send co 20 s
+  // na zamkniętym sockecie) rzuca asynchroniczny, nieprzechwytywalny INVALID_STATE_ERR i wywala
+  // aplikację. Polling jest niezawodny i wystarczający dla tej tury-po-turze gry.
   useEffect(() => {
     if (stage !== "room" || roomCode.length === 0) {
       return;
     }
     const code = roomCode;
     // Pierwsze wczytanie odraczamy (setState poza ciałem efektu).
-    let timer: ReturnType<typeof setTimeout> | undefined = setTimeout(() => void reload(code), 0);
-    const channels = [roomChannel(code), playersChannel(), votesChannel()];
-    const unsubscribe = appwriteClient.subscribe(channels, (event) => {
-      const payload = (event as { payload?: { roomCode?: string } }).payload;
-      // Eventy z kolekcji players/votes filtrujemy do tego pokoju (room channel jest już wąski).
-      if (payload && payload.roomCode && payload.roomCode !== code) {
-        return;
-      }
-      if (timer) {
-        clearTimeout(timer);
-      }
-      timer = setTimeout(() => void reload(code), 60);
-    });
-    // Fallback: odpytuj stan co 2,5 s. Realtime bywa zawodny na natywie (WebSocket gubi się
-    // np. po Fast Refresh / w tle), a polling gwarantuje synchronizację między urządzeniami.
+    const first = setTimeout(() => void reload(code), 0);
     const poll = setInterval(() => void reload(code), 2500);
     return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
+      clearTimeout(first);
       clearInterval(poll);
-      unsubscribe();
     };
   }, [stage, roomCode, reload]);
 
