@@ -50,7 +50,7 @@ export function StartScreen({ game }: { game: GameApi }) {
         showsVerticalScrollIndicator={false}
       >
         <View className="items-center pb-2 pt-4">
-          <BrandLogo width={300} />
+          <BrandLogo width={360} />
         </View>
 
         {game.lastSession ? (
