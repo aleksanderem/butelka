@@ -1,5 +1,5 @@
+import { useToast } from "heroui-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert } from "react-native";
 
 import { avatarOrder } from "@/game/avatars";
 import { ensureContent } from "@/game/content-client";
@@ -41,6 +41,14 @@ const AUTO_START_MS = 2500;
 /** Ukryty kod w polu „numer pokoju”, który przełącza tryb testowy (funkcje deweloperskie). */
 const TEST_MODE_CODE = "100704";
 
+/** Bezpiecznie wyłuskuje czytelny komunikat z błędu do pokazania w toaście. */
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return "Coś poszło nie tak. Spróbuj ponownie.";
+}
+
 function botClientId(): string {
   return `bot_${Math.random().toString(36).slice(2, 9)}`;
 }
@@ -52,6 +60,7 @@ function botClientId(): string {
  */
 export function useGame() {
   const clientId = useClientId();
+  const { toast } = useToast();
 
   // Lokalny stan profilu i nawigacji (zanim gracz dołączy do pokoju).
   const [stage, setStage] = useState<Stage>("entry");
@@ -424,10 +433,11 @@ export function useGame() {
         return updated;
       });
       setJoinCode("");
-      Alert.alert(
-        "Tryb testowy",
-        next ? "Włączony — funkcje testowe są teraz dostępne." : "Wyłączony."
-      );
+      toast.show({
+        variant: next ? "success" : "default",
+        label: "Tryb testowy",
+        description: next ? "Włączony — funkcje testowe są teraz dostępne." : "Wyłączony.",
+      });
       return;
     }
     if (normalizedJoinCode.length < 6) {
@@ -437,22 +447,32 @@ export function useGame() {
     setRoomTab("join");
     seedProfileFromGlobals();
     setStage("profile");
-  }, [globalSettings.testMode, normalizedJoinCode, seedProfileFromGlobals]);
+  }, [globalSettings.testMode, normalizedJoinCode, seedProfileFromGlobals, toast]);
 
   const completeProfile = useCallback(async () => {
     if (!canEnterRoom || !clientId || !roomCode) {
       return;
     }
-    await roomApi.enterRoom({
-      code: roomCode,
-      asHost: roomTab === "create",
-      clientId,
-      name: normalizedName,
-      avatarId,
-      colorId,
-      // Przy zakładaniu pokoju startujemy z globalnego domyślnego doboru treści.
-      contentSelection: serializeSelection(globalSettings.contentSelection),
-    });
+    try {
+      await roomApi.enterRoom({
+        code: roomCode,
+        asHost: roomTab === "create",
+        clientId,
+        name: normalizedName,
+        avatarId,
+        colorId,
+        // Przy zakładaniu pokoju startujemy z globalnego domyślnego doboru treści.
+        contentSelection: serializeSelection(globalSettings.contentSelection),
+      });
+    } catch (error) {
+      // Najczęściej: dołączanie do nieistniejącego pokoju. Zostajemy na onboardingu.
+      toast.show({
+        variant: "danger",
+        label: roomTab === "create" ? "Nie udało się utworzyć pokoju" : "Nie udało się dołączyć",
+        description: getErrorMessage(error),
+      });
+      return;
+    }
     setRoomDoc(undefined);
     setPlayerDocs([]);
     setVoteDocs([]);
@@ -466,6 +486,7 @@ export function useGame() {
     normalizedName,
     roomCode,
     roomTab,
+    toast,
   ]);
 
   const leaveRoom = useCallback(() => {
@@ -505,20 +526,29 @@ export function useGame() {
     setAvatarId(session.avatarId);
     setColorId(session.colorId);
     setRoomCode(session.code);
-    await roomApi.enterRoom({
-      code: session.code,
-      asHost: true,
-      clientId,
-      name: session.name,
-      avatarId: session.avatarId,
-      colorId: session.colorId,
-    });
+    try {
+      await roomApi.enterRoom({
+        code: session.code,
+        asHost: true,
+        clientId,
+        name: session.name,
+        avatarId: session.avatarId,
+        colorId: session.colorId,
+      });
+    } catch (error) {
+      toast.show({
+        variant: "danger",
+        label: "Nie udało się wrócić do sesji",
+        description: getErrorMessage(error),
+      });
+      return;
+    }
     setRoomDoc(undefined);
     setPlayerDocs([]);
     setVoteDocs([]);
     setLastSession(null);
     setStage("room");
-  }, [clientId, lastSession]);
+  }, [clientId, lastSession, toast]);
 
   const dismissSession = useCallback(() => setLastSession(null), []);
 
