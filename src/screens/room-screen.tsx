@@ -67,7 +67,7 @@ export function RoomScreen({ game }: { game: GameApi }) {
         <View className="gap-3 px-5 pb-3" style={{ paddingTop: insets.top + 8 }}>
           <RoomHeader
             highlightIndex={highlightIndex}
-            onBack={game.leaveRoom}
+            onBack={game.requestLeave}
             onPlayers={() => game.setPlayersOpen(true)}
             onSettings={() => game.setSettingsOpen(true)}
             players={game.players}

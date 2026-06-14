@@ -145,13 +145,15 @@ async function main() {
   await strAttr("rooms", "nextTruthApproval", 16, false, "majority");
   await strAttr("rooms", "nextDareApproval", 16, false, "off");
   await boolAttr("rooms", "autoStart", false, false);
+  // Dobór treści: JSON map modeKey -> poziom 0..3.
+  await strAttr("rooms", "contentSelection", 2000, false);
   await strAttr("rooms", "pendingAction", 16, false);
   await intAttr("rooms", "createdAt", true);
   await waitForAttributes("rooms", [
     "code", "phase", "hostClientId", "luckyClientId", "spinSeed", "spinStartedAt",
     "challengeType", "challengeText", "requireEndTurnApproval", "requireNextTruthApproval",
     "requireNextDareApproval", "endTurnApproval", "nextTruthApproval", "nextDareApproval",
-    "autoStart", "pendingAction", "createdAt",
+    "autoStart", "contentSelection", "pendingAction", "createdAt",
   ]);
 
   // players

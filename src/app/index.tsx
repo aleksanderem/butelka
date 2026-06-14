@@ -3,6 +3,8 @@ import type { JSX } from "react";
 import { Screen } from "@/components/screen";
 import { useGame } from "@/game/use-game";
 import { ApprovalModal } from "@/screens/approval-modal";
+import { GlobalSettingsScreen } from "@/screens/global-settings-screen";
+import { LeaveConfirmDialog } from "@/screens/leave-confirm-dialog";
 import { OnboardingScreen } from "@/screens/onboarding-screen";
 import { RoomScreen } from "@/screens/room-screen";
 import { SettingsScreen } from "@/screens/settings-screen";
@@ -14,7 +16,11 @@ export default function HomeScreen(): JSX.Element {
   return (
     <Screen>
       {game.stage === "entry" ? (
-        <StartScreen game={game} />
+        game.globalSettingsOpen ? (
+          <GlobalSettingsScreen game={game} />
+        ) : (
+          <StartScreen game={game} />
+        )
       ) : game.stage === "profile" ? (
         <OnboardingScreen game={game} />
       ) : game.settingsOpen ? (
@@ -24,6 +30,7 @@ export default function HomeScreen(): JSX.Element {
       )}
 
       <ApprovalModal game={game} />
+      <LeaveConfirmDialog game={game} />
     </Screen>
   );
 }

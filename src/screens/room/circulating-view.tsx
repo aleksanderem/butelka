@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
 import { CardFan } from "@/components/card-fan";
+import { ContentSummary } from "@/components/content-summary";
 import { GameCard } from "@/components/game-card";
 import { HowItWorks } from "@/components/how-it-works";
 import { NeonButton } from "@/components/neon-button";
@@ -88,6 +89,8 @@ export function CirculatingView({ game }: { game: GameApi }) {
           </Text>
         </View>
       ) : null}
+
+      {isLobby ? <ContentSummary game={game} /> : null}
 
       <HowItWorks />
     </View>

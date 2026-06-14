@@ -3,14 +3,15 @@ import { Separator, Slider, Switch } from "heroui-native";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
+import { ContentLevelEditor } from "@/components/content-level-editor";
 import type { ApprovalThreshold, RoomSettings } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 
-type TabId = "general" | "gameplay" | "sounds";
+type TabId = "general" | "content" | "gameplay" | "sounds";
 
 const TABS: { id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
-  { id: "general", icon: "settings-outline", label: "Ogólne" },
+  { id: "content", icon: "sparkles-outline", label: "Treści" },
   { id: "gameplay", icon: "game-controller-outline", label: "Rozgrywka" },
   { id: "sounds", icon: "volume-high-outline", label: "Dźwięki" },
 ];
@@ -26,7 +27,7 @@ const THRESHOLD_LABEL: Record<ApprovalThreshold, string> = {
 
 /** Pełnoekranowa podstrona ustawień pokoju (taby u góry). */
 export function SettingsScreen({ game }: { game: GameApi }) {
-  const [tab, setTab] = useState<TabId>("gameplay");
+  const [tab, setTab] = useState<TabId>("content");
 
   return (
     <View className="flex-1 gap-4 px-5 pt-4">
@@ -79,12 +80,34 @@ export function SettingsScreen({ game }: { game: GameApi }) {
         contentContainerStyle={{ paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
       >
-        {tab === "gameplay" ? (
+        {tab === "content" ? (
+          <ContentTab game={game} />
+        ) : tab === "gameplay" ? (
           <GameplayTab settings={game.settings} onChange={game.updateSettings} />
         ) : (
           <ComingSoon label={TABS.find((t) => t.id === tab)?.label ?? ""} />
         )}
       </ScrollView>
+    </View>
+  );
+}
+
+function ContentTab({ game }: { game: GameApi }) {
+  return (
+    <View className="gap-4">
+      <View className="gap-1">
+        <Text className="text-base font-bold text-foreground">Z czego losujemy?</Text>
+        <Text className="text-xs leading-5 text-muted">
+          Wybierz główne kategorie i jak mocne treści mają z nich wpadać. Suwak: Wył. → Łagodne →
+          Mocniejsze → Pełne. Możesz włączyć kilka naraz.
+        </Text>
+      </View>
+
+      <ContentLevelEditor
+        bundle={game.contentBundle}
+        onSetLevel={game.setContentLevel}
+        selection={game.contentSelection}
+      />
     </View>
   );
 }

@@ -1,6 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { avatarOrder } from "@/game/avatars";
+import { ensureContent } from "@/game/content-client";
+import {
+  parseSelection,
+  serializeSelection,
+  type ContentLevel,
+  type ContentSelection,
+} from "@/game/content-selection";
+import type { ContentBundle } from "@/game/content-types";
+import {
+  EMPTY_GLOBAL_SETTINGS,
+  loadGlobalSettings,
+  saveGlobalSettings,
+  type GlobalSettings,
+} from "@/game/global-settings";
 import { colorOrder, defaultSettings, makeRoomCode } from "@/game/data";
 import * as roomApi from "@/game/room-api";
 import { SPIN_MS } from "@/game/room-api";
@@ -50,11 +64,44 @@ export function useGame() {
   // Testowanie na jednym urządzeniu: tożsamość, jako którą oglądamy/gramy.
   // null = realne urządzenie; inaczej clientId wybranego gracza testowego.
   const [actingClientId, setActingClientId] = useState<string | null>(null);
+  // Potwierdzenie wyjścia z pokoju + zapamiętana sesja do ponownego dołączenia z ekranu głównego.
+  const [confirmLeaveOpen, setConfirmLeaveOpen] = useState(false);
+  const [lastSession, setLastSession] = useState<{
+    code: string;
+    name: string;
+    avatarId: AvatarId;
+    colorId: PlayerColorId;
+  } | null>(null);
 
   // Surowy stan pokoju z Appwrite: undefined = ładowanie, null = pokój nie istnieje.
   const [roomDoc, setRoomDoc] = useState<RoomDoc | null | undefined>(undefined);
   const [playerDocs, setPlayerDocs] = useState<PlayerDoc[]>([]);
   const [voteDocs, setVoteDocs] = useState<VoteDoc[]>([]);
+
+  // Paczka treści z content API (modes/categories/cards) — ładowana raz, cache na dysku.
+  const [contentBundle, setContentBundle] = useState<ContentBundle | null>(null);
+  useEffect(() => {
+    let alive = true;
+    void ensureContent().then((bundle) => {
+      if (alive && bundle) setContentBundle(bundle);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Globalne ustawienia gracza (domyślne imię/avatar/kolor + domyślny dobór treści) — z dysku.
+  const [globalSettings, setGlobalSettings] = useState<GlobalSettings>(EMPTY_GLOBAL_SETTINGS);
+  const [globalSettingsOpen, setGlobalSettingsOpen] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    void loadGlobalSettings().then((loaded) => {
+      if (alive) setGlobalSettings(loaded);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   // Tożsamość, którą traktujemy jako „Ty” (umożliwia podgląd jako gracz testowy).
   const effectiveClientId = actingClientId ?? clientId;
@@ -216,6 +263,12 @@ export function useGame() {
   const challengeType = (roomDoc?.challengeType ?? null) as ChallengeType | null;
   const challengeText = roomDoc?.challengeText ?? null;
 
+  // Dobór treści pokoju (modeKey -> poziom 0..3), czytany z roomDoc.
+  const contentSelection: ContentSelection = useMemo(
+    () => parseSelection(roomDoc?.contentSelection),
+    [roomDoc?.contentSelection]
+  );
+
   // Auto-start: host losuje automatycznie po krótkim odliczaniu, gdy włączone i są ≥2 gracze.
   // Refy (synchronizowane w efekcie), żeby polling (reload co 2,5 s) nie resetował timera —
   // deps efektu to stabilne prymitywy.
@@ -342,13 +395,21 @@ export function useGame() {
     [settings]
   );
 
+  /** Auto-wypełnia onboarding domyślnym profilem z globalnych ustawień (jeśli ustawiony). */
+  const seedProfileFromGlobals = useCallback(() => {
+    if (globalSettings.name) setPlayerName(globalSettings.name);
+    if (globalSettings.avatarId) setAvatarId(globalSettings.avatarId);
+    if (globalSettings.colorId) setColorId(globalSettings.colorId);
+  }, [globalSettings]);
+
   const createRoom = useCallback(() => {
     // Kod generujemy lokalnie — przejście do onboardingu jest natychmiastowe,
     // a pokój powstaje w backendzie dopiero przy wejściu do gry (completeProfile).
     setRoomCode(makeRoomCode());
     setRoomTab("create");
+    seedProfileFromGlobals();
     setStage("profile");
-  }, []);
+  }, [seedProfileFromGlobals]);
 
   const joinRoom = useCallback(() => {
     if (normalizedJoinCode.length < 6) {
@@ -356,8 +417,9 @@ export function useGame() {
     }
     setRoomCode(normalizedJoinCode);
     setRoomTab("join");
+    seedProfileFromGlobals();
     setStage("profile");
-  }, [normalizedJoinCode]);
+  }, [normalizedJoinCode, seedProfileFromGlobals]);
 
   const completeProfile = useCallback(async () => {
     if (!canEnterRoom || !clientId || !roomCode) {
@@ -370,21 +432,35 @@ export function useGame() {
       name: normalizedName,
       avatarId,
       colorId,
+      // Przy zakładaniu pokoju startujemy z globalnego domyślnego doboru treści.
+      contentSelection: serializeSelection(globalSettings.contentSelection),
     });
     setRoomDoc(undefined);
     setPlayerDocs([]);
     setVoteDocs([]);
     setStage("room");
-  }, [avatarId, canEnterRoom, clientId, colorId, normalizedName, roomCode, roomTab]);
+  }, [
+    avatarId,
+    canEnterRoom,
+    clientId,
+    colorId,
+    globalSettings,
+    normalizedName,
+    roomCode,
+    roomTab,
+  ]);
 
-  const leaveRoom = useCallback(async () => {
-    // Wychodzimy zawsze jako realne urządzenie, nie jako podglądany gracz testowy.
-    if (roomCode && clientId) {
-      await roomApi.leaveRoom(roomCode, clientId);
-    }
-    setActingClientId(null);
+  const leaveRoom = useCallback(() => {
+    // Zamknij dialog i wróć NATYCHMIAST (synchronicznie) — usunięcie gracza leci w tle.
+    // Sesję zapamiętujemy, żeby można było dołączyć ponownie z ekranu głównego.
+    setConfirmLeaveOpen(false);
     setPlayersOpen(false);
     setSettingsOpen(false);
+    if (roomCode && clientId) {
+      setLastSession({ code: roomCode, name: playerName, avatarId, colorId });
+      void roomApi.leaveRoom(roomCode, clientId);
+    }
+    setActingClientId(null);
     setStage("entry");
     setRoomCode("");
     setJoinCode("");
@@ -392,7 +468,41 @@ export function useGame() {
     setRoomDoc(undefined);
     setPlayerDocs([]);
     setVoteDocs([]);
-  }, [clientId, roomCode]);
+  }, [avatarId, clientId, colorId, playerName, roomCode]);
+
+  /** Powrót do ekranu głównego BEZ wychodzenia (sesja zostaje aktywna) — strzałka „wstecz". */
+  const requestLeave = useCallback(() => {
+    setPlayersOpen(false);
+    setSettingsOpen(false);
+    setConfirmLeaveOpen(true);
+  }, []);
+
+  /** Ponowne dołączenie do ostatniej sesji (z ekranu głównego). */
+  const rejoinSession = useCallback(async () => {
+    if (!lastSession || !clientId) {
+      return;
+    }
+    const session = lastSession;
+    setPlayerName(session.name);
+    setAvatarId(session.avatarId);
+    setColorId(session.colorId);
+    setRoomCode(session.code);
+    await roomApi.enterRoom({
+      code: session.code,
+      asHost: true,
+      clientId,
+      name: session.name,
+      avatarId: session.avatarId,
+      colorId: session.colorId,
+    });
+    setRoomDoc(undefined);
+    setPlayerDocs([]);
+    setVoteDocs([]);
+    setLastSession(null);
+    setStage("room");
+  }, [clientId, lastSession]);
+
+  const dismissSession = useCallback(() => setLastSession(null), []);
 
   /** Podgląd jako wybrany gracz (null = wróć do własnego widoku). */
   const setActingAs = useCallback(
@@ -521,6 +631,46 @@ export function useGame() {
     [reload, roomDoc, settings]
   );
 
+  /** Ustawia poziom doboru dla głównej kategorii (0 = wyłączona). Zapisuje na pokoju. */
+  const setContentLevel = useCallback(
+    (modeKey: string, level: ContentLevel) => {
+      if (!roomDoc) return;
+      const code = roomDoc.code;
+      const next: ContentSelection = parseSelection(roomDoc.contentSelection);
+      if (level <= 0) {
+        delete next[modeKey];
+      } else {
+        next[modeKey] = level;
+      }
+      void roomApi.updateContentSelection(code, serializeSelection(next)).then(() => reload(code));
+    },
+    [reload, roomDoc]
+  );
+
+  /** Aktualizuje globalne ustawienia (imię/avatar/kolor) i zapisuje na dysk. */
+  const updateGlobalSettings = useCallback((patch: Partial<GlobalSettings>) => {
+    setGlobalSettings((prev) => {
+      const next = { ...prev, ...patch };
+      void saveGlobalSettings(next);
+      return next;
+    });
+  }, []);
+
+  /** Ustawia poziom domyślnego doboru treści dla głównej kategorii (globalnie). */
+  const setGlobalContentLevel = useCallback((modeKey: string, level: ContentLevel) => {
+    setGlobalSettings((prev) => {
+      const nextSelection: ContentSelection = { ...prev.contentSelection };
+      if (level <= 0) {
+        delete nextSelection[modeKey];
+      } else {
+        nextSelection[modeKey] = level;
+      }
+      const next = { ...prev, contentSelection: nextSelection };
+      void saveGlobalSettings(next);
+      return next;
+    });
+  }, []);
+
   return {
     // stan
     stage,
@@ -541,6 +691,10 @@ export function useGame() {
     challengeType,
     challengeText,
     settings,
+    contentBundle,
+    contentSelection,
+    globalSettings,
+    globalSettingsOpen,
     settingsOpen,
     pendingApproval,
     approval,
@@ -554,6 +708,9 @@ export function useGame() {
     actingClientId,
     isImpersonating,
     viewAsPlayer,
+    // wyjście z pokoju + zapamiętana sesja
+    confirmLeaveOpen,
+    lastSession,
     // settery pól formularza
     setRoomTab,
     setJoinCode,
@@ -562,10 +719,15 @@ export function useGame() {
     setColorId,
     setSettingsOpen,
     setPlayersOpen,
+    setConfirmLeaveOpen,
+    setGlobalSettingsOpen,
     // akcje
     createRoom,
     joinRoom,
     leaveRoom,
+    requestLeave,
+    rejoinSession,
+    dismissSession,
     completeProfile,
     addDemoPlayer,
     setActingAs,
@@ -580,6 +742,9 @@ export function useGame() {
     rejectApproval,
     cancelApproval,
     updateSettings,
+    setContentLevel,
+    updateGlobalSettings,
+    setGlobalContentLevel,
   };
 }
 

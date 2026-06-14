@@ -77,7 +77,7 @@ export function PlayersSheet({ game }: { game: GameApi }) {
           <Pressable
             accessibilityRole="button"
             className="flex-row items-center justify-center gap-2 rounded-2xl py-3.5"
-            onPress={game.leaveRoom}
+            onPress={game.requestLeave}
             style={{ borderColor: "rgba(244,63,94,0.5)", borderWidth: 1.5 }}
           >
             <Ionicons color={neon.magenta} name="exit-outline" size={18} />

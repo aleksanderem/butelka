@@ -1,20 +1,10 @@
 import type { AnimationObject } from "lottie-react-native";
 
-import celebrate from "@/assets/bursts/celebrate.json";
-import dare from "@/assets/bursts/dare.json";
-import spin from "@/assets/bursts/spin.json";
-import truth from "@/assets/bursts/truth.json";
+import cornerLeft from "@/assets/bursts/corner-left.json";
+import cornerRight from "@/assets/bursts/corner-right.json";
 
-/** Reakcyjne animacje (Lottie burst) odpalane po akcjach z przycisków. */
+/** Reakcyjne animacje (Lottie) wystrzeliwane z dolnych rogów po akcjach z przycisków. */
 export const bursts = {
-  /** Energia przy losowaniu szczęśliwca. */
-  spin: spin as AnimationObject,
-  /** Fioletowy spark przy wyborze „Prawda”. */
-  truth: truth as AnimationObject,
-  /** Czerwono-magentowy spark przy wyborze „Wyzwanie”. */
-  dare: dare as AnimationObject,
-  /** Kolorowy wybuch przy akceptacji / celebracji. */
-  celebrate: celebrate as AnimationObject,
+  cornerLeft: cornerLeft as AnimationObject,
+  cornerRight: cornerRight as AnimationObject,
 } as const;
-
-export type BurstName = keyof typeof bursts;

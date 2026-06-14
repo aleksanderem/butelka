@@ -4,7 +4,7 @@
 
 import { Query } from "@/lib/appwrite-sdk";
 import { COL_PLAYERS, COL_ROOMS, COL_VOTES, DB_ID, databases } from "@/lib/appwrite";
-import { pickPrompt } from "@/game/prompts";
+import { DEFAULT_SELECTION, pickCardText, serializeSelection } from "@/game/content-selection";
 import type { ApprovalAction, ApprovalThreshold, ChallengeType, Phase } from "@/game/types";
 
 /** Ile trwa animacja krążenia karty, zanim host ujawni szczęśliwca. */
@@ -27,6 +27,8 @@ export interface RoomDoc {
   nextTruthApproval?: ApprovalThreshold;
   nextDareApproval?: ApprovalThreshold;
   autoStart?: boolean;
+  // Dobór treści: JSON map modeKey -> poziom 0..3 (patrz content-selection.ts).
+  contentSelection?: string;
   pendingAction: ApprovalAction | null;
   createdAt: number;
 }
@@ -84,6 +86,8 @@ export interface EnterRoomParams {
   name: string;
   avatarId: string;
   colorId: string;
+  /** Dobór treści (JSON) zapisywany na NOWO tworzonym pokoju. Pomijany przy dołączaniu. */
+  contentSelection?: string;
 }
 
 type RoomPatch = Partial<Omit<RoomDoc, "$id">>;
@@ -155,6 +159,7 @@ export async function enterRoom({
   name,
   avatarId,
   colorId,
+  contentSelection,
 }: EnterRoomParams): Promise<void> {
   let exists = true;
   try {
@@ -184,6 +189,7 @@ export async function enterRoom({
       nextTruthApproval: "majority",
       nextDareApproval: "off",
       autoStart: false,
+      contentSelection: contentSelection ?? serializeSelection(DEFAULT_SELECTION),
       pendingAction: null,
       createdAt: Date.now(),
     });
@@ -325,7 +331,7 @@ export async function pickChallenge(room: RoomDoc, type: ChallengeType): Promise
   }
   await updateRoom(room.code, {
     challengeType: type,
-    challengeText: pickPrompt(type),
+    challengeText: pickCardText(room.contentSelection, type),
     phase: "task",
   });
 }
@@ -335,7 +341,7 @@ export async function rerollChallenge(room: RoomDoc): Promise<void> {
     return;
   }
   await updateRoom(room.code, {
-    challengeText: pickPrompt(room.challengeType, room.challengeText),
+    challengeText: pickCardText(room.contentSelection, room.challengeType, room.challengeText),
   });
 }
 
@@ -344,16 +350,16 @@ function settingRequiresApproval(room: RoomDoc, action: ApprovalAction): boolean
 }
 
 /** Wykonuje akcję (koniec tury / następna prawda / następne wyzwanie) i czyści głosy. */
-export async function applyAction(code: string, action: ApprovalAction): Promise<void> {
-  await clearVotes(code);
+export async function applyAction(room: RoomDoc, action: ApprovalAction): Promise<void> {
+  await clearVotes(room.code);
   if (action === "endTurn") {
-    await updateRoom(code, resetRoundPatch());
+    await updateRoom(room.code, resetRoundPatch());
     return;
   }
   const type: ChallengeType = action === "nextTruth" ? "prawda" : "wyzwanie";
-  await updateRoom(code, {
+  await updateRoom(room.code, {
     challengeType: type,
-    challengeText: pickPrompt(type),
+    challengeText: pickCardText(room.contentSelection, type),
     phase: "task",
     pendingAction: null,
   });
@@ -369,7 +375,7 @@ export async function requestAction(
   action: ApprovalAction
 ): Promise<void> {
   if (!settingRequiresApproval(room, action)) {
-    await applyAction(room.code, action);
+    await applyAction(room, action);
     return;
   }
   await clearVotes(room.code);
@@ -406,7 +412,7 @@ export async function resolveVotes(
     // Świeży odczyt chroni przed podwójnym wykonaniem przy nakładających się eventach.
     const fresh = (await databases.getDocument(DB_ID, COL_ROOMS, room.code)) as unknown as RoomDoc;
     if (fresh.pendingAction === action) {
-      await applyAction(room.code, action);
+      await applyAction(room, action);
       return true;
     }
     return false;
@@ -428,4 +434,9 @@ export async function updateSettings(
   }
 ): Promise<void> {
   await updateRoom(code, settings);
+}
+
+/** Zapisuje dobór treści (JSON map modeKey -> poziom) na pokoju. */
+export async function updateContentSelection(code: string, selectionJson: string): Promise<void> {
+  await updateRoom(code, { contentSelection: selectionJson });
 }
