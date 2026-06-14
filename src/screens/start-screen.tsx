@@ -5,16 +5,10 @@ import { useState } from "react";
 import { Image, Pressable, ScrollView, Text, View, type ViewStyle } from "react-native";
 
 import { BrandLogo } from "@/components/brand-logo";
-import { CategoryCard } from "@/components/category-card";
 import { NeonButton } from "@/components/neon-button";
 import { NeonCard } from "@/components/neon-card";
-import { MAIN_CATEGORIES, type MainCategory } from "@/game/main-categories";
 import type { GameApi } from "@/game/use-game";
-import { CategoryDetailSheet } from "@/screens/category-detail-sheet";
 import { gradients, neon } from "@/theme/colors";
-
-const CAT_CARD_W = 150;
-const CAT_CARD_H = 200;
 
 /** Styl slotu OTP: domyślnie border w kolorze WYZWANIE, a aktywny (focus) dostaje neonowy glow. */
 function otpSlotStyle(isActive: boolean): ViewStyle {
@@ -47,7 +41,6 @@ const infoContent: Record<InfoKind, { title: string; body: string }> = {
 
 export function StartScreen({ game }: { game: GameApi }) {
   const [info, setInfo] = useState<InfoKind | null>(null);
-  const [detail, setDetail] = useState<MainCategory | null>(null);
 
   return (
     <View className="flex-1 px-5 pt-6">
@@ -151,12 +144,15 @@ export function StartScreen({ game }: { game: GameApi }) {
             variant="pink"
           />
         </NeonCard>
-
-        <CategoriesSection onSelect={setDetail} />
       </ScrollView>
 
-      <View className="flex-row justify-center gap-10 pb-2 pt-3">
+      <View className="flex-row justify-center gap-8 pb-2 pt-3">
         <FooterLink icon="help-circle-outline" label="Zasady" onPress={() => setInfo("rules")} />
+        <FooterLink
+          icon="grid-outline"
+          label="Kategorie"
+          onPress={() => game.setCategoriesOpen(true)}
+        />
         <FooterLink
           icon="settings-outline"
           label="Ustawienia"
@@ -168,12 +164,6 @@ export function StartScreen({ game }: { game: GameApi }) {
           onPress={() => setInfo("about")}
         />
       </View>
-
-      <CategoryDetailSheet
-        bundle={game.contentBundle}
-        category={detail}
-        onClose={() => setDetail(null)}
-      />
 
       <Dialog isOpen={info !== null} onOpenChange={(open) => !open && setInfo(null)}>
         <Dialog.Portal>
@@ -187,32 +177,6 @@ export function StartScreen({ game }: { game: GameApi }) {
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog>
-    </View>
-  );
-}
-
-function CategoriesSection({ onSelect }: { onSelect: (category: MainCategory) => void }) {
-  return (
-    <View className="gap-3">
-      <View className="flex-row items-center justify-between">
-        <Text className="text-lg font-extrabold text-foreground">Kategorie</Text>
-        <Text className="text-xs text-muted">Dotknij, by zobaczyć</Text>
-      </View>
-      <ScrollView
-        horizontal
-        contentContainerStyle={{ gap: 12, paddingRight: 4 }}
-        showsHorizontalScrollIndicator={false}
-      >
-        {MAIN_CATEGORIES.map((category) => (
-          <CategoryCard
-            category={category}
-            height={CAT_CARD_H}
-            key={category.key}
-            onPress={() => onSelect(category)}
-            width={CAT_CARD_W}
-          />
-        ))}
-      </ScrollView>
     </View>
   );
 }

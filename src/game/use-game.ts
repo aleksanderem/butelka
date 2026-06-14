@@ -108,6 +108,7 @@ export function useGame() {
   // Globalne ustawienia gracza (domyślne imię/avatar/kolor + domyślny dobór treści) — z dysku.
   const [globalSettings, setGlobalSettings] = useState<GlobalSettings>(EMPTY_GLOBAL_SETTINGS);
   const [globalSettingsOpen, setGlobalSettingsOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
   useEffect(() => {
     let alive = true;
     void loadGlobalSettings().then((loaded) => {
@@ -766,6 +767,7 @@ export function useGame() {
     contentSelection,
     globalSettings,
     globalSettingsOpen,
+    categoriesOpen,
     testMode: globalSettings.testMode,
     ageVerified: globalSettings.ageVerified,
     acceptedCategories: globalSettings.acceptedCategories,
@@ -795,6 +797,7 @@ export function useGame() {
     setPlayersOpen,
     setConfirmLeaveOpen,
     setGlobalSettingsOpen,
+    setCategoriesOpen,
     // akcje
     createRoom,
     joinRoom,
