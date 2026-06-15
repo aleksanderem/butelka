@@ -300,3 +300,9 @@ S0003. Dzwieki UI + frosted glass (build 6):
 - expo-audio ~56.0.12 (modul natywny) -> rebuild dev clienta (UTF-8 locale). Podczas rebuildu Metro wepchnal nowy JS do starej binarki -> przejsciowy redbox "Cannot find native module 'ExpoAudio'"; znika po instalacji nowej binarki.
 - tsc czysty. Commit b4a4988. Build 6 EAS -> TestFlight (po wyraznej zgodzie uzytkownika; klasyfikator blokuje deploy bez niej).
 
+
+S0003. Korekty po review UI (przed build 7):
+- Dzwieki UI ocenione jako fatalne -> USUNIETE kompletnie (commit 86cdb94): sounds.ts + assets/sounds + wpiecia + przelacznik + GlobalSettings.sound + expo-audio (dep+plugin). Frosted glass zostaje.
+- Fix paska statusu (commit 67c4c88): tlo StartScreen (VideoBackdrop+BlurView+tint) rozciagniete pod status bar i dolny inset (top:-insets.top, bottom:-insets.bottom) -> jednolity frosted-dark, koniec jasniejszej wstegi przy godzinie.
+- Zweryfikowane w symulatorze (Metro --clear; dev client build6 ma jeszcze ExpoAudio w binarce, ale JS go nie importuje -> bez redboxa).
+- BUILD 7: ODLOZONY na zyczenie uzytkownika — zbiera kolejne poprawki UI, build z calym pakietem naraz. tsc czysty na obu commitach.
