@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { FullscreenClip } from "@/components/fullscreen-clip";
-import { initSounds } from "@/lib/sounds";
 
 import "../global.css";
 
@@ -35,10 +34,6 @@ export default function RootLayout(): JSX.Element | null {
   // zostawiaj użytkownika na czarnym ekranie, gdy font nie wstanie (np. na natywie).
   const ready = fontsLoaded || fontError !== null;
   const [showIntro, setShowIntro] = useState(true);
-
-  useEffect(() => {
-    initSounds();
-  }, []);
 
   useEffect(() => {
     if (ready) {

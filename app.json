@@ -34,8 +34,7 @@
         }
       ],
       "expo-font",
-      "expo-video",
-      "expo-audio"
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,
