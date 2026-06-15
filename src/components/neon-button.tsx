@@ -3,6 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
+import { hapticTap } from "@/lib/haptics";
 import { gradients, neon } from "@/theme/colors";
 
 export type NeonVariant = "violet" | "pink" | "ghost";
@@ -44,7 +45,14 @@ export function NeonButton({
       accessibilityRole="button"
       className={className}
       disabled={disabled}
-      onPress={onPress}
+      onPress={
+        onPress
+          ? () => {
+              hapticTap();
+              onPress();
+            }
+          : undefined
+      }
       style={({ pressed }) => [
         {
           borderRadius: 16,

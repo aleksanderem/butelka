@@ -11,6 +11,7 @@ import { HeroDoodles } from "@/components/hero-doodles";
 import { NeonButton } from "@/components/neon-button";
 import { NeonCard } from "@/components/neon-card";
 import { VideoBackdrop } from "@/components/video-backdrop";
+import { hapticTap } from "@/lib/haptics";
 import type { GameApi } from "@/game/use-game";
 import { gradients, neon } from "@/theme/colors";
 
@@ -87,7 +88,10 @@ export function StartScreen({ game }: { game: GameApi }) {
           <Pressable
             accessibilityLabel="Utwórz pokój"
             accessibilityRole="button"
-            onPress={game.createRoom}
+            onPress={() => {
+              hapticTap();
+              game.createRoom();
+            }}
             style={({ pressed }) => ({
               borderRadius: 24,
               shadowColor: neon.purple,
@@ -215,7 +219,14 @@ function FooterLink({
   onPress: () => void;
 }) {
   return (
-    <Pressable accessibilityRole="button" className="items-center gap-1.5" onPress={onPress}>
+    <Pressable
+      accessibilityRole="button"
+      className="items-center gap-1.5"
+      onPress={() => {
+        hapticTap();
+        onPress();
+      }}
+    >
       <Ionicons color={neon.textMuted} name={icon} size={24} />
       <Text className="text-xs font-medium text-muted">{label}</Text>
     </Pressable>

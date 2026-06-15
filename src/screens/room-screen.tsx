@@ -8,6 +8,7 @@ import { FullscreenClip } from "@/components/fullscreen-clip";
 import { RoomHeader } from "@/components/room-header";
 import type { Phase } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
+import { hapticPulse, hapticReveal, hapticSpinTick } from "@/lib/haptics";
 
 const REVEAL_SOURCE = require("../../assets/animated/reveal-bottle.mp4");
 import { ChallengeView } from "@/screens/room/challenge-view";
@@ -85,8 +86,53 @@ export function RoomScreen({ game }: { game: GameApi }) {
       <PlayersSheet game={game} />
 
       <RevealGate phase={game.phase} />
+      <RoomHaptics activeIndex={game.activeIndex} amLucky={game.amLucky} phase={game.phase} />
     </View>
   );
+}
+
+/**
+ * Sygnaly haptyczne pokoju (no-op na symulatorze):
+ * - tyk przy kazdej zmianie wskazania podczas losowania (czuja wszyscy),
+ * - mocny sygnal w momencie wskazania szczesliwca,
+ * - puls u wylosowanego, powtarzany do momentu wyboru prawda/wyzwanie.
+ */
+function RoomHaptics({
+  phase,
+  activeIndex,
+  amLucky,
+}: {
+  phase: Phase;
+  activeIndex: number | null;
+  amLucky: boolean;
+}) {
+  // Tyk przy kazdej zmianie aktywnego gracza w trakcie krazenia karty.
+  useEffect(() => {
+    if (phase === "spinning") {
+      hapticSpinTick();
+    }
+  }, [phase, activeIndex]);
+
+  // Mocniejszy sygnal dokladnie w chwili wskazania (spinning -> chosen).
+  const prevPhase = useRef(phase);
+  useEffect(() => {
+    if (prevPhase.current === "spinning" && phase === "chosen") {
+      hapticReveal();
+    }
+    prevPhase.current = phase;
+  }, [phase]);
+
+  // Puls u szczesliwca dopoki nie wybierze (faza "chosen") — tylko na jego urzadzeniu.
+  useEffect(() => {
+    if (!(amLucky && phase === "chosen")) {
+      return;
+    }
+    hapticPulse();
+    const id = setInterval(hapticPulse, 1100);
+    return () => clearInterval(id);
+  }, [amLucky, phase]);
+
+  return null;
 }
 
 /**
