@@ -41,18 +41,6 @@ const HERO: Placement[] = [
     opacity: 0.95,
     glowScale: 1.5,
   },
-  // Podkreslenie pod "WYZWANIE": cover z niskim boxem -> przyciecie do cienkiego poziomego pasa
-  {
-    index: 20,
-    top: "20.5%",
-    left: "15%",
-    width: 250,
-    height: 50,
-    resizeMode: "cover",
-    glow: "#F43F5E",
-    opacity: 0.95,
-    glowScale: 1.1,
-  },
   // Kwiatek w prawym gornym rogu (fiolet)
   {
     index: 26,
