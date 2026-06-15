@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Dialog, InputOTP } from "heroui-native";
 import { useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { NeonButton } from "@/components/neon-button";
@@ -43,15 +44,26 @@ const infoContent: Record<InfoKind, { title: string; body: string }> = {
 
 export function StartScreen({ game }: { game: GameApi }) {
   const [info, setInfo] = useState<InfoKind | null>(null);
+  const insets = useSafeAreaInsets();
 
   return (
     <View className="flex-1">
-      <VideoBackdrop opacity={0.6} />
-      <BlurView intensity={38} pointerEvents="none" style={StyleSheet.absoluteFill} tint="dark" />
+      {/* Tło rozciągnięte pod status bar i dolny inset (ujemne offsety), by cały ekran —
+          łącznie z paskiem godziny — miał ten sam frosted-dark, a nie jaśniejszą poświatę. */}
       <View
         pointerEvents="none"
-        style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(10,7,18,0.35)" }]}
-      />
+        style={{
+          position: "absolute",
+          top: -insets.top,
+          bottom: -insets.bottom,
+          left: 0,
+          right: 0,
+        }}
+      >
+        <VideoBackdrop opacity={0.6} />
+        <BlurView intensity={38} pointerEvents="none" style={StyleSheet.absoluteFill} tint="dark" />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(10,7,18,0.35)" }]} />
+      </View>
       <View className="flex-1 px-5 pt-6">
         <ScrollView
           className="flex-1"
