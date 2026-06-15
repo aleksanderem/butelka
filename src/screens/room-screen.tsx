@@ -10,7 +10,7 @@ import type { Phase } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
 import { hapticPulse, hapticReveal, hapticSpinTick } from "@/lib/haptics";
 
-const REVEAL_SOURCE = require("../../assets/animated/reveal-bottle.mp4");
+const DRAW_SOURCE = require("../../assets/animated/draw-shuffle.mp4");
 import { ChallengeView } from "@/screens/room/challenge-view";
 import { CirculatingView } from "@/screens/room/circulating-view";
 import { LuckyView } from "@/screens/room/lucky-view";
@@ -28,6 +28,9 @@ export function RoomScreen({ game }: { game: GameApi }) {
   const insets = useSafeAreaInsets();
   // Wysokość nagłówka, by treść zaczynała się pod nim (i przewijała się za jego rozmyciem).
   const [headerHeight, setHeaderHeight] = useState(0);
+  // Zwiększane po zakończeniu klipu losowania — wymusza remount LuckyView, by jego wejście
+  // (pop karty) odpaliło się dokładnie w momencie odsłonięcia, a nie pod spodem nakładki.
+  const [drawNonce, setDrawNonce] = useState(0);
 
   return (
     <View className="flex-1">
@@ -43,7 +46,7 @@ export function RoomScreen({ game }: { game: GameApi }) {
         showsVerticalScrollIndicator={false}
       >
         {game.phase === "chosen" ? (
-          <LuckyView game={game} />
+          <LuckyView game={game} key={drawNonce} />
         ) : game.phase === "task" ? (
           <ChallengeView game={game} />
         ) : (
@@ -85,7 +88,7 @@ export function RoomScreen({ game }: { game: GameApi }) {
 
       <PlayersSheet game={game} />
 
-      <RevealGate phase={game.phase} />
+      <DrawOverlay onReveal={() => setDrawNonce((n) => n + 1)} phase={game.phase} />
       <RoomHaptics activeIndex={game.activeIndex} amLucky={game.amLucky} phase={game.phase} />
     </View>
   );
@@ -136,16 +139,17 @@ function RoomHaptics({
 }
 
 /**
- * Pokazuje klip „reveal" (wirująca butelka) na pełnym ekranie w momencie, gdy faza pokoju
- * przechodzi ze `spinning` na `chosen` — czyli gdy los właśnie wskazał szczęśliwca.
- * Po zakończeniu klipu odsłania się leżący pod spodem `LuckyView`.
+ * Animacja losowania: gdy zaczyna się tura (faza wchodzi w `spinning`), na pełnym ekranie leci
+ * klip tasujących się neonowych kart, który pod koniec osiada na pojedynczej karcie. Klip gra
+ * cały (~6s) — w międzyczasie host rozstrzyga losowanie (SPIN_MS=3,2s -> `chosen`), więc po jego
+ * zakończeniu odsłania się leżący pod spodem `LuckyView` z wybranym graczem.
  */
-function RevealGate({ phase }: { phase: Phase }) {
+function DrawOverlay({ phase, onReveal }: { phase: Phase; onReveal: () => void }) {
   const [active, setActive] = useState(false);
   const prevPhase = useRef(phase);
 
   useEffect(() => {
-    if (prevPhase.current === "spinning" && phase === "chosen") {
+    if (prevPhase.current !== "spinning" && phase === "spinning") {
       setActive(true);
     }
     prevPhase.current = phase;
@@ -156,7 +160,14 @@ function RevealGate({ phase }: { phase: Phase }) {
   }
 
   return (
-    <FullscreenClip maxDurationMs={5500} onDone={() => setActive(false)} source={REVEAL_SOURCE} />
+    <FullscreenClip
+      maxDurationMs={6500}
+      onDone={() => {
+        setActive(false);
+        onReveal();
+      }}
+      source={DRAW_SOURCE}
+    />
   );
 }
 
