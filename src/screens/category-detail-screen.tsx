@@ -227,18 +227,20 @@ export function CategoryDetailScreen({
       </View>
 
       {showBottomTabs ? (
-        <View className="flex-row gap-2 px-5 pb-6 pt-3">
-          <BottomTab
-            accent={category.accent}
+        <View className="flex-row gap-3 px-5 pb-6 pt-3">
+          <NeonButton
+            className="flex-1"
+            icon="help"
             label="Prawda"
             onPress={() => changeType("prawda")}
-            selected={previewType === "prawda"}
+            variant={previewType === "prawda" ? "violet" : "ghost"}
           />
-          <BottomTab
-            accent={category.accent}
+          <NeonButton
+            className="flex-1"
+            icon="flash"
             label="Wyzwanie"
             onPress={() => changeType("wyzwanie")}
-            selected={previewType === "wyzwanie"}
+            variant={previewType === "wyzwanie" ? "pink" : "ghost"}
           />
         </View>
       ) : null}
@@ -368,35 +370,6 @@ function TabButton({
         className="text-xs font-semibold"
         numberOfLines={1}
         style={{ color: active ? neon.white : neon.textMuted }}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function BottomTab({
-  label,
-  selected,
-  accent,
-  onPress,
-}: {
-  label: string;
-  selected: boolean;
-  accent: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected }}
-      className="flex-1 items-center rounded-2xl py-3.5"
-      onPress={onPress}
-      style={{ backgroundColor: selected ? accent : "rgba(255,255,255,0.05)" }}
-    >
-      <Text
-        className="text-base font-extrabold"
-        style={{ color: selected ? neon.white : neon.textMuted }}
       >
         {label}
       </Text>
