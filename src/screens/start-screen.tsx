@@ -7,6 +7,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BrandLogo } from "@/components/brand-logo";
+import { HeroDoodles } from "@/components/hero-doodles";
 import { NeonButton } from "@/components/neon-button";
 import { NeonCard } from "@/components/neon-card";
 import { VideoBackdrop } from "@/components/video-backdrop";
@@ -64,6 +65,7 @@ export function StartScreen({ game }: { game: GameApi }) {
         <BlurView intensity={38} pointerEvents="none" style={StyleSheet.absoluteFill} tint="dark" />
         <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(10,7,18,0.35)" }]} />
       </View>
+      <HeroDoodles />
       <View className="flex-1 px-5 pt-6">
         <ScrollView
           className="flex-1"
