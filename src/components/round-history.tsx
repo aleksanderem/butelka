@@ -2,8 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
 import { NeonCard } from "@/components/neon-card";
+import { AvatarVisual } from "@/components/player-avatar";
+import { avatarSources } from "@/game/avatars";
 import type { RoundHistoryEntry } from "@/game/round-history";
-import { neon } from "@/theme/colors";
+import type { AvatarId } from "@/game/types";
+import { neon, playerPalette, type PlayerColorId } from "@/theme/colors";
+
+/** Wpis ma poprawny avatar tylko wtedy, gdy zna i maskotkę, i kolor (starsze/uszkodzone wpisy nie). */
+function hasAvatar(entry: RoundHistoryEntry): boolean {
+  return entry.avatarId in avatarSources && entry.colorId in playerPalette;
+}
 
 /** Przebieg gry: log zakończonych tur (najnowsze u góry). Zastępuje statyczne „Jak to działa?". */
 export function RoundHistory({ history }: { history: RoundHistoryEntry[] }) {
@@ -29,18 +37,26 @@ export function RoundHistory({ history }: { history: RoundHistoryEntry[] }) {
                 key={`${entry.at}-${index}`}
                 style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
               >
-                <View
-                  style={{
-                    alignItems: "center",
-                    backgroundColor: `${accent}22`,
-                    borderRadius: 16,
-                    height: 32,
-                    justifyContent: "center",
-                    width: 32,
-                  }}
-                >
-                  <Ionicons color={accent} name={isTruth ? "help" : "flash"} size={16} />
-                </View>
+                {hasAvatar(entry) ? (
+                  <AvatarVisual
+                    avatarId={entry.avatarId as AvatarId}
+                    colorId={entry.colorId as PlayerColorId}
+                    size="xs"
+                  />
+                ) : (
+                  <View
+                    style={{
+                      alignItems: "center",
+                      backgroundColor: `${accent}22`,
+                      borderRadius: 18,
+                      height: 36,
+                      justifyContent: "center",
+                      width: 36,
+                    }}
+                  >
+                    <Ionicons color={accent} name={isTruth ? "help" : "flash"} size={16} />
+                  </View>
+                )}
                 <View className="flex-1">
                   <Text className="text-sm font-bold text-foreground" numberOfLines={1}>
                     {entry.name || "Gracz"}

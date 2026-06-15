@@ -5,9 +5,10 @@ import { avatarSources } from "@/game/avatars";
 import type { AvatarId, Player } from "@/game/types";
 import { neon, playerPalette, type PlayerColorId } from "@/theme/colors";
 
-type Size = "sm" | "md" | "lg" | "xl";
+type Size = "xs" | "sm" | "md" | "lg" | "xl";
 
 const dims: Record<Size, { box: number; ring: number }> = {
+  xs: { box: 36, ring: 2 },
   sm: { box: 48, ring: 2 },
   md: { box: 64, ring: 2.5 },
   lg: { box: 72, ring: 3 },
