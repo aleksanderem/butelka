@@ -11,8 +11,9 @@
 
 ## B. Do zrobienia przez Ciebie w App Store Connect (portal)
 - [ ] Umowa Paid Apps NIE jest potrzebna (apka darmowa, bez IAP) — pomijamy bank/podatki
-- [ ] Polityka prywatności: zhostuj treść z `store/PRIVACY-POLICY.md` i wklej URL
-- [ ] URL pomocy (wymagany) — prosty landing / strona kontaktu
+- [x] Polityka prywatności ZHOSTOWANA: `https://butelka-legal.aleksander-kolabogroup.workers.dev/privacy`
+- [x] URL pomocy ZHOSTOWANY: `https://butelka-legal.aleksander-kolabogroup.workers.dev/`
+      (Cloudflare Workers Static Assets, źródło w repo `web/`, deploy: `cd web && npx wrangler deploy`)
 - [ ] Metadane: nazwa, podtytuł, opis, słowa kluczowe, tekst promocyjny — z `store/app-store-connect.md`
 - [ ] Ocena wiekowa: wypełnij kwestionariusz wg sekcji 3 (`app-store-connect.md`)
 - [ ] App Privacy: uzupełnij etykietę wg sekcji 4

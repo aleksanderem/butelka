@@ -45,7 +45,7 @@ Zbierz ekipę i odpal Butelkę. Reszta zrobi się sama.
 **Słowa kluczowe (max 100 znaków, po przecinku, bez spacji):**
 `prawda,wyzwanie,impreza,domówka,gra towarzyska,melanż,znajomi,party,butelka,randka,dla par,18+`
 
-**URL pomocy:** _(wymagane — podstaw stronę, może być prosty landing/Notion)_
+**URL pomocy (wymagane):** `https://butelka-legal.aleksander-kolabogroup.workers.dev/`
 **URL marketingowy:** _(opcjonalny)_
 **Prawa autorskie:** `© 2026 Aleksander Miesak` _(do podmiany)_
 
@@ -114,7 +114,7 @@ Zbierane dane:
 - **Dane użytkowania → interakcje z produktem** (otwarcia kategorii): cel — Analityka.
   Nie powiązane z tożsamością. Nie do śledzenia.
 
-Polityka prywatności (URL): _(hostuj treść z `store/PRIVACY-POLICY.md`)_
+Polityka prywatności (URL): `https://butelka-legal.aleksander-kolabogroup.workers.dev/privacy`
 
 ---
 
