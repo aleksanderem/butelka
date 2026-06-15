@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { Animated, Text, View } from "react-native";
 
 import { Confetti } from "@/components/confetti";
-import { Crown } from "@/components/crown";
+import { GameCard } from "@/components/game-card";
 import { NeonButton } from "@/components/neon-button";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
@@ -11,7 +11,8 @@ import { fonts } from "@/theme/fonts";
 
 export function LuckyView({ game }: { game: GameApi }) {
   const amLucky = game.amLucky;
-  const luckyName = game.luckyPlayer?.name ?? "";
+  const lucky = game.luckyPlayer;
+  const luckyName = lucky?.name ?? "";
 
   // Wejscie karty szczesliwca: pop (fade + scale). Odpalane na mount — RoomScreen remontuje
   // ten widok kluczem dopiero po zakonczeniu klipu losowania, wiec pop pokrywa sie z odsloniem.
@@ -33,9 +34,16 @@ export function LuckyView({ game }: { game: GameApi }) {
       }}
     >
       <View className="items-center gap-7 pt-4">
-        <View className="items-center justify-center" style={{ width: 280 }}>
+        <View className="items-center justify-center" style={{ height: 268, width: 280 }}>
           <Confetti />
-          <Crown size={124} />
+          <View style={{ transform: [{ scale: 1.12 }] }}>
+            <GameCard
+              animate
+              avatarId={lucky?.avatarId}
+              colorId={lucky?.colorId}
+              label={amLucky ? "Ty" : luckyName}
+            />
+          </View>
         </View>
 
         <View className="items-center gap-1.5">
