@@ -4,7 +4,13 @@
 
 import { Query } from "@/lib/appwrite-sdk";
 import { COL_PLAYERS, COL_ROOMS, COL_VOTES, DB_ID, databases } from "@/lib/appwrite";
-import { DEFAULT_SELECTION, pickCardText, serializeSelection } from "@/game/content-selection";
+import {
+  cleanCardText,
+  DEFAULT_SELECTION,
+  pickCardText,
+  serializeSelection,
+} from "@/game/content-selection";
+import { appendHistory } from "@/game/round-history";
 import type { ApprovalAction, ApprovalThreshold, ChallengeType, Phase } from "@/game/types";
 
 /** Ile trwa krążenie, zanim host ujawni szczęśliwca. Krótko (~2s), bo klip losowania trwa ~6s
@@ -30,6 +36,8 @@ export interface RoomDoc {
   autoStart?: boolean;
   // Dobór treści: JSON map modeKey -> poziom 0..3 (patrz content-selection.ts).
   contentSelection?: string;
+  // Przebieg gry: JSON tablica zakończonych tur (patrz round-history.ts). Opcjonalne (starsze pokoje).
+  history?: string;
   pendingAction: ApprovalAction | null;
   createdAt: number;
 }
@@ -350,11 +358,28 @@ function settingRequiresApproval(room: RoomDoc, action: ApprovalAction): boolean
   return thresholdForAction(room, action) !== "off";
 }
 
-/** Wykonuje akcję (koniec tury / następna prawda / następne wyzwanie) i czyści głosy. */
-export async function applyAction(room: RoomDoc, action: ApprovalAction): Promise<void> {
+/** Wykonuje akcję (koniec tury / następna prawda / następne wyzwanie) i czyści głosy.
+ *  Na koniec tury dopisuje wpis do przebiegu gry (kto był szczęśliwcem + co wybrał). */
+export async function applyAction(
+  room: RoomDoc,
+  action: ApprovalAction,
+  players: PlayerDoc[]
+): Promise<void> {
   await clearVotes(room.code);
   if (action === "endTurn") {
-    await updateRoom(room.code, resetRoundPatch());
+    const patch = resetRoundPatch();
+    const lucky = players.find((p) => p.clientId === room.luckyClientId);
+    if (lucky && room.challengeType) {
+      patch.history = appendHistory(room.history, {
+        name: lucky.name,
+        avatarId: lucky.avatarId,
+        colorId: lucky.colorId,
+        type: room.challengeType,
+        text: room.challengeText ? cleanCardText(room.challengeText) : "",
+        at: Date.now(),
+      });
+    }
+    await updateRoom(room.code, patch);
     return;
   }
   const type: ChallengeType = action === "nextTruth" ? "prawda" : "wyzwanie";
@@ -373,10 +398,11 @@ export async function applyAction(room: RoomDoc, action: ApprovalAction): Promis
 export async function requestAction(
   room: RoomDoc,
   clientId: string,
-  action: ApprovalAction
+  action: ApprovalAction,
+  players: PlayerDoc[]
 ): Promise<void> {
   if (!settingRequiresApproval(room, action)) {
-    await applyAction(room, action);
+    await applyAction(room, action, players);
     return;
   }
   await clearVotes(room.code);
@@ -413,7 +439,7 @@ export async function resolveVotes(
     // Świeży odczyt chroni przed podwójnym wykonaniem przy nakładających się eventach.
     const fresh = (await databases.getDocument(DB_ID, COL_ROOMS, room.code)) as unknown as RoomDoc;
     if (fresh.pendingAction === action) {
-      await applyAction(room, action);
+      await applyAction(room, action, players);
       return true;
     }
     return false;

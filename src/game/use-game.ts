@@ -24,6 +24,7 @@ import { colorOrder, defaultSettings, makeRoomCode } from "@/game/data";
 import * as roomApi from "@/game/room-api";
 import { SPIN_MS } from "@/game/room-api";
 import type { PlayerDoc, RoomDoc, VoteDoc } from "@/game/room-api";
+import { parseHistory } from "@/game/round-history";
 import type {
   ApprovalState,
   AvatarId,
@@ -265,6 +266,9 @@ export function useGame() {
   );
   const challengeType = (roomDoc?.challengeType ?? null) as ChallengeType | null;
   const challengeText = roomDoc?.challengeText ?? null;
+
+  // Przebieg gry: log zakończonych tur (parsowany z roomDoc.history).
+  const roundHistory = useMemo(() => parseHistory(roomDoc?.history), [roomDoc?.history]);
 
   // Dobór treści pokoju (modeKey -> poziom 0..3), czytany z roomDoc.
   const contentSelection: ContentSelection = useMemo(
@@ -617,15 +621,19 @@ export function useGame() {
     }
     const code = roomDoc.code;
     const action = challengeType === "prawda" ? "nextTruth" : "nextDare";
-    void roomApi.requestAction(roomDoc, effectiveClientId, action).then(() => reload(code));
-  }, [challengeType, effectiveClientId, reload, roomDoc]);
+    void roomApi
+      .requestAction(roomDoc, effectiveClientId, action, playerDocs)
+      .then(() => reload(code));
+  }, [challengeType, effectiveClientId, playerDocs, reload, roomDoc]);
 
   const passTurn = useCallback(() => {
     if (roomDoc && effectiveClientId) {
       const code = roomDoc.code;
-      void roomApi.requestAction(roomDoc, effectiveClientId, "endTurn").then(() => reload(code));
+      void roomApi
+        .requestAction(roomDoc, effectiveClientId, "endTurn", playerDocs)
+        .then(() => reload(code));
     }
-  }, [effectiveClientId, reload, roomDoc]);
+  }, [effectiveClientId, playerDocs, reload, roomDoc]);
 
   const confirmApproval = useCallback(() => {
     if (roomDoc && roomDoc.pendingAction && effectiveClientId) {
@@ -762,6 +770,7 @@ export function useGame() {
     amLucky,
     challengeType,
     challengeText,
+    roundHistory,
     settings,
     contentBundle,
     contentSelection,

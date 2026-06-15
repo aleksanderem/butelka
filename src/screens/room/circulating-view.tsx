@@ -4,8 +4,8 @@ import { Text, View } from "react-native";
 import { CardFan } from "@/components/card-fan";
 import { ContentSummary } from "@/components/content-summary";
 import { GameCard } from "@/components/game-card";
-import { HowItWorks } from "@/components/how-it-works";
 import { NeonButton } from "@/components/neon-button";
+import { RoundHistory } from "@/components/round-history";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 
@@ -94,7 +94,7 @@ export function CirculatingView({ game }: { game: GameApi }) {
 
       {isLobby ? <ContentSummary game={game} /> : null}
 
-      <HowItWorks />
+      <RoundHistory history={game.roundHistory} />
     </View>
   );
 }
