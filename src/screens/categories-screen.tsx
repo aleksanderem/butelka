@@ -20,8 +20,16 @@ export function CategoriesScreen({ game }: { game: GameApi }) {
     return <CategoryDetailScreen category={detail} game={game} onBack={() => setDetail(null)} />;
   }
 
-  const cardW = Math.floor((width - H_PADDING * 2 - GAP) / 2);
-  const cardH = Math.round(cardW * 1.34);
+  const cardSize = Math.floor((width - H_PADDING * 2 - GAP) / 2);
+  const bundle = game.contentBundle;
+  // Obcinamy prefiks trybu z nazwy podkategorii ("Teen — Kreatywne absurdy" -> "Kreatywne absurdy"),
+  // bo karta i tak pokazuje nazwę kategorii — chip ma być krótki.
+  const subNamesFor = (key: MainCategory["key"]): string[] =>
+    bundle
+      ? bundle.categories
+          .filter((c) => c.modeGroup === key && c.enabled)
+          .map((c) => c.namePl.split("—").pop()?.trim() ?? c.namePl)
+      : [];
 
   return (
     <View className="flex-1 px-5 pt-4">
@@ -50,10 +58,10 @@ export function CategoriesScreen({ game }: { game: GameApi }) {
           {MAIN_CATEGORIES.map((category) => (
             <CategoryCard
               category={category}
-              height={cardH}
               key={category.key}
               onPress={() => setDetail(category)}
-              width={cardW}
+              size={cardSize}
+              subNames={subNamesFor(category.key)}
             />
           ))}
         </View>

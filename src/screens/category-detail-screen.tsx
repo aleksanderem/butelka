@@ -225,10 +225,7 @@ export function CategoryDetailScreen({
       </View>
 
       {showBottomTabs ? (
-        <View
-          className="flex-row gap-2 px-5 pb-6 pt-3"
-          style={{ borderTopColor: "rgba(255,255,255,0.08)", borderTopWidth: 1 }}
-        >
+        <View className="flex-row gap-2 px-5 pb-6 pt-3">
           <BottomTab
             accent={category.accent}
             label="Prawda"
