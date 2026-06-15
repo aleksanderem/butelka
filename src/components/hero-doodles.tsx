@@ -32,7 +32,7 @@ const HERO: Placement[] = [
   // Korona nad logo (rozowy) — wysrodkowana, nad slowem PRAWDA
   {
     index: 25,
-    top: 11,
+    top: -19,
     left: 138,
     width: 80,
     glow: "#EC4899",
