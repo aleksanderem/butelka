@@ -1,3 +1,4 @@
+import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import type { ReactNode } from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
@@ -38,16 +39,22 @@ export function NeonCard({
       className={`overflow-hidden rounded-3xl p-5 ${className ?? ""}`}
       style={[
         {
-          backgroundColor: glass ? "rgba(20,15,32,0.55)" : neon.surface,
-          borderColor: glass ? "rgba(255,255,255,0.18)" : borderColor[glow],
-          borderWidth: 1,
+          // glass = przezroczysty: tlo robi BlurView nizej, View zostaje transparentny.
+          // Ramka i glow biora kolor z `glow` — swiecaca obwodka jak na kartach kategorii.
+          backgroundColor: glass ? "transparent" : neon.surface,
+          borderColor: glass
+            ? glow === "none"
+              ? "rgba(255,255,255,0.22)"
+              : borderColor[glow]
+            : borderColor[glow],
+          borderWidth: glass ? 1.5 : 1,
         },
         glass
           ? {
-              shadowColor: neon.purple,
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.45,
-              shadowRadius: 34,
+              shadowColor: glow === "none" ? neon.purple : glowColor[glow],
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0.55,
+              shadowRadius: 26,
               elevation: 12,
             }
           : glow === "none"
@@ -67,14 +74,18 @@ export function NeonCard({
         style,
       ]}
     >
+      {/* Frosted, PRZEZROCZYSTE tlo szkla: blur tla + minimalna kryjnosc (tint robi sheen nizej). */}
+      {glass ? (
+        <BlurView intensity={18} pointerEvents="none" style={StyleSheet.absoluteFill} tint="dark" />
+      ) : null}
       <LinearGradient
         colors={
           glass
-            ? ["rgba(255,255,255,0.16)", "rgba(255,255,255,0.04)", "rgba(255,255,255,0)"]
+            ? ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)", "rgba(255,255,255,0.015)"]
             : ["rgba(255,255,255,0.05)", "rgba(255,255,255,0)"]
         }
         end={{ x: 0.5, y: 1 }}
-        locations={glass ? [0, 0.42, 1] : [0, 0.5]}
+        locations={glass ? [0, 0.45, 1] : [0, 0.5]}
         pointerEvents="none"
         start={{ x: 0.5, y: 0 }}
         style={StyleSheet.absoluteFill}

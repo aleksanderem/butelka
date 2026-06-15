@@ -149,7 +149,7 @@ export function StartScreen({ game }: { game: GameApi }) {
             </View>
           </Pressable>
 
-          <NeonCard className="items-center gap-5" glass>
+          <NeonCard className="items-center gap-5" glass glow="pink">
             <View className="items-center gap-2">
               <Text className="text-lg font-extrabold text-foreground">Dołącz do pokoju</Text>
               <Text className="text-center text-sm text-muted">Wpisz ID pokoju, aby dołączyć</Text>
@@ -242,21 +242,21 @@ function FooterLink({
         onPress();
       }}
     >
-      {/* Szklany, bezbarwny chip: mrożona warstwa + cienka jasna ramka + biała ikona konturowa. */}
+      {/* Szklany, bezbarwny chip: PRZEZROCZYSTY mrożony blur + cienka jasna ramka + biała ikona. */}
       <View
         className="overflow-hidden rounded-2xl"
-        style={{ borderColor: "rgba(255,255,255,0.16)", borderWidth: 1 }}
+        style={{ borderColor: "rgba(255,255,255,0.14)", borderWidth: 1 }}
       >
         <BlurView
-          intensity={20}
+          intensity={12}
           style={{ alignItems: "center", height: 46, justifyContent: "center", width: 46 }}
           tint="light"
         >
           <View
             pointerEvents="none"
-            style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(255,255,255,0.06)" }]}
+            style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(255,255,255,0.03)" }]}
           />
-          <Ionicons color="rgba(255,255,255,0.92)" name={icon} size={22} />
+          <Ionicons color="rgba(255,255,255,0.9)" name={icon} size={22} />
         </BlurView>
       </View>
       <Text className="text-xs font-medium text-muted">{label}</Text>
