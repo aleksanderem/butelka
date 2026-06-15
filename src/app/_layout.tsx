@@ -17,7 +17,7 @@ import { FullscreenClip } from "@/components/fullscreen-clip";
 
 import "../global.css";
 
-const INTRO_SOURCE = require("../../assets/animated/intro-card.mp4");
+const INTRO_SOURCE = require("../../assets/animated/entry-video.mp4");
 
 SplashScreen.preventAutoHideAsync();
 
@@ -51,7 +51,7 @@ export default function RootLayout(): JSX.Element | null {
         <Stack screenOptions={{ headerShown: false }} />
         {showIntro ? (
           <FullscreenClip
-            maxDurationMs={4800}
+            maxDurationMs={11600}
             onDone={() => setShowIntro(false)}
             source={INTRO_SOURCE}
           />
