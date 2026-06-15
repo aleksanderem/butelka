@@ -288,3 +288,15 @@ S0003. Natywny rebuild (expo-video to modul natywny):
 - Next: weryfikacja w symulatorze (intro/tlo/reveal), potem nowy build TestFlight.
 
 ---
+
+S0003. Dzwieki UI + frosted glass (build 6):
+- 5 SFX wygenerowane modelem mirelo_text_to_audio (higgsfield): tap/spin/reveal/success/error.
+- GOTCHA gen audio: (1) prompty "soft/light/gentle" -> niemal cisza (max -50..-65 dB), trim ja dokanczal -> regeneracja z mocnymi promptami ("punchy/clear/distinct"). (2) CLI 'generate create --wait' odpalony 4x rownolegle nie zwracal URL -> niezawodnie: submit przez MCP generate_audio (job pending), potem CLI 'generate get <id> --json' do result_url.
+- Obrobka: ffmpeg silenceremove (trim brzegow) + loudnorm I=-15/-16 -> aac/m4a 44.1k, glosnosc wyrownana.
+- src/lib/sounds.ts: createAudioPlayer per dzwiek przy starcie (initSounds w _layout), playSound(name) z seekTo(0)+play, glosnosc per-dzwiek, flaga enabled (setSoundEnabled). setAudioModeAsync({playsInSilentMode:false}) — respektuje wyciszenie telefonu.
+- Wpiecia: NeonButton.onPress + 'Utworz pokoj' + FooterLink -> tap; RevealGate (room-screen) -> spin na ->spinning, reveal na ->chosen; index.tsx -> success na stage ->room. setSoundEnabled zsync z game.globalSettings.sound.
+- GlobalSettings.sound (bool, default true) + przelacznik 'Efekty dzwiekowe' w global-settings-screen ProfileTab (custom toggle Pressable, nie heroui Switch).
+- Frosted glass: start-screen owiniety, VideoBackdrop opacity 0.6 + BlurView intensity 38 tint dark + tint rgba(10,7,18,0.35) nad bg, tresc na wierzchu. Zweryfikowane zrzutem.
+- expo-audio ~56.0.12 (modul natywny) -> rebuild dev clienta (UTF-8 locale). Podczas rebuildu Metro wepchnal nowy JS do starej binarki -> przejsciowy redbox "Cannot find native module 'ExpoAudio'"; znika po instalacji nowej binarki.
+- tsc czysty. Commit b4a4988. Build 6 EAS -> TestFlight (po wyraznej zgodzie uzytkownika; klasyfikator blokuje deploy bez niej).
+

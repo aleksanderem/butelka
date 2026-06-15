@@ -1,18 +1,18 @@
 {
   "session_id": "S0003",
   "started_at": "2026-06-15T05:25:00Z",
-  "last_updated": "2026-06-15T05:50:00Z",
+  "last_updated": "2026-06-15T06:40:00Z",
   "status": "active",
-  "focus": "Animowane assety do gry (higgsfield) + wpiecie ich do apki przez expo-video: intro-splash, petlowe tlo, reveal losowania.",
+  "focus": "Animowane assety (higgsfield) + dzwieki UI (mirelo) wpiete przez expo-video/expo-audio; frosted glass na ekranie glownym.",
   "tasks_snapshot": {
-    "total": 16,
-    "not_started": 1,
-    "in_progress": 4,
-    "passing": 11,
+    "total": 22,
+    "not_started": 0,
+    "in_progress": 1,
+    "passing": 21,
     "failing": 0,
     "blocked": 0
   },
-  "active_task_ids": [12, 13, 14, 15, 16],
+  "active_task_ids": [22],
   "blockers": [],
-  "notes": "3 klipy wygenerowane higgsfieldem (Seedance 2.0, 9:16 720p) i zweryfikowane na klatkach: assets/animated/{intro-card,reveal-bottle,bg-loop}.mp4. expo-video ~56.1.3 zainstalowane (plugin w app.json, mp4 bundlowane). Wpiete: FullscreenClip (intro w _layout, reveal w RoomScreen na przejsciu spinning->chosen), VideoBackdrop (bg-loop pod StartScreen). tsc czysty. CocoaPods locale fix: pod install/expo run:ios MUSZA miec LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 (inaczej Encoding::CompatibilityError ASCII-8BIT). pod install OK (ExpoVideo zintegrowany). Trwa natywny rebuild dev clienta na iPhone 16e (UDID C727F0E8-61D5-4FA6-8148-A81596D0A640). Po weryfikacji w symulatorze -> nowy build TestFlight."
+  "notes": "WIDEO (build 5, w TestFlight): intro-card splash, bg-loop tlo, reveal-bottle losowanie (expo-video). KLUCZOWY FIX: klipy higgsfield mialy moov na koncu -> remux ffmpeg +faststart, inaczej AVPlayer nie gra po http w dev. DZWIEKI (build 6, w trakcie): 5 SFX mirelo (tap/spin/reveal/success/error) -> m4a (trim+loudnorm), src/lib/sounds.ts (expo-audio, glosnosc per-dzwiek, flaga on/off). Wpiete: tap=NeonButton+Utworz+stopka, spin=start losowania, reveal=wskazanie szczesliwca, success=wejscie do pokoju. Przelacznik 'Efekty dzwiekowe' w Ustawieniach->Profil (GlobalSettings.sound, persystencja). FROSTED GLASS: BlurView+tint nad bg-loop na StartScreen (zweryfikowane). UWAGA gen audio: mirelo z promptami 'soft/light/gentle' daje niemal cisze (-50..-65dB) -> uzywac mocnych promptow; CLI rownolegle (4 naraz) nie zwraca URL -> generowac przez MCP (job pending) i odpytac CLI 'generate get <id>'. Commity c540a10 (wideo) + b4a4988 (audio+frost). expo-audio ~56.0.12. Zweryfikowane w sym: apka wstaje z ExpoAudio bez redboxa, frosted glass dziala. NIEZWERYFIKOWANE w sym: odsluch SFX + render przelacznika (uzytkownik potwierdzi na urzadzeniu). Build 6 (build number 6, v1.0.0) wgrany do App Store Connect, przetwarzany przez Apple. Builds 5 (wideo) i 6 (audio+frost) oba w TestFlight. DO ZROBIENIA PRZEZ UZYTKOWNIKA: zrotowac APPWRITE_API_KEY; potwierdzic na urzadzeniu odsluch SFX + render przelacznika dzwiekow."
 }
