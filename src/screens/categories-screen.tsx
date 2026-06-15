@@ -9,7 +9,7 @@ import { CategoryDetailScreen } from "@/screens/category-detail-screen";
 import { neon } from "@/theme/colors";
 
 const H_PADDING = 20;
-const GAP = 12;
+const GAP = 20;
 
 /** Zakładka „Kategorie": grid 2-kolumnowy; dotknięcie -> osobny pełnoekranowy widok szczegółów. */
 export function CategoriesScreen({ game }: { game: GameApi }) {
