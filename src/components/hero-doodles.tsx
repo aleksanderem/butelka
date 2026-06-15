@@ -10,9 +10,11 @@ type Placement = {
   top: number | `${number}%`;
   left: number | `${number}%`;
   width: number;
-  /** Domyslnie = width (kwadrat). Dla podkreslenia mniejsza wysokosc. */
+  /** Domyslnie = width (kwadrat). */
   height?: number;
   rotate?: string;
+  /** Poziome rozciagniecie animacji (np. swoosh -> szerokie podkreslenie). */
+  scaleX?: number;
   opacity?: number;
   /** Neonowy kolor poswiaty (glow). */
   glow: string;
@@ -24,7 +26,7 @@ type Placement = {
 /**
  * Doodle wokol hero:
  * - korona (26) nad logo,
- * - podkreslenie (21) bezposrednio pod slowem "WYZWANIE",
+ * - podkreslenie (21) bezposrednio pod slowem "WYZWANIE" (czysty swoosh rozciagniety w poziom),
  * - kwiatek (27) w prawym gornym rogu.
  * Kazdy z neonowym glow (miekki blob SVG za animacja).
  */
@@ -39,18 +41,17 @@ const HERO: Placement[] = [
     opacity: 0.95,
     glowScale: 1.5,
   },
-  // Podkreslenie pod "WYZWANIE" (magenta) — szeroko, wysrodkowane pod slowem.
-  // "cover" przycina kwadratowy kanwas do poziomego pasa z kreska -> szeroka linia.
+  // Podkreslenie pod "WYZWANIE": cover z niskim boxem -> przyciecie do cienkiego poziomego pasa
   {
     index: 20,
-    top: "22.5%",
+    top: "20.5%",
     left: "15%",
-    width: 255,
-    height: 74,
+    width: 250,
+    height: 50,
     resizeMode: "cover",
     glow: "#F43F5E",
     opacity: 0.95,
-    glowScale: 1.15,
+    glowScale: 1.1,
   },
   // Kwiatek w prawym gornym rogu (fiolet)
   {
@@ -136,8 +137,9 @@ export function HeroDoodles({ preview = false }: { preview?: boolean }) {
       {HERO.map((p, i) => {
         const w = p.width;
         const h = p.height ?? p.width;
+        const sx = p.scaleX ?? 1;
         const scale = p.glowScale ?? 1.5;
-        const gw = w * scale;
+        const gw = w * sx * scale;
         const gh = h * scale;
         return (
           <View
@@ -158,7 +160,7 @@ export function HeroDoodles({ preview = false }: { preview?: boolean }) {
               loop
               resizeMode={p.resizeMode ?? "contain"}
               source={doodleSources[p.index] as AnimationObject}
-              style={{ height: h, width: w }}
+              style={{ height: h, transform: [{ scaleX: sx }], width: w }}
             />
           </View>
         );
