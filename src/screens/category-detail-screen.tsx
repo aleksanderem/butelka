@@ -182,7 +182,7 @@ export function CategoryDetailScreen({
       </View>
 
       {showBottomBar ? (
-        <View className="flex-row gap-3 px-5 pb-6 pt-3">
+        <View className="flex-row gap-3 px-5 pb-1 pt-3">
           <NeonButton
             className="flex-1"
             icon="help"
