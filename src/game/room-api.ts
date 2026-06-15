@@ -7,8 +7,9 @@ import { COL_PLAYERS, COL_ROOMS, COL_VOTES, DB_ID, databases } from "@/lib/appwr
 import { DEFAULT_SELECTION, pickCardText, serializeSelection } from "@/game/content-selection";
 import type { ApprovalAction, ApprovalThreshold, ChallengeType, Phase } from "@/game/types";
 
-/** Ile trwa animacja krążenia karty, zanim host ujawni szczęśliwca. */
-export const SPIN_MS = 3200;
+/** Ile trwa krążenie, zanim host ujawni szczęśliwca. Krótko (~2s), bo klip losowania trwa ~6s
+ *  i karta wybrańca ma wyrastać już ~4s przed jego końcem (gdy faza wejdzie w „chosen”). */
+export const SPIN_MS = 2000;
 
 const QUERY_LIMIT = 100;
 

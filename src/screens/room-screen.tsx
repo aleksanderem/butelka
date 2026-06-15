@@ -1,12 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { useVideoPlayer, VideoView } from "expo-video";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { FullscreenClip } from "@/components/fullscreen-clip";
+import { GameCard } from "@/components/game-card";
 import { RoomHeader } from "@/components/room-header";
-import type { Phase } from "@/game/types";
+import type { Phase, Player } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
 import { hapticPulse, hapticReveal, hapticSpinTick } from "@/lib/haptics";
 
@@ -88,7 +89,12 @@ export function RoomScreen({ game }: { game: GameApi }) {
 
       <PlayersSheet game={game} />
 
-      <DrawOverlay onReveal={() => setDrawNonce((n) => n + 1)} phase={game.phase} />
+      <DrawOverlay
+        amLucky={game.amLucky}
+        luckyPlayer={game.luckyPlayer}
+        onReveal={() => setDrawNonce((n) => n + 1)}
+        phase={game.phase}
+      />
       <RoomHaptics activeIndex={game.activeIndex} amLucky={game.amLucky} phase={game.phase} />
     </View>
   );
@@ -140,11 +146,21 @@ function RoomHaptics({
 
 /**
  * Animacja losowania: gdy zaczyna się tura (faza wchodzi w `spinning`), na pełnym ekranie leci
- * klip tasujących się neonowych kart, który pod koniec osiada na pojedynczej karcie. Klip gra
- * cały (~6s) — w międzyczasie host rozstrzyga losowanie (SPIN_MS=3,2s -> `chosen`), więc po jego
- * zakończeniu odsłania się leżący pod spodem `LuckyView` z wybranym graczem.
+ * klip tasujących się neonowych kart (~6s). Gdy los wskaże szczęśliwca (faza `chosen`, ~2s przez
+ * SPIN_MS), na klipie WYRASTA karta wybranego gracza (scale) i trzyma do końca klipu — wtedy
+ * nakładka wygasa i odsłania `LuckyView` z tą samą kartą (płynne przejście).
  */
-function DrawOverlay({ phase, onReveal }: { phase: Phase; onReveal: () => void }) {
+function DrawOverlay({
+  phase,
+  luckyPlayer,
+  amLucky,
+  onReveal,
+}: {
+  phase: Phase;
+  luckyPlayer: Player | null;
+  amLucky: boolean;
+  onReveal: () => void;
+}) {
   const [active, setActive] = useState(false);
   const prevPhase = useRef(phase);
 
@@ -160,14 +176,104 @@ function DrawOverlay({ phase, onReveal }: { phase: Phase; onReveal: () => void }
   }
 
   return (
-    <FullscreenClip
-      maxDurationMs={6500}
+    <DrawClip
+      amLucky={amLucky}
+      luckyPlayer={luckyPlayer}
       onDone={() => {
         setActive(false);
         onReveal();
       }}
-      source={DRAW_SOURCE}
+      phase={phase}
     />
+  );
+}
+
+/** Klip losowania + wyrastająca karta wybrańca. */
+function DrawClip({
+  phase,
+  luckyPlayer,
+  amLucky,
+  onDone,
+}: {
+  phase: Phase;
+  luckyPlayer: Player | null;
+  amLucky: boolean;
+  onDone: () => void;
+}) {
+  const fade = useRef(new Animated.Value(1)).current;
+  const cardScale = useRef(new Animated.Value(0)).current;
+  const doneRef = useRef(false);
+  const grownRef = useRef(false);
+
+  const player = useVideoPlayer(DRAW_SOURCE, (p) => {
+    p.loop = false;
+    p.muted = true;
+    p.play();
+  });
+
+  // Karta wybrańca wyrasta, gdy los wskaże (faza „chosen” + znany gracz).
+  useEffect(() => {
+    if (!grownRef.current && phase === "chosen" && luckyPlayer) {
+      grownRef.current = true;
+      Animated.spring(cardScale, {
+        friction: 7,
+        tension: 36,
+        toValue: 1,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [phase, luckyPlayer, cardScale]);
+
+  useEffect(() => {
+    const finish = () => {
+      if (doneRef.current) {
+        return;
+      }
+      doneRef.current = true;
+      Animated.timing(fade, { duration: 300, toValue: 0, useNativeDriver: true }).start(() =>
+        onDone()
+      );
+    };
+    const subscription = player.addListener("playToEnd", finish);
+    const timeout = setTimeout(finish, 6500);
+    return () => {
+      subscription.remove();
+      clearTimeout(timeout);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [player]);
+
+  return (
+    <Animated.View
+      style={[StyleSheet.absoluteFill, { backgroundColor: neon.bg, opacity: fade, zIndex: 100 }]}
+    >
+      <VideoView
+        contentFit="cover"
+        nativeControls={false}
+        player={player}
+        style={StyleSheet.absoluteFill}
+      />
+      <View
+        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, { alignItems: "center", justifyContent: "center" }]}
+      >
+        <Animated.View
+          style={{
+            opacity: cardScale,
+            transform: [
+              { scale: cardScale.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1.12] }) },
+            ],
+          }}
+        >
+          <GameCard
+            animate
+            avatarId={luckyPlayer?.avatarId}
+            colorId={luckyPlayer?.colorId}
+            label={amLucky ? "Ty" : (luckyPlayer?.name ?? "")}
+          />
+        </Animated.View>
+      </View>
+    </Animated.View>
   );
 }
 

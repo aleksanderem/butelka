@@ -14,25 +14,15 @@ export function LuckyView({ game }: { game: GameApi }) {
   const lucky = game.luckyPlayer;
   const luckyName = lucky?.name ?? "";
 
-  // Wejscie karty szczesliwca: pop (fade + scale). Odpalane na mount — RoomScreen remontuje
-  // ten widok kluczem dopiero po zakonczeniu klipu losowania, wiec pop pokrywa sie z odsloniem.
+  // Wejscie: samo fade-in. Karta wyrosla juz w klipie losowania (DrawClip), wiec tu plynnie
+  // przejmujemy ten sam widok karty (cross-fade), bez ponownego „popu”.
   const enter = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    Animated.spring(enter, {
-      friction: 6,
-      tension: 60,
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
+    Animated.timing(enter, { duration: 280, toValue: 1, useNativeDriver: true }).start();
   }, [enter]);
 
   return (
-    <Animated.View
-      style={{
-        opacity: enter,
-        transform: [{ scale: enter.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }],
-      }}
-    >
+    <Animated.View style={{ opacity: enter }}>
       <View className="items-center gap-7 pt-4">
         <View className="items-center justify-center" style={{ height: 268, width: 280 }}>
           <Confetti />
