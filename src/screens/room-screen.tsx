@@ -8,6 +8,7 @@ import { FullscreenClip } from "@/components/fullscreen-clip";
 import { RoomHeader } from "@/components/room-header";
 import type { Phase } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
+import { playSound } from "@/lib/sounds";
 
 const REVEAL_SOURCE = require("../../assets/animated/reveal-bottle.mp4");
 import { ChallengeView } from "@/screens/room/challenge-view";
@@ -99,8 +100,13 @@ function RevealGate({ phase }: { phase: Phase }) {
   const prevPhase = useRef(phase);
 
   useEffect(() => {
-    if (prevPhase.current === "spinning" && phase === "chosen") {
-      setActive(true);
+    if (prevPhase.current !== phase) {
+      if (phase === "spinning") {
+        playSound("spin");
+      } else if (prevPhase.current === "spinning" && phase === "chosen") {
+        setActive(true);
+        playSound("reveal");
+      }
     }
     prevPhase.current = phase;
   }, [phase]);

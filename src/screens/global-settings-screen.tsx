@@ -142,6 +142,40 @@ function ProfileTab({ game }: { game: GameApi }) {
           ))}
         </View>
       </View>
+
+      <View className="gap-3">
+        <Text className="text-base font-bold text-foreground">Dźwięki</Text>
+        <Pressable
+          accessibilityRole="switch"
+          accessibilityState={{ checked: gs.sound }}
+          className="flex-row items-center justify-between rounded-2xl px-4 py-3.5"
+          onPress={() => game.updateGlobalSettings({ sound: !gs.sound })}
+          style={{
+            backgroundColor: "rgba(255,255,255,0.04)",
+            borderColor: "rgba(255,255,255,0.08)",
+            borderWidth: 1,
+          }}
+        >
+          <View className="flex-row items-center gap-3">
+            <Ionicons
+              color={gs.sound ? neon.purpleBright : neon.textMuted}
+              name={gs.sound ? "volume-high" : "volume-mute"}
+              size={20}
+            />
+            <Text className="text-sm font-semibold text-foreground">Efekty dźwiękowe</Text>
+          </View>
+          <View
+            className="h-7 w-12 rounded-full p-0.5"
+            style={{
+              alignItems: gs.sound ? "flex-end" : "flex-start",
+              backgroundColor: gs.sound ? neon.purple : "rgba(255,255,255,0.15)",
+              justifyContent: "center",
+            }}
+          >
+            <View className="h-6 w-6 rounded-full" style={{ backgroundColor: "#FFFFFF" }} />
+          </View>
+        </Pressable>
+      </View>
     </View>
   );
 }

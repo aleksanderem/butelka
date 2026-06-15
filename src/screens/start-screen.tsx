@@ -1,13 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { Dialog, InputOTP } from "heroui-native";
 import { useState } from "react";
-import { Image, Pressable, ScrollView, Text, View, type ViewStyle } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { NeonButton } from "@/components/neon-button";
 import { NeonCard } from "@/components/neon-card";
 import { VideoBackdrop } from "@/components/video-backdrop";
+import { playSound } from "@/lib/sounds";
 import type { GameApi } from "@/game/use-game";
 import { gradients, neon } from "@/theme/colors";
 
@@ -45,7 +47,12 @@ export function StartScreen({ game }: { game: GameApi }) {
 
   return (
     <View className="flex-1">
-      <VideoBackdrop opacity={0.45} />
+      <VideoBackdrop opacity={0.6} />
+      <BlurView intensity={38} pointerEvents="none" style={StyleSheet.absoluteFill} tint="dark" />
+      <View
+        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(10,7,18,0.35)" }]}
+      />
       <View className="flex-1 px-5 pt-6">
         <ScrollView
           className="flex-1"
@@ -67,7 +74,10 @@ export function StartScreen({ game }: { game: GameApi }) {
           <Pressable
             accessibilityLabel="Utwórz pokój"
             accessibilityRole="button"
-            onPress={game.createRoom}
+            onPress={() => {
+              playSound("tap");
+              game.createRoom();
+            }}
             style={({ pressed }) => ({
               borderRadius: 24,
               shadowColor: neon.purple,
@@ -195,7 +205,14 @@ function FooterLink({
   onPress: () => void;
 }) {
   return (
-    <Pressable accessibilityRole="button" className="items-center gap-1.5" onPress={onPress}>
+    <Pressable
+      accessibilityRole="button"
+      className="items-center gap-1.5"
+      onPress={() => {
+        playSound("tap");
+        onPress();
+      }}
+    >
       <Ionicons color={neon.textMuted} name={icon} size={24} />
       <Text className="text-xs font-medium text-muted">{label}</Text>
     </Pressable>

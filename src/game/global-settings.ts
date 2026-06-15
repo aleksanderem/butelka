@@ -19,6 +19,8 @@ export interface GlobalSettings {
   acceptedCategories: string[];
   /** Ukryty tryb testowy (odblokowywany kodem pokoju) — pokazuje funkcje deweloperskie. */
   testMode: boolean;
+  /** Efekty dzwiekowe UI (kliknięcia, losowanie, reveal). Domyślnie włączone. */
+  sound: boolean;
 }
 
 const KEY = "butelka.globalSettings.v1";
@@ -39,6 +41,7 @@ export const EMPTY_GLOBAL_SETTINGS: GlobalSettings = {
   ageVerified: false,
   acceptedCategories: [],
   testMode: false,
+  sound: true,
 };
 
 export async function loadGlobalSettings(): Promise<GlobalSettings> {
@@ -56,6 +59,7 @@ export async function loadGlobalSettings(): Promise<GlobalSettings> {
         ? obj.acceptedCategories.filter((x): x is string => typeof x === "string")
         : [],
       testMode: obj.testMode === true,
+      sound: obj.sound !== false,
     };
   } catch {
     return { ...EMPTY_GLOBAL_SETTINGS, contentSelection: defaultContentSelection() };
