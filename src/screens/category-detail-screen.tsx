@@ -6,7 +6,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-nati
 
 import { NeonButton } from "@/components/neon-button";
 import { CATEGORY_IMAGES } from "@/game/category-images";
-import { ADULT_MODE_GROUPS } from "@/game/content-selection";
+import { ADULT_MODE_GROUPS, cleanCardText } from "@/game/content-selection";
 import type { Card, Category } from "@/game/content-types";
 import { ageBadge, type MainCategory } from "@/game/main-categories";
 import type { ChallengeType } from "@/game/types";
@@ -185,7 +185,9 @@ export function CategoryDetailScreen({
                       key={card.cardId}
                       style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
                     >
-                      <Text className="text-sm leading-5 text-foreground">{card.textPl}</Text>
+                      <Text className="text-sm leading-5 text-foreground">
+                        {cleanCardText(card.textPl)}
+                      </Text>
                     </View>
                   ))
                 ) : (

@@ -233,6 +233,12 @@ export function cardPool(
  * Losuje treść karty zgodnie z doborem pokoju i typem.
  * Fallback do wbudowanych promptów, gdy brak paczki w pamięci lub pula pusta (offline / dziwny dobór).
  */
+/** Usuwa końcowe tagi w nawiasach kwadratowych z tekstu karty
+ *  (np. „Zrób przysiady [grupowe]” -> „Zrób przysiady”). */
+export function cleanCardText(text: string): string {
+  return text.replace(/(?:\s*\[[^\]]*\])+\s*$/u, "").trim();
+}
+
 export function pickCardText(
   selectionJson: string | undefined | null,
   type: ChallengeType,
@@ -246,5 +252,5 @@ export function pickCardText(
 
   const fresh = exclude ? pool.filter((card) => card.textPl !== exclude) : pool;
   const source = fresh.length > 0 ? fresh : pool;
-  return source[Math.floor(Math.random() * source.length)].textPl;
+  return cleanCardText(source[Math.floor(Math.random() * source.length)].textPl);
 }

@@ -3,6 +3,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { NeonButton } from "@/components/neon-button";
 import { NeonCard } from "@/components/neon-card";
+import { cleanCardText } from "@/game/content-selection";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 
@@ -23,7 +24,7 @@ export function ChallengeView({ game }: { game: GameApi }) {
 
       <NeonCard className="items-center gap-5" glow={isTruth ? "violet" : "pink"}>
         <Text className="text-center text-xl font-bold leading-8 text-foreground">
-          {game.challengeText}
+          {game.challengeText ? cleanCardText(game.challengeText) : null}
         </Text>
         {amLucky ? (
           <Pressable
