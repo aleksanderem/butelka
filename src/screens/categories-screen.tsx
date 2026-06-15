@@ -32,8 +32,8 @@ export function CategoriesScreen({ game }: { game: GameApi }) {
       : [];
 
   return (
-    <View className="flex-1 px-5 pt-4">
-      <View className="flex-row items-center gap-3 pb-3">
+    <View className="flex-1 pt-4">
+      <View className="flex-row items-center gap-3 px-5 pb-3">
         <Pressable
           accessibilityLabel="Wróć"
           accessibilityRole="button"
@@ -51,7 +51,7 @@ export function CategoriesScreen({ game }: { game: GameApi }) {
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 28, paddingTop: 4 }}
+        contentContainerStyle={{ paddingBottom: 28, paddingHorizontal: H_PADDING, paddingTop: 4 }}
         showsVerticalScrollIndicator={false}
       >
         <View style={{ gap: GAP }}>

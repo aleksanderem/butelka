@@ -31,9 +31,9 @@ export function CategoryCard({
         borderRadius: 26,
         elevation: 14,
         shadowColor: category.accent,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.55,
-        shadowRadius: 20,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.6,
+        shadowRadius: 26,
       }}
     >
       <Pressable
@@ -105,7 +105,11 @@ export function CategoryCard({
               {extra > 0 ? (
                 <View
                   className="rounded-full px-2.5 py-1"
-                  style={{ backgroundColor: `${category.accent}33`, borderColor: `${category.accent}80`, borderWidth: 1 }}
+                  style={{
+                    backgroundColor: `${category.accent}33`,
+                    borderColor: `${category.accent}80`,
+                    borderWidth: 1,
+                  }}
                 >
                   <Text className="text-[11px] font-bold" style={{ color: "#FFFFFF" }}>
                     +{extra}
