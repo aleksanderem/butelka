@@ -24,7 +24,7 @@ type Placement = {
 };
 
 /**
- * Doodle wokol logo (korona nad, kwiatek w prawym gornym). Pozycje w px wzgledem PUDELKA LOGO
+ * Doodle wokol logo (tylko korona nad logiem). Pozycje w px wzgledem PUDELKA LOGO
  * (360x176), bo HeroDoodles jest renderowany wewnatrz kontenera logo — dzieki temu doodle
  * scrolluja RAZEM z logiem, a nie zostaja przyklejone do ekranu. Kazdy z neonowym glow.
  */
@@ -38,17 +38,6 @@ const HERO: Placement[] = [
     glow: "#EC4899",
     opacity: 0.95,
     glowScale: 1.5,
-  },
-  // Kwiatek w prawym gornym rogu logo (fiolet)
-  {
-    index: 26,
-    top: 4,
-    left: 296,
-    width: 54,
-    rotate: "-6deg",
-    glow: "#A855F7",
-    opacity: 0.75,
-    glowScale: 1.6,
   },
 ];
 

@@ -10,6 +10,8 @@ type NeonCardProps = {
   children: ReactNode;
   className?: string;
   glow?: Glow;
+  /** Mocniejszy efekt szkła: jaśniejsza obwódka, sheen u góry i odbicia światła na krawędziach. */
+  glass?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -24,41 +26,79 @@ const borderColor: Record<Glow, string> = {
   none: "rgba(168,150,200,0.14)",
 };
 
-export function NeonCard({ children, className, glow = "none", style }: NeonCardProps) {
+export function NeonCard({
+  children,
+  className,
+  glow = "none",
+  glass = false,
+  style,
+}: NeonCardProps) {
   return (
     <View
       className={`overflow-hidden rounded-3xl p-5 ${className ?? ""}`}
       style={[
         {
-          backgroundColor: neon.surface,
-          borderColor: borderColor[glow],
+          backgroundColor: glass ? "rgba(20,15,32,0.55)" : neon.surface,
+          borderColor: glass ? "rgba(255,255,255,0.18)" : borderColor[glow],
           borderWidth: 1,
         },
-        glow === "none"
+        glass
           ? {
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 16 },
-              shadowOpacity: 0.4,
-              shadowRadius: 28,
+              shadowColor: neon.purple,
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.45,
+              shadowRadius: 34,
+              elevation: 12,
             }
-          : {
-              shadowColor: glowColor[glow],
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: 0.5,
-              shadowRadius: 26,
-              elevation: 8,
-            },
+          : glow === "none"
+            ? {
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 16 },
+                shadowOpacity: 0.4,
+                shadowRadius: 28,
+              }
+            : {
+                shadowColor: glowColor[glow],
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.5,
+                shadowRadius: 26,
+                elevation: 8,
+              },
         style,
       ]}
     >
       <LinearGradient
-        colors={["rgba(255,255,255,0.05)", "rgba(255,255,255,0)"]}
+        colors={
+          glass
+            ? ["rgba(255,255,255,0.16)", "rgba(255,255,255,0.04)", "rgba(255,255,255,0)"]
+            : ["rgba(255,255,255,0.05)", "rgba(255,255,255,0)"]
+        }
         end={{ x: 0.5, y: 1 }}
-        locations={[0, 0.5]}
+        locations={glass ? [0, 0.42, 1] : [0, 0.5]}
         pointerEvents="none"
         start={{ x: 0.5, y: 0 }}
         style={StyleSheet.absoluteFill}
       />
+      {glass ? (
+        <>
+          {/* Górna krawędź łapiąca światło (jasny pasek tuż przy ramce). */}
+          <LinearGradient
+            colors={["transparent", "rgba(255,255,255,0.6)", "transparent"]}
+            end={{ x: 1, y: 0 }}
+            pointerEvents="none"
+            start={{ x: 0, y: 0 }}
+            style={{ position: "absolute", top: 0, left: 18, right: 18, height: 1.5 }}
+          />
+          {/* Delikatne odbicie na dolnej krawędzi. */}
+          <LinearGradient
+            colors={["transparent", "rgba(255,255,255,0.18)", "transparent"]}
+            end={{ x: 1, y: 0 }}
+            pointerEvents="none"
+            start={{ x: 0, y: 0 }}
+            style={{ position: "absolute", bottom: 0, left: 28, right: 28, height: 1 }}
+          />
+        </>
+      ) : null}
       {children}
     </View>
   );

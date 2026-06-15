@@ -3,16 +3,7 @@ import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { InputOTP } from "heroui-native";
 import { useState } from "react";
-import {
-  Image,
-  type ImageSourcePropType,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  type ViewStyle,
-} from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BrandLogo } from "@/components/brand-logo";
@@ -158,7 +149,7 @@ export function StartScreen({ game }: { game: GameApi }) {
             </View>
           </Pressable>
 
-          <NeonCard className="items-center gap-5">
+          <NeonCard className="items-center gap-5" glass>
             <View className="items-center gap-2">
               <Text className="text-lg font-extrabold text-foreground">Dołącz do pokoju</Text>
               <Text className="text-center text-sm text-muted">Wpisz ID pokoju, aby dołączyć</Text>
@@ -209,25 +200,21 @@ export function StartScreen({ game }: { game: GameApi }) {
         </ScrollView>
 
         <View className="flex-row justify-center gap-8 pb-2 pt-3">
+          <FooterLink icon="book-outline" label="Zasady" onPress={() => setInfo("rules")} />
           <FooterLink
-            label="Zasady"
-            onPress={() => setInfo("rules")}
-            source={require("../../assets/icons/glass/rules.png")}
-          />
-          <FooterLink
+            icon="layers-outline"
             label="Kategorie"
             onPress={() => game.setCategoriesOpen(true)}
-            source={require("../../assets/icons/glass/categories.png")}
           />
           <FooterLink
+            icon="settings-outline"
             label="Ustawienia"
             onPress={() => game.setGlobalSettingsOpen(true)}
-            source={require("../../assets/icons/glass/settings.png")}
           />
           <FooterLink
+            icon="information-circle-outline"
             label="O grze"
             onPress={() => setInfo("about")}
-            source={require("../../assets/icons/glass/about.png")}
           />
         </View>
       </View>
@@ -238,11 +225,11 @@ export function StartScreen({ game }: { game: GameApi }) {
 }
 
 function FooterLink({
-  source,
+  icon,
   label,
   onPress,
 }: {
-  source: ImageSourcePropType;
+  icon: keyof typeof Ionicons.glyphMap;
   label: string;
   onPress: () => void;
 }) {
@@ -255,7 +242,23 @@ function FooterLink({
         onPress();
       }}
     >
-      <Image resizeMode="contain" source={source} style={{ height: 30, width: 30 }} />
+      {/* Szklany, bezbarwny chip: mrożona warstwa + cienka jasna ramka + biała ikona konturowa. */}
+      <View
+        className="overflow-hidden rounded-2xl"
+        style={{ borderColor: "rgba(255,255,255,0.16)", borderWidth: 1 }}
+      >
+        <BlurView
+          intensity={20}
+          style={{ alignItems: "center", height: 46, justifyContent: "center", width: 46 }}
+          tint="light"
+        >
+          <View
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(255,255,255,0.06)" }]}
+          />
+          <Ionicons color="rgba(255,255,255,0.92)" name={icon} size={22} />
+        </BlurView>
+      </View>
       <Text className="text-xs font-medium text-muted">{label}</Text>
     </Pressable>
   );
