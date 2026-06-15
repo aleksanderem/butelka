@@ -260,3 +260,31 @@ Weryfikacja:
   - Web preview: panel Rozgrywka renderuje sie czysto (pigulki zawijaja sie 2x2, aktywna podswietlona); klik 'Wszyscy' dla zmiany pytania -> przelaczyl sie (zapis do Appwrite dziala).
   - tsc + lint zielone.
 Uwaga kompatybilnosci: stare pokoje (bez nowych atrybutow) czytane z domyslnymi progami — dziala wstecznie.
+
+=== SESSION S0003 START === 2026-06-15T05:25:00Z
+Focus: Animowane assety do gry (higgsfield) + wpiecie przez expo-video.
+Continuing from: S0002 (completed) — nowa sesja.
+
+---
+
+S0003. Generowanie assetow (higgsfield, Seedance 2.0, 9:16 720p):
+- Uzytkownik wybral 3 klipy: reveal losowania, tlo-loop, intro/splash.
+- CLI higgsfield: PATH wskazywal zepsuta instalacje Herd-nvm (brak vendor/hf). Dziala homebrew: /opt/homebrew/bin/higgsfield (zalogowany amiesak@gmail.com, ultra, ~2999 kredytow).
+- Wygenerowane do assets/animated/: reveal-bottle.mp4 (2.2M, top-down wirujaca butelka -> hero ujecie), bg-loop.mp4 (3.9M, neonowe czastki), intro-card.mp4 (2.4M, ikona apki -> wybuch czastek; start-image=assets/images/icon.png).
+- Zweryfikowane przez ekstrakcje klatek (ffmpeg) — wszystkie w klimacie, bez zniekszt. tekstu.
+
+S0003. Integracja (expo-video ~56.1.3):
+- npx expo install expo-video — plugin dodany do app.json, mp4 w domyslnych assetExts.
+- Nowe komponenty: src/components/fullscreen-clip.tsx (klip pełnoekranowy zagraj-raz: playToEnd + bezpiecznik czasowy, tap=skip, fade-out), src/components/video-backdrop.tsx (petlowe wyciszone tlo, pointerEvents none).
+- _layout.tsx: FullscreenClip(intro-card) jako splash raz na starcie (state showIntro).
+- start-screen.tsx: VideoBackdrop(bg-loop, opacity 0.45) pod trescia (owiniete w dodatkowy <View flex-1>).
+- room-screen.tsx: RevealGate -> FullscreenClip(reveal-bottle) na przejsciu fazy spinning->chosen.
+- npx tsc --noEmit = czysty.
+
+S0003. Natywny rebuild (expo-video to modul natywny):
+- WAZNE: pod install / expo run:ios wymagaja LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 (inaczej CocoaPods Encoding::CompatibilityError ASCII-8BIT). To bylo blokerem w S0002 — teraz rozwiazane.
+- pod install OK (105 podow, ExpoVideo 56.1.3 zintegrowany).
+- expo run:ios na iPhone 16e (UDID C727F0E8-61D5-4FA6-8148-A81596D0A640) — kompilacja w toku.
+- Next: weryfikacja w symulatorze (intro/tlo/reveal), potem nowy build TestFlight.
+
+---

@@ -1,11 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { FullscreenClip } from "@/components/fullscreen-clip";
 import { RoomHeader } from "@/components/room-header";
+import type { Phase } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
+
+const REVEAL_SOURCE = require("../../assets/animated/reveal-bottle.mp4");
 import { ChallengeView } from "@/screens/room/challenge-view";
 import { CirculatingView } from "@/screens/room/circulating-view";
 import { LuckyView } from "@/screens/room/lucky-view";
@@ -79,7 +83,34 @@ export function RoomScreen({ game }: { game: GameApi }) {
       </View>
 
       <PlayersSheet game={game} />
+
+      <RevealGate phase={game.phase} />
     </View>
+  );
+}
+
+/**
+ * Pokazuje klip „reveal" (wirująca butelka) na pełnym ekranie w momencie, gdy faza pokoju
+ * przechodzi ze `spinning` na `chosen` — czyli gdy los właśnie wskazał szczęśliwca.
+ * Po zakończeniu klipu odsłania się leżący pod spodem `LuckyView`.
+ */
+function RevealGate({ phase }: { phase: Phase }) {
+  const [active, setActive] = useState(false);
+  const prevPhase = useRef(phase);
+
+  useEffect(() => {
+    if (prevPhase.current === "spinning" && phase === "chosen") {
+      setActive(true);
+    }
+    prevPhase.current = phase;
+  }, [phase]);
+
+  if (!active) {
+    return null;
+  }
+
+  return (
+    <FullscreenClip maxDurationMs={5500} onDone={() => setActive(false)} source={REVEAL_SOURCE} />
   );
 }
 

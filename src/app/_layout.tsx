@@ -10,10 +10,14 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { HeroUINativeProvider } from "heroui-native";
 import type { JSX } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import { FullscreenClip } from "@/components/fullscreen-clip";
+
 import "../global.css";
+
+const INTRO_SOURCE = require("../../assets/animated/intro-card.mp4");
 
 SplashScreen.preventAutoHideAsync();
 
@@ -29,6 +33,7 @@ export default function RootLayout(): JSX.Element | null {
   // Renderuj, gdy fonty się wczytają LUB gdy ich ładowanie zawiedzie — nigdy nie
   // zostawiaj użytkownika na czarnym ekranie, gdy font nie wstanie (np. na natywie).
   const ready = fontsLoaded || fontError !== null;
+  const [showIntro, setShowIntro] = useState(true);
 
   useEffect(() => {
     if (ready) {
@@ -44,6 +49,13 @@ export default function RootLayout(): JSX.Element | null {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <HeroUINativeProvider>
         <Stack screenOptions={{ headerShown: false }} />
+        {showIntro ? (
+          <FullscreenClip
+            maxDurationMs={4800}
+            onDone={() => setShowIntro(false)}
+            source={INTRO_SOURCE}
+          />
+        ) : null}
       </HeroUINativeProvider>
     </GestureHandlerRootView>
   );
