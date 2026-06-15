@@ -57,9 +57,28 @@ async function api(method, path, body) {
   if (!res.ok) {
     // 409 = juz istnieje -> idempotentnie OK.
     if (res.status === 409) return { exists: true };
-    throw new Error(`${method} ${path} -> ${res.status} ${text}`);
+    // UWAGA: NIE dolaczamy `text` do bledu — Appwrite 1.7.4 echo'uje naglowki
+    // (w tym x-appwrite-key) w trace bledu, co wyciekaloby klucz API do logow.
+    throw new Error(`${method} ${path} -> ${res.status}`);
   }
   return json;
+}
+
+// Cache kluczy atrybutow per kolekcja -> idempotentne pomijanie istniejacych (bez ponownego POST,
+// ktory na kolekcji u limitu rozmiaru zwraca 400 zamiast 409 i wywalalby skrypt).
+const _attrCache = new Map();
+async function attrExists(col, key) {
+  if (!_attrCache.has(col)) {
+    let keys = new Set();
+    try {
+      const list = await api("GET", `/databases/${DB_ID}/collections/${col}/attributes`);
+      keys = new Set((list.attributes || []).map((a) => a.key));
+    } catch {
+      // kolekcja moze jeszcze nie istniec — pusty zbior
+    }
+    _attrCache.set(col, keys);
+  }
+  return _attrCache.get(col).has(key);
 }
 
 async function ensureDatabase() {
@@ -79,24 +98,27 @@ async function ensureCollection(id, name) {
 }
 
 async function strAttr(col, key, size, required, def) {
+  if (await attrExists(col, key)) return console.log(`  [${col}] string ${key}: istnieje`);
   const body = { key, size, required };
   if (!required && def !== undefined) body.default = def;
-  const r = await api("POST", `/databases/${DB_ID}/collections/${col}/attributes/string`, body);
-  console.log(`  [${col}] string ${key}: ${r.exists ? "istnieje" : "ok"}`);
+  await api("POST", `/databases/${DB_ID}/collections/${col}/attributes/string`, body);
+  console.log(`  [${col}] string ${key}: ok`);
 }
 
 async function intAttr(col, key, required, def) {
+  if (await attrExists(col, key)) return console.log(`  [${col}] integer ${key}: istnieje`);
   const body = { key, required };
   if (!required && def !== undefined) body.default = def;
-  const r = await api("POST", `/databases/${DB_ID}/collections/${col}/attributes/integer`, body);
-  console.log(`  [${col}] integer ${key}: ${r.exists ? "istnieje" : "ok"}`);
+  await api("POST", `/databases/${DB_ID}/collections/${col}/attributes/integer`, body);
+  console.log(`  [${col}] integer ${key}: ok`);
 }
 
 async function boolAttr(col, key, required, def) {
+  if (await attrExists(col, key)) return console.log(`  [${col}] boolean ${key}: istnieje`);
   const body = { key, required };
   if (!required && def !== undefined) body.default = def;
-  const r = await api("POST", `/databases/${DB_ID}/collections/${col}/attributes/boolean`, body);
-  console.log(`  [${col}] boolean ${key}: ${r.exists ? "istnieje" : "ok"}`);
+  await api("POST", `/databases/${DB_ID}/collections/${col}/attributes/boolean`, body);
+  console.log(`  [${col}] boolean ${key}: ok`);
 }
 
 async function waitForAttributes(col, keys) {
@@ -177,6 +199,15 @@ async function main() {
   await boolAttr("votes", "approved", true);
   await waitForAttributes("votes", ["roomCode", "action", "clientId", "approved"]);
   await ensureIndex("votes", "by_room", ["roomCode"]);
+
+  // events — lekka analityka popytu (np. otwarcia kategorii). Fire-and-forget z klienta.
+  await ensureCollection("events", "Events");
+  await strAttr("events", "type", 32, true);
+  await strAttr("events", "key", 64, true);
+  await strAttr("events", "clientId", 64, false);
+  await intAttr("events", "at", true);
+  await waitForAttributes("events", ["type", "key", "clientId", "at"]);
+  await ensureIndex("events", "by_type", ["type"]);
 
   console.log("\nGotowe. Backend Appwrite skonfigurowany.");
 }
