@@ -12,6 +12,8 @@ export interface MainCategory {
   ageGate: AgeGate;
   accent: string;
   gradient: readonly [string, string];
+  /** Paczka premium (na launchu DARMOWA i grywalna — tylko oznaczona i mierzymy zainteresowanie). */
+  premium?: boolean;
 }
 
 export const MAIN_CATEGORIES: readonly MainCategory[] = [
@@ -44,6 +46,7 @@ export const MAIN_CATEGORIES: readonly MainCategory[] = [
     ageGate: "18+",
     accent: "#C084FC",
     gradient: ["#9333EA", "#6B21A8"],
+    premium: true,
   },
   {
     key: "couple",
@@ -54,6 +57,7 @@ export const MAIN_CATEGORIES: readonly MainCategory[] = [
     ageGate: "18+",
     accent: "#F472B6",
     gradient: ["#DB2777", "#9D174D"],
+    premium: true,
   },
   {
     key: "group_hot",
@@ -64,6 +68,7 @@ export const MAIN_CATEGORIES: readonly MainCategory[] = [
     ageGate: "explicit_18+",
     accent: "#F0ABFC",
     gradient: ["#C026D3", "#86198F"],
+    premium: true,
   },
   {
     key: "couple_hot",
@@ -74,6 +79,7 @@ export const MAIN_CATEGORIES: readonly MainCategory[] = [
     ageGate: "explicit_18+",
     accent: "#FB7185",
     gradient: ["#E11D48", "#9F1239"],
+    premium: true,
   },
 ] as const;
 

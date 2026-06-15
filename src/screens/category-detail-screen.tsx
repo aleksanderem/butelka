@@ -112,6 +112,21 @@ export function CategoryDetailScreen({
               {ageBadge(category.ageGate)}
             </Text>
           </View>
+          {category.premium ? (
+            <View
+              className="flex-row items-center gap-1 rounded-full px-2 py-0.5"
+              style={{
+                backgroundColor: "rgba(251,191,36,0.16)",
+                borderColor: `${neon.gold}80`,
+                borderWidth: 1,
+              }}
+            >
+              <Ionicons color={neon.gold} name="star" size={10} />
+              <Text className="text-[11px] font-extrabold" style={{ color: neon.gold }}>
+                PREMIUM
+              </Text>
+            </View>
+          ) : null}
         </View>
       </View>
 

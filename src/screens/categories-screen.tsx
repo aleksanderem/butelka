@@ -3,8 +3,10 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 
 import { CategoryCard } from "@/components/category-card";
+import { logEvent } from "@/game/analytics";
 import { MAIN_CATEGORIES, type MainCategory } from "@/game/main-categories";
 import type { GameApi } from "@/game/use-game";
+import { useClientId } from "@/lib/client-id";
 import { CategoryDetailScreen } from "@/screens/category-detail-screen";
 import { neon } from "@/theme/colors";
 
@@ -14,11 +16,18 @@ const GAP = 20;
 /** Zakładka „Kategorie": grid 2-kolumnowy; dotknięcie -> osobny pełnoekranowy widok szczegółów. */
 export function CategoriesScreen({ game }: { game: GameApi }) {
   const { width } = useWindowDimensions();
+  const clientId = useClientId();
   const [detail, setDetail] = useState<MainCategory | null>(null);
 
   if (detail) {
     return <CategoryDetailScreen category={detail} game={game} onBack={() => setDetail(null)} />;
   }
+
+  // Sygnał popytu: które kategorie ludzie podglądają (popularność + zainteresowanie premium).
+  const openCategory = (category: MainCategory) => {
+    logEvent("category_open", category.key, clientId);
+    setDetail(category);
+  };
 
   const cardSize = Math.round(width - H_PADDING * 2);
   const bundle = game.contentBundle;
@@ -59,7 +68,7 @@ export function CategoriesScreen({ game }: { game: GameApi }) {
             <CategoryCard
               category={category}
               key={category.key}
-              onPress={() => setDetail(category)}
+              onPress={() => openCategory(category)}
               size={cardSize}
               subNames={subNamesFor(category.key)}
             />
