@@ -13,14 +13,13 @@ import type { ChallengeType } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 
-type TabId = "preview" | "subs";
 const PREVIEW_LIMIT = 24;
 const TYPE_MATCH: Record<ChallengeType, Card["cardType"][]> = {
   prawda: ["truth"],
   wyzwanie: ["dare", "choice"],
 };
 
-/** Pełnoekranowy widok szczegółów głównej kategorii: nagłówek + taby + dolny pasek Prawda/Wyzwanie. */
+/** Pełnoekranowy widok szczegółów głównej kategorii: nagłówek + podgląd kart + dolny pasek Prawda/Wyzwanie. */
 export function CategoryDetailScreen({
   category,
   game,
@@ -30,7 +29,6 @@ export function CategoryDetailScreen({
   game: GameApi;
   onBack: () => void;
 }) {
-  const [tab, setTab] = useState<TabId>("preview");
   const [previewType, setPreviewType] = useState<ChallengeType>("prawda");
   const [selectedSub, setSelectedSub] = useState<string | null>(null);
   const [shuffled, setShuffled] = useState<Card[] | null>(null);
@@ -44,7 +42,6 @@ export function CategoryDetailScreen({
         .filter((c) => c.modeGroup === category.key && c.enabled)
         .sort((a, b) => a.order - b.order)
     : [];
-  const cardCount = bundle ? bundle.cards.filter((c) => c.modeGroup === category.key).length : 0;
 
   const pool = useMemo(() => {
     if (!bundle) return [] as Card[];
@@ -76,7 +73,7 @@ export function CategoryDetailScreen({
     setShuffled(null);
   };
 
-  const showBottomTabs = tab === "preview" && !locked;
+  const showBottomBar = !locked;
 
   return (
     <View className="flex-1" style={{ backgroundColor: neon.bg }}>
@@ -121,112 +118,70 @@ export function CategoryDetailScreen({
       <View className="flex-1 gap-3 px-5 pt-3" style={{ backgroundColor: neon.bg }}>
         <Text className="text-sm leading-5 text-muted">{category.descriptionPl}</Text>
 
-        <View className="flex-row gap-2">
-          <TabButton
-            active={tab === "preview"}
-            icon="documents-outline"
-            label="Podgląd kart"
-            onPress={() => setTab("preview")}
-          />
-          <TabButton
-            active={tab === "subs"}
-            icon="albums-outline"
-            label={`Podkategorie (${subs.length})`}
-            onPress={() => setTab("subs")}
-          />
-        </View>
-
-        {tab === "preview" ? (
-          locked ? (
-            <View className="flex-1 items-center justify-center gap-3 px-4">
-              <Text style={{ fontSize: 40 }}>🔞</Text>
-              <Text className="text-center text-xs leading-5 text-muted">
-                Treści 18+. Potwierdź wiek, aby podejrzeć karty z tej kategorii.
-              </Text>
-              <NeonButton label="Mam 18+" onPress={game.verifyAge} variant="pink" />
-            </View>
-          ) : (
-            <View className="flex-1 gap-3">
-              {subs.length > 0 ? (
-                <SubcategorySelect
-                  accent={category.accent}
-                  onSelect={changeSub}
-                  selectedSub={selectedSub}
-                  subs={subs}
-                />
-              ) : null}
-
-              <View className="flex-row items-center justify-between">
-                <Text className="text-xs text-muted">{sample.length} przykładów</Text>
-                {sample.length > 0 ? (
-                  <Pressable
-                    accessibilityRole="button"
-                    className="flex-row items-center gap-1"
-                    hitSlop={8}
-                    onPress={reshuffle}
-                  >
-                    <Ionicons color={category.accent} name="shuffle" size={14} />
-                    <Text className="text-xs font-semibold" style={{ color: category.accent }}>
-                      Losuj inne
-                    </Text>
-                  </Pressable>
-                ) : null}
-              </View>
-
-              <ScrollView
-                className="flex-1"
-                contentContainerStyle={{ paddingBottom: 16, gap: 10 }}
-                showsVerticalScrollIndicator={false}
-              >
-                {sample.length > 0 ? (
-                  sample.map((card) => (
-                    <View
-                      className="rounded-2xl px-3.5 py-3"
-                      key={card.cardId}
-                      style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
-                    >
-                      <Text className="text-sm leading-5 text-foreground">
-                        {cleanCardText(card.textPl)}
-                      </Text>
-                    </View>
-                  ))
-                ) : (
-                  <Text className="py-4 text-center text-xs text-muted">
-                    {bundle ? "Brak kart tego typu." : "Ładuję karty…"}
-                  </Text>
-                )}
-              </ScrollView>
-            </View>
-          )
+        {locked ? (
+          <View className="flex-1 items-center justify-center gap-3 px-4">
+            <Text style={{ fontSize: 40 }}>🔞</Text>
+            <Text className="text-center text-xs leading-5 text-muted">
+              Treści 18+. Potwierdź wiek, aby podejrzeć karty z tej kategorii.
+            </Text>
+            <NeonButton label="Mam 18+" onPress={game.verifyAge} variant="pink" />
+          </View>
         ) : (
-          <ScrollView
-            className="flex-1"
-            contentContainerStyle={{ paddingBottom: 24, gap: 10 }}
-            showsVerticalScrollIndicator={false}
-          >
-            <Text className="text-xs text-muted">Łącznie {cardCount} kart w tej kategorii.</Text>
-            {subs.map((sub) => (
-              <View
-                className="flex-row items-center gap-2 rounded-2xl px-3.5 py-3"
-                key={sub.categoryId}
-                style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
-              >
-                <Text className="flex-1 text-sm font-semibold text-foreground">{sub.namePl}</Text>
-                {sub.requiresAcceptance ? (
-                  <View className="flex-row items-center gap-1">
-                    <Ionicons color={category.accent} name="warning" size={13} />
-                    <Text className="text-[10px]" style={{ color: category.accent }}>
-                      18+
+          <View className="flex-1 gap-3">
+            {subs.length > 0 ? (
+              <SubcategorySelect
+                accent={category.accent}
+                onSelect={changeSub}
+                selectedSub={selectedSub}
+                subs={subs}
+              />
+            ) : null}
+
+            <View className="flex-row items-center justify-between">
+              <Text className="text-xs text-muted">{sample.length} przykładów</Text>
+              {sample.length > 0 ? (
+                <Pressable
+                  accessibilityRole="button"
+                  className="flex-row items-center gap-1"
+                  hitSlop={8}
+                  onPress={reshuffle}
+                >
+                  <Ionicons color={category.accent} name="shuffle" size={14} />
+                  <Text className="text-xs font-semibold" style={{ color: category.accent }}>
+                    Losuj inne
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
+
+            <ScrollView
+              className="flex-1"
+              contentContainerStyle={{ paddingBottom: 16, gap: 10 }}
+              showsVerticalScrollIndicator={false}
+            >
+              {sample.length > 0 ? (
+                sample.map((card) => (
+                  <View
+                    className="rounded-2xl px-3.5 py-3"
+                    key={card.cardId}
+                    style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
+                  >
+                    <Text className="text-sm leading-5 text-foreground">
+                      {cleanCardText(card.textPl)}
                     </Text>
                   </View>
-                ) : null}
-              </View>
-            ))}
-          </ScrollView>
+                ))
+              ) : (
+                <Text className="py-4 text-center text-xs text-muted">
+                  {bundle ? "Brak kart tego typu." : "Ładuję karty…"}
+                </Text>
+              )}
+            </ScrollView>
+          </View>
         )}
       </View>
 
-      {showBottomTabs ? (
+      {showBottomBar ? (
         <View className="flex-row gap-3 px-5 pb-6 pt-3">
           <NeonButton
             className="flex-1"
@@ -342,37 +297,6 @@ function SelectOption({
         {label}
       </Text>
       {selected ? <Ionicons color={accent} name="checkmark" size={18} /> : null}
-    </Pressable>
-  );
-}
-
-function TabButton({
-  label,
-  icon,
-  active,
-  onPress,
-}: {
-  label: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  active: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: active }}
-      className="flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl px-2 py-2.5"
-      onPress={onPress}
-      style={{ backgroundColor: active ? "rgba(139,92,246,0.18)" : "rgba(255,255,255,0.04)" }}
-    >
-      <Ionicons color={active ? neon.purpleBright : neon.textMuted} name={icon} size={16} />
-      <Text
-        className="text-xs font-semibold"
-        numberOfLines={1}
-        style={{ color: active ? neon.white : neon.textMuted }}
-      >
-        {label}
-      </Text>
     </Pressable>
   );
 }
