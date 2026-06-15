@@ -1,15 +1,25 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import { Dialog, InputOTP } from "heroui-native";
+import { InputOTP } from "heroui-native";
 import { useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from "react-native";
+import {
+  Image,
+  type ImageSourcePropType,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type ViewStyle,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { HeroDoodles } from "@/components/hero-doodles";
 import { NeonButton } from "@/components/neon-button";
 import { NeonCard } from "@/components/neon-card";
+import { OnboardingCarousel, type OnboardingSlide } from "@/components/onboarding-carousel";
 import { VideoBackdrop } from "@/components/video-backdrop";
 import { hapticTap } from "@/lib/haptics";
 import type { GameApi } from "@/game/use-game";
@@ -33,15 +43,36 @@ function otpSlotStyle(isActive: boolean): ViewStyle {
 
 type InfoKind = "rules" | "about";
 
-const infoContent: Record<InfoKind, { title: string; body: string }> = {
-  rules: {
-    title: "Jak grać?",
-    body: "Karta „Ty” krąży wśród graczy. Kogo wskaże los, ten zostaje szczęśliwcem i wybiera: prawdę albo wyzwanie. Po wykonaniu zadania tura przechodzi dalej — i wszystko zaczyna się od nowa.",
-  },
-  about: {
-    title: "O grze",
-    body: "Butelka to pokojowa gra w prawdę albo wyzwanie. Stwórz pokój, zaproś znajomych ich ID i bawcie się razem na jednym lub wielu telefonach.",
-  },
+const infoSlides: Record<InfoKind, OnboardingSlide[]> = {
+  rules: [
+    {
+      icon: require("../../assets/icons/glass/cards.png"),
+      title: "Karta krąży",
+      body: "Karta „Ty” krąży wśród wszystkich graczy w pokoju — losowo, w rytm animacji.",
+    },
+    {
+      icon: require("../../assets/icons/glass/crown.png"),
+      title: "Los wskazuje szczęśliwca",
+      body: "Kogo wskaże los, ten zostaje szczęśliwcem rundy. Jego karta wyrasta na środku ekranu.",
+    },
+    {
+      icon: require("../../assets/icons/glass/truth.png"),
+      title: "Prawda albo wyzwanie",
+      body: "Szczęśliwiec wybiera: prawdę albo wyzwanie. Po wykonaniu zadania tura przechodzi dalej.",
+    },
+  ],
+  about: [
+    {
+      icon: require("../../assets/icons/glass/about.png"),
+      title: "Butelka",
+      body: "Pokojowa gra w prawdę albo wyzwanie — neonowa, szybka i robiona dla znajomych.",
+    },
+    {
+      icon: require("../../assets/icons/glass/together.png"),
+      title: "Grajcie razem",
+      body: "Stwórz pokój, podaj znajomym jego ID i bawcie się na jednym lub wielu telefonach.",
+    },
+  ],
 };
 
 export function StartScreen({ game }: { game: GameApi }) {
@@ -178,47 +209,40 @@ export function StartScreen({ game }: { game: GameApi }) {
         </ScrollView>
 
         <View className="flex-row justify-center gap-8 pb-2 pt-3">
-          <FooterLink icon="help-circle-outline" label="Zasady" onPress={() => setInfo("rules")} />
           <FooterLink
-            icon="grid-outline"
+            label="Zasady"
+            onPress={() => setInfo("rules")}
+            source={require("../../assets/icons/glass/rules.png")}
+          />
+          <FooterLink
             label="Kategorie"
             onPress={() => game.setCategoriesOpen(true)}
+            source={require("../../assets/icons/glass/categories.png")}
           />
           <FooterLink
-            icon="settings-outline"
             label="Ustawienia"
             onPress={() => game.setGlobalSettingsOpen(true)}
+            source={require("../../assets/icons/glass/settings.png")}
           />
           <FooterLink
-            icon="information-circle-outline"
             label="O grze"
             onPress={() => setInfo("about")}
+            source={require("../../assets/icons/glass/about.png")}
           />
         </View>
-
-        <Dialog isOpen={info !== null} onOpenChange={(open) => !open && setInfo(null)}>
-          <Dialog.Portal>
-            <Dialog.Overlay />
-            <Dialog.Content>
-              <Dialog.Close variant="tertiary" />
-              <View className="gap-2 pr-8">
-                <Dialog.Title>{info ? infoContent[info].title : ""}</Dialog.Title>
-                <Dialog.Description>{info ? infoContent[info].body : ""}</Dialog.Description>
-              </View>
-            </Dialog.Content>
-          </Dialog.Portal>
-        </Dialog>
       </View>
+
+      {info ? <OnboardingCarousel onClose={() => setInfo(null)} slides={infoSlides[info]} /> : null}
     </View>
   );
 }
 
 function FooterLink({
-  icon,
+  source,
   label,
   onPress,
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
+  source: ImageSourcePropType;
   label: string;
   onPress: () => void;
 }) {
@@ -231,7 +255,7 @@ function FooterLink({
         onPress();
       }}
     >
-      <Ionicons color={neon.textMuted} name={icon} size={24} />
+      <Image resizeMode="contain" source={source} style={{ height: 30, width: 30 }} />
       <Text className="text-xs font-medium text-muted">{label}</Text>
     </Pressable>
   );
