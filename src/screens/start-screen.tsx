@@ -66,7 +66,6 @@ export function StartScreen({ game }: { game: GameApi }) {
         <BlurView intensity={38} pointerEvents="none" style={StyleSheet.absoluteFill} tint="dark" />
         <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(10,7,18,0.35)" }]} />
       </View>
-      <HeroDoodles />
       <View className="flex-1 px-5 pt-6">
         <ScrollView
           className="flex-1"
@@ -74,7 +73,12 @@ export function StartScreen({ game }: { game: GameApi }) {
           showsVerticalScrollIndicator={false}
         >
           <View className="items-center pb-2 pt-4">
-            <BrandLogo width={360} />
+            {/* Pudełko = rozmiar logo; doodle (HeroDoodles) są pozycjonowane względem niego,
+                więc scrollują RAZEM z logiem. overflow widoczny -> korona wystaje nad górę. */}
+            <View style={{ height: 176, width: 360 }}>
+              <BrandLogo width={360} />
+              <HeroDoodles />
+            </View>
           </View>
 
           {game.lastSession ? (
