@@ -95,8 +95,11 @@ Aplikacja zawiera treści dla dorosłych → docelowo 17+ / 18+.
 - Przemoc (rysunkowa/realistyczna): **Brak**
 - Nieograniczony dostęp do sieci: **Nie**
 
-> Patrz „Decyzje do podjęcia" niżej — jeśli wyłączymy najostrzejsze tryby na v1, „treści seksualne"
-> zjeżdżają do „Rzadkie/łagodne" i ryzyko odrzucenia mocno spada.
+> DECYZJA v1: zostawiamy pełny zestaw trybów (łącznie z explicit). Ryzyko odrzucenia za treści
+> seksualne pozostaje realne. Mitygacja: w notatkach dla recenzenta i opisie podkreślamy, że to
+> sugestywna gra imprezowa dla dorosłych „z naciskiem na zgodę i granice", bramka wieku 18+,
+> a treści nie są pornograficzne. Jeśli przyjdzie odrzucenie 1.1.4/1.1.6 — wtedy wyłączymy
+> tryby explicit (group_hot/couple_hot) i wyślemy ponownie.
 
 ---
 

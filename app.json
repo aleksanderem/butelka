@@ -9,7 +9,7 @@
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0A0712",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.butelka.game",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false

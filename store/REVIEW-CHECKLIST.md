@@ -23,22 +23,20 @@
 ## C. Zrzuty ekranu (wymagane)
 - iPhone 6.9" (np. 1320×2868) — WYMAGANE
 - iPhone 6.5" (1284×2778) — zalecane
-- iPad 13" — WYMAGANE **tylko jeśli zostawimy `supportsTablet: true`** (patrz decyzja D2)
+- iPad — NIE wymagane (ustawiliśmy `supportsTablet: false`, iPhone-only)
 - 3–10 zrzutów; pokaż: ekran główny, kategorie, losowanie/krążenie karty, prawda/wyzwanie, przebieg gry
 
-## D. Decyzje, które wpływają na zgłoszenie
-**D1 — najostrzejsze treści 18+ (tryby „Hot — grupowo" i „Tylko we 2 — Hot", `explicit`):**
-Apple odrzuca treści jawnie seksualne/pornograficzne niezależnie od bramki wieku. Bezpieczniej na
-v1 wyłączyć te dwa tryby (zostają Classic/Teen/Melanż/We 2), co zbija ryzyko odrzucenia i obniża
-ocenę „treści seksualnych". Można je dodać później. Alternatywa: zostawić i ryzykować rundę odbić.
+## D. Decyzje (PODJĘTE na v1)
+**D1 — najostrzejsze treści 18+ (explicit): ZOSTAJĄ.** Wysyłamy pełny zestaw, świadomie z ryzykiem
+odrzucenia (1.1.4/1.1.6). Mitygacja w notatkach dla recenzenta i opisie (sugestywna gra dla
+dorosłych, zgoda i granice, bramka 18+, nie pornografia). Plan B przy odbiciu: wyłączyć
+group_hot/couple_hot i wysłać ponownie.
 
-**D2 — `supportsTablet`:** obecnie `true` → App Store wymaga zrzutów iPada. Apka jest portretową grą
-na telefon — rekomendacja: ustawić `false` (iPhone-only), żeby nie robić assetów iPada i uprościć
-review.
+**D2 — `supportsTablet`: USTAWIONE `false`** (iPhone-only). Zrzuty iPada nie są wymagane.
 
-**D3 — badge „PREMIUM" bez zakupów:** etykieta jest tylko oznaczeniem (treść darmowa, brak IAP).
-Recenzent może zapytać „gdzie kupić premium". Opcje: zostawić (małe ryzyko pytania) albo na v1
-zmienić napis na nie-komercyjny (np. „HOT”/„18+”), a „PREMIUM” wrócić z prawdziwym IAP.
+**D3 — badge: ZŁAGODZONY.** „PREMIUM" → „HOT" (różowy płomień), pokazywany tylko na realnie
+gorących trybach (Melanż, Hot — grupowo, Tylko we 2 — Hot); „Tylko we 2" stracił badge. Logowanie
+popytu działa bez zmian (logujemy wszystkie otwarcia kategorii). „PREMIUM" wróci z prawdziwym IAP.
 
 ## E. Krytyczne przed wysyłką
 - [ ] Backend Appwrite ONLINE i stabilny w trakcie recenzji — inaczej „Utwórz pokój" nie działa i

@@ -81,14 +81,14 @@ export function CategoryCard({
           <View
             className="absolute left-3 top-3 flex-row items-center gap-1 rounded-full px-2.5 py-1"
             style={{
-              backgroundColor: "rgba(251,191,36,0.16)",
-              borderColor: `${neon.gold}80`,
+              backgroundColor: "rgba(244,63,94,0.18)",
+              borderColor: `${neon.magenta}80`,
               borderWidth: 1,
             }}
           >
-            <Ionicons color={neon.gold} name="star" size={11} />
-            <Text className="text-[11px] font-extrabold" style={{ color: neon.gold }}>
-              PREMIUM
+            <Ionicons color={neon.magenta} name="flame" size={11} />
+            <Text className="text-[11px] font-extrabold" style={{ color: neon.magenta }}>
+              HOT
             </Text>
           </View>
         ) : null}

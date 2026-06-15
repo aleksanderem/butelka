@@ -57,7 +57,6 @@ export const MAIN_CATEGORIES: readonly MainCategory[] = [
     ageGate: "18+",
     accent: "#F472B6",
     gradient: ["#DB2777", "#9D174D"],
-    premium: true,
   },
   {
     key: "group_hot",
