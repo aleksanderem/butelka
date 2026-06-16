@@ -66,6 +66,14 @@
       "messagingAndChat": false,
       "parentalControls": false,
       "userGeneratedContent": false
+    },
+    "review": {
+      "firstName": "Aleksander",
+      "lastName": "Miesak",
+      "email": "aleksander@kolaboit.pl",
+      "phone": "+48516996210",
+      "demoRequired": false,
+      "notes": "Aplikacja jest darmowa i nie wymaga konta — wpisujesz imię i grasz.\n\nJak przetestować:\n1. Na ekranie głównym dotknij „Utwórz pokój” — dostaniesz 6-cyfrowy kod.\n2. Aby zagrać solo do testu: na ekranie głównym w polu „Dołącz do pokoju” wpisz kod 100704 i dotknij Dołącz — włączy się tryb testowy. Następnie „Utwórz pokój”, a w pokoju „Dodaj gracza testowego” i „Losuj szczęśliwca”.\n3. Szczęśliwiec wybiera Prawda lub Wyzwanie — pojawia się karta z treścią.\n\nTreści 18+ są za bramką wieku (przycisk „Mam 18+”). Brak zakupów w aplikacji, brak reklam. Backend wymagany do gry w pokoju."
     }
   }
 }
