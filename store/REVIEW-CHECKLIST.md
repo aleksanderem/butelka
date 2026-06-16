@@ -22,10 +22,13 @@
 - [ ] Kategoria: Gry (Games) → np. Trivia / Casual
 
 ## C. Zrzuty ekranu (wymagane)
-- iPhone 6.9" (np. 1320×2868) — WYMAGANE
-- iPhone 6.5" (1284×2778) — zalecane
-- iPad — NIE wymagane (ustawiliśmy `supportsTablet: false`, iPhone-only)
-- 3–10 zrzutów; pokaż: ekran główny, kategorie, losowanie/krążenie karty, prawda/wyzwanie, przebieg gry
+- iPhone 6.9" (1320×2868) — WYMAGANE
+- iPhone 6.5" (1284×2778) — zalecane (można odpuścić; Apple wymaga min. 6.9")
+- iPad — NIE wymagane (`supportsTablet: false`, iPhone-only)
+- [x] GOTOWE: 8 zrzutów 1320×2868 w `store/screenshots/` (zrobione na iPhone 17 Pro Max):
+      01-start, 02-categories, 03-category-detail, 04-room-lobby, 05-draw-reveal,
+      06-lucky, 07-challenge, 08-character. Wybierz 3–10 do uploadu (sugestia: 01,02,03,04,06,07).
+- Opcjonalnie: dodać podpisy/marketingowe ramki (osobny krok ASO) — surowe zrzuty też przejdą.
 
 ## D. Decyzje (PODJĘTE na v1)
 **D1 — najostrzejsze treści 18+ (explicit): ZOSTAJĄ.** Wysyłamy pełny zestaw, świadomie z ryzykiem
