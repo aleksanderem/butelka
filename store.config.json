@@ -1,0 +1,71 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "version": "1.0",
+    "copyright": "2026 Aleksander Miesak",
+    "release": {
+      "automaticRelease": false
+    },
+    "info": {
+      "en-US": {
+        "title": "Butelka: Prawda czy Wyzwanie",
+        "subtitle": "Gra imprezowa na domówkę",
+        "description": "Butelka to prawda albo wyzwanie na Twoją domówkę, melanż czy wieczór ze znajomymi — w jednej, neonowej aplikacji.\n\nJAK TO DZIAŁA\n• Stwórz pokój i podaj znajomym 6-cyfrowy kod.\n• Grajcie razem na jednym telefonie albo każdy na swoim.\n• Karta „Ty” krąży wśród graczy, los wskazuje szczęśliwca, a on wybiera: prawda czy wyzwanie.\n• Tura przechodzi dalej — i tak aż do rana.\n\nKATEGORIE NA KAŻDĄ EKIPĘ\n• Classic — dla każdego, zero spiny, idealne na rozgrzewkę.\n• Teen — bezpieczna wersja dla młodszych, bez alkoholu i podtekstów.\n• Melanż / Impreza — imprezowy chaos dla dorosłych.\n• Tylko we 2 — bliskość i rozmowy dla par.\n• Tryby hot dla dorosłych — odważniej, z naciskiem na zgodę i granice.\n\nDLACZEGO POLUBISZ\n• Bez zakładania konta — wpisujesz imię i grasz.\n• Tysiące kart, regulacja intensywności i filtry treści.\n• Bramka wieku dla treści 18+.\n• Dopracowany, szybki interfejs i przyjemne wibracje.\n\nZbierz ekipę i odpal Butelkę. Reszta zrobi się sama.",
+        "keywords": [
+          "prawda",
+          "wyzwanie",
+          "impreza",
+          "domówka",
+          "gra towarzyska",
+          "melanż",
+          "znajomi",
+          "party",
+          "butelka",
+          "randka",
+          "dla par",
+          "18+"
+        ],
+        "promoText": "Klasyka domówek w telefonie. Stwórz pokój, podaj kod znajomym i grajcie w prawdę albo wyzwanie — na jednym lub wielu telefonach. Neonowo, szybko, bez nudy.",
+        "supportUrl": "https://butelka-legal.aleksander-kolabogroup.workers.dev/",
+        "privacyPolicyUrl": "https://butelka-legal.aleksander-kolabogroup.workers.dev/privacy"
+      }
+    },
+    "categories": [
+      [
+        "GAMES",
+        "GAMES_BOARD",
+        "GAMES_CASUAL"
+      ],
+      "SOCIAL_NETWORKING"
+    ],
+    "advisory": {
+      "ageRatingOverride": "NONE",
+      "alcoholTobaccoOrDrugUseOrReferences": "INFREQUENT_OR_MILD",
+      "contests": "NONE",
+      "gambling": false,
+      "gamblingSimulated": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "kidsAgeBand": null,
+      "koreaAgeRatingOverride": "NONE",
+      "lootBox": false,
+      "matureOrSuggestiveThemes": "FREQUENT_OR_INTENSE",
+      "medicalOrTreatmentInformation": "NONE",
+      "profanityOrCrudeHumor": "INFREQUENT_OR_MILD",
+      "sexualContentGraphicAndNudity": "INFREQUENT_OR_MILD",
+      "sexualContentOrNudity": "FREQUENT_OR_INTENSE",
+      "unrestrictedWebAccess": false,
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealistic": "NONE",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+      "advertising": false,
+      "ageAssurance": false,
+      "ageRatingOverrideV2": "NONE",
+      "developerAgeRatingInfoUrl": null,
+      "gunsOrOtherWeapons": "NONE",
+      "healthOrWellnessTopics": false,
+      "messagingAndChat": false,
+      "parentalControls": false,
+      "userGeneratedContent": false
+    }
+  }
+}
