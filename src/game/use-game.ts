@@ -57,6 +57,13 @@ function botClientId(): string {
   return `bot_${Math.random().toString(36).slice(2, 9)}`;
 }
 
+/** Pochłania przejściowy błąd sieci akcji „strzel i zapomnij" na pokoju, żeby nieobsłużony
+ *  promise (np. AppwriteException „fetch failed/offline") nie wywalił UI. Polling co 2,5 s
+ *  i tak dociągnie aktualny stan, więc cicho ignorujemy. */
+function ignoreNetworkError(): void {
+  // celowo nic
+}
+
 /**
  * Cały stan i logika gry „Butelka”. Profil i nawigacja są lokalne, a stan pokoju
  * pochodzi z Appwrite (Realtime) — ekrany konsumują niezmieniony interfejs GameApi.
@@ -98,9 +105,11 @@ export function useGame() {
   const [contentBundle, setContentBundle] = useState<ContentBundle | null>(null);
   useEffect(() => {
     let alive = true;
-    void ensureContent().then((bundle) => {
-      if (alive && bundle) setContentBundle(bundle);
-    });
+    void ensureContent()
+      .then((bundle) => {
+        if (alive && bundle) setContentBundle(bundle);
+      })
+      .catch(ignoreNetworkError);
     return () => {
       alive = false;
     };
@@ -112,9 +121,11 @@ export function useGame() {
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   useEffect(() => {
     let alive = true;
-    void loadGlobalSettings().then((loaded) => {
-      if (alive) setGlobalSettings(loaded);
-    });
+    void loadGlobalSettings()
+      .then((loaded) => {
+        if (alive) setGlobalSettings(loaded);
+      })
+      .catch(ignoreNetworkError);
     return () => {
       alive = false;
     };
@@ -170,7 +181,10 @@ export function useGame() {
     const startedAt = roomDoc.spinStartedAt ?? Date.now();
     const remaining = Math.max(0, SPIN_MS - (Date.now() - startedAt));
     const id = setTimeout(() => {
-      void roomApi.finalizeSpin(code, seed).then(() => reload(code));
+      void roomApi
+        .finalizeSpin(code, seed)
+        .then(() => reload(code))
+        .catch(ignoreNetworkError);
     }, remaining);
     return () => clearTimeout(id);
   }, [roomDoc, clientId, reload]);
@@ -195,6 +209,7 @@ export function useGame() {
           return reload(code);
         }
       })
+      .catch(ignoreNetworkError)
       .finally(() => {
         resolvingRef.current = false;
       });
@@ -293,7 +308,10 @@ export function useGame() {
     const id = setTimeout(() => {
       const rd = roomDocRef.current;
       if (rd) {
-        void roomApi.startSpin(rd, playerDocsRef.current).then(() => reload(rd.code));
+        void roomApi
+          .startSpin(rd, playerDocsRef.current)
+          .then(() => reload(rd.code))
+          .catch(ignoreNetworkError);
       }
     }, AUTO_START_MS);
     return () => clearTimeout(id);
@@ -492,7 +510,7 @@ export function useGame() {
     setSettingsOpen(false);
     if (roomCode && clientId) {
       setLastSession({ code: roomCode, name: playerName, avatarId, colorId });
-      void roomApi.leaveRoom(roomCode, clientId);
+      void roomApi.leaveRoom(roomCode, clientId).catch(ignoreNetworkError);
     }
     setActingClientId(null);
     setStage("entry");
@@ -561,7 +579,8 @@ export function useGame() {
         const code = roomDoc.code;
         void roomApi
           .kickPlayer(roomDoc, effectiveClientId, targetClientId)
-          .then(() => reload(code));
+          .then(() => reload(code))
+          .catch(ignoreNetworkError);
       }
     },
     [effectiveClientId, reload, roomDoc]
@@ -581,13 +600,17 @@ export function useGame() {
         avatarId: avatarOrder[i % avatarOrder.length],
         colorId: colorOrder[i % colorOrder.length],
       })
-      .then(() => reload(roomCode));
+      .then(() => reload(roomCode))
+      .catch(ignoreNetworkError);
   }, [playerDocs.length, reload, roomCode]);
 
   const spin = useCallback(() => {
     if (roomDoc) {
       const code = roomDoc.code;
-      void roomApi.startSpin(roomDoc, playerDocs).then(() => reload(code));
+      void roomApi
+        .startSpin(roomDoc, playerDocs)
+        .then(() => reload(code))
+        .catch(ignoreNetworkError);
     }
   }, [playerDocs, reload, roomDoc]);
 
@@ -595,7 +618,10 @@ export function useGame() {
     (type: ChallengeType) => {
       if (roomDoc) {
         const code = roomDoc.code;
-        void roomApi.pickChallenge(roomDoc, type).then(() => reload(code));
+        void roomApi
+          .pickChallenge(roomDoc, type)
+          .then(() => reload(code))
+          .catch(ignoreNetworkError);
       }
     },
     [reload, roomDoc]
@@ -604,14 +630,20 @@ export function useGame() {
   const rerollChallenge = useCallback(() => {
     if (roomDoc) {
       const code = roomDoc.code;
-      void roomApi.rerollChallenge(roomDoc).then(() => reload(code));
+      void roomApi
+        .rerollChallenge(roomDoc)
+        .then(() => reload(code))
+        .catch(ignoreNetworkError);
     }
   }, [reload, roomDoc]);
 
   const rerollLucky = useCallback(() => {
     if (roomDoc) {
       const code = roomDoc.code;
-      void roomApi.rerollLucky(roomDoc, playerDocs).then(() => reload(code));
+      void roomApi
+        .rerollLucky(roomDoc, playerDocs)
+        .then(() => reload(code))
+        .catch(ignoreNetworkError);
     }
   }, [playerDocs, reload, roomDoc]);
 
@@ -623,7 +655,8 @@ export function useGame() {
     const action = challengeType === "prawda" ? "nextTruth" : "nextDare";
     void roomApi
       .requestAction(roomDoc, effectiveClientId, action, playerDocs)
-      .then(() => reload(code));
+      .then(() => reload(code))
+      .catch(ignoreNetworkError);
   }, [challengeType, effectiveClientId, playerDocs, reload, roomDoc]);
 
   const passTurn = useCallback(() => {
@@ -631,7 +664,8 @@ export function useGame() {
       const code = roomDoc.code;
       void roomApi
         .requestAction(roomDoc, effectiveClientId, "endTurn", playerDocs)
-        .then(() => reload(code));
+        .then(() => reload(code))
+        .catch(ignoreNetworkError);
     }
   }, [effectiveClientId, playerDocs, reload, roomDoc]);
 
@@ -640,7 +674,8 @@ export function useGame() {
       const code = roomDoc.code;
       void roomApi
         .upsertVote(code, roomDoc.pendingAction, effectiveClientId, true)
-        .then(() => reload(code));
+        .then(() => reload(code))
+        .catch(ignoreNetworkError);
     }
   }, [effectiveClientId, reload, roomDoc]);
 
@@ -649,7 +684,8 @@ export function useGame() {
       const code = roomDoc.code;
       void roomApi
         .upsertVote(code, roomDoc.pendingAction, effectiveClientId, false)
-        .then(() => reload(code));
+        .then(() => reload(code))
+        .catch(ignoreNetworkError);
     }
   }, [effectiveClientId, reload, roomDoc]);
 
@@ -657,7 +693,10 @@ export function useGame() {
   const cancelApproval = useCallback(() => {
     if (roomDoc && roomDoc.pendingAction) {
       const code = roomDoc.code;
-      void roomApi.cancelAction(code).then(() => reload(code));
+      void roomApi
+        .cancelAction(code)
+        .then(() => reload(code))
+        .catch(ignoreNetworkError);
     }
   }, [reload, roomDoc]);
 
@@ -672,7 +711,10 @@ export function useGame() {
           autoStart: settings.autoStart,
           ...patch,
         };
-        void roomApi.updateSettings(code, merged).then(() => reload(code));
+        void roomApi
+          .updateSettings(code, merged)
+          .then(() => reload(code))
+          .catch(ignoreNetworkError);
       }
     },
     [reload, roomDoc, settings]
@@ -684,7 +726,10 @@ export function useGame() {
       if (!roomDoc) return;
       const code = roomDoc.code;
       const next = fn(parseSelection(roomDoc.contentSelection));
-      void roomApi.updateContentSelection(code, serializeSelection(next)).then(() => reload(code));
+      void roomApi
+        .updateContentSelection(code, serializeSelection(next))
+        .then(() => reload(code))
+        .catch(ignoreNetworkError);
     },
     [reload, roomDoc]
   );
