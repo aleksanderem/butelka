@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Input } from "heroui-native";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, useWindowDimensions, View } from "react-native";
 
 import { ColorDot } from "@/components/color-dot";
 import { NeonButton } from "@/components/neon-button";
@@ -11,8 +11,19 @@ import { colorOrder } from "@/game/data";
 import type { GameApi } from "@/game/use-game";
 import { neon, playerPalette } from "@/theme/colors";
 
+const AVATAR_H_PAD = 20;
+const AVATAR_GAP = 12;
+
 export function OnboardingScreen({ game }: { game: GameApi }) {
   const heading = game.roomTab === "create" ? "Tworzenie pokoju" : "Dołączanie do pokoju";
+
+  // Siatka avatarów responsywna: 5 kolumn na szerokich ekranach (Pro Max/Plus ≥ 420pt), 4 na węższych.
+  // Bok avatara liczony tak, by kolumny wypełniły rząd bez resztki po prawej.
+  const { width } = useWindowDimensions();
+  const avatarCols = width >= 420 ? 5 : 4;
+  const avatarSize = Math.floor(
+    (width - AVATAR_H_PAD * 2 - AVATAR_GAP * (avatarCols - 1)) / avatarCols
+  );
 
   return (
     <View className="flex-1">
@@ -58,7 +69,13 @@ export function OnboardingScreen({ game }: { game: GameApi }) {
             />
             <View
               pointerEvents="none"
-              style={{ bottom: 0, justifyContent: "center", position: "absolute", right: 16, top: 0 }}
+              style={{
+                bottom: 0,
+                justifyContent: "center",
+                position: "absolute",
+                right: 16,
+                top: 0,
+              }}
             >
               <Text className="text-sm font-medium text-muted">{game.playerName.length}/20</Text>
             </View>
@@ -67,14 +84,15 @@ export function OnboardingScreen({ game }: { game: GameApi }) {
 
         <View className="gap-3">
           <Text className="text-base font-bold text-foreground">2. Wybierz avatar</Text>
-          <View className="flex-row flex-wrap gap-3">
+          <View className="flex-row flex-wrap" style={{ gap: AVATAR_GAP }}>
             {avatarOrder.map((id) => (
               <SelectableAvatar
-                key={id}
                 avatarId={id}
                 colorId={game.colorId}
+                key={id}
                 onPress={() => game.setAvatarId(id)}
                 selected={game.avatarId === id}
+                size={avatarSize}
               />
             ))}
           </View>

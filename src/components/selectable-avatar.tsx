@@ -10,6 +10,8 @@ type SelectableAvatarProps = {
   colorId: PlayerColorId;
   selected: boolean;
   onPress: () => void;
+  /** Bok avatara w px (siatka responsywna). Domyślnie 72 (= preset „lg"). */
+  size?: number;
 };
 
 export function SelectableAvatar({
@@ -17,11 +19,12 @@ export function SelectableAvatar({
   colorId,
   selected,
   onPress,
+  size = 72,
 }: SelectableAvatarProps) {
   return (
     <Pressable accessibilityRole="button" onPress={onPress}>
       <View>
-        <AvatarVisual active={selected} avatarId={avatarId} colorId={colorId} size="lg" />
+        <AvatarVisual active={selected} avatarId={avatarId} colorId={colorId} size={size} />
         {selected ? (
           <View
             style={{

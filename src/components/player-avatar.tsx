@@ -18,7 +18,8 @@ const dims: Record<Size, { box: number; ring: number }> = {
 type AvatarVisualProps = {
   avatarId: AvatarId;
   colorId: PlayerColorId;
-  size?: Size;
+  /** Rozmiar: nazwany preset ALBO konkretny bok w px (do siatek responsywnych). */
+  size?: Size | number;
   active?: boolean;
   dimmed?: boolean;
   /** Czy odtwarzać animację (domyślnie tylko aktywny lub duży podgląd — oszczędza CPU). */
@@ -37,7 +38,8 @@ export function AvatarVisual({
   animate,
   backgroundColor,
 }: AvatarVisualProps) {
-  const { box, ring } = dims[size];
+  const { box, ring } =
+    typeof size === "number" ? { box: size, ring: size >= 56 ? 3 : 2 } : dims[size];
   const color = playerPalette[colorId];
   const playing = animate ?? (active || size === "xl");
   const inner = box - ring * 2;
