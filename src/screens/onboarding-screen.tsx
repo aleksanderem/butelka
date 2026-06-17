@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Input } from "heroui-native";
-import { ScrollView, Text, useWindowDimensions, View } from "react-native";
+import { Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 
 import { ColorDot } from "@/components/color-dot";
 import { NeonButton } from "@/components/neon-button";
@@ -56,6 +56,28 @@ export function OnboardingScreen({ game }: { game: GameApi }) {
             <Text className="text-sm text-muted">Zanim dołączysz, stwórz swoją postać</Text>
           </View>
         </View>
+
+        {game.roomTab === "create" ? (
+          <View className="gap-3">
+            <Text className="text-base font-bold text-foreground">Tryb gry</Text>
+            <View className="flex-row gap-3">
+              <ModeOption
+                active={!game.newRoomSingleDevice}
+                icon="people-outline"
+                label="Wiele telefonów"
+                onPress={() => game.setNewRoomSingleDevice(false)}
+                sub="Każdy gra na swoim, dołącza kodem"
+              />
+              <ModeOption
+                active={game.newRoomSingleDevice}
+                icon="phone-portrait-outline"
+                label="Jeden telefon"
+                onPress={() => game.setNewRoomSingleDevice(true)}
+                sub="Jedna osoba prowadzi i dodaje graczy"
+              />
+            </View>
+          </View>
+        ) : null}
 
         <View className="gap-3">
           <Text className="text-base font-bold text-foreground">1. Wpisz swoje imię</Text>
@@ -130,5 +152,39 @@ export function OnboardingScreen({ game }: { game: GameApi }) {
         </View>
       </View>
     </View>
+  );
+}
+
+function ModeOption({
+  active,
+  icon,
+  label,
+  sub,
+  onPress,
+}: {
+  active: boolean;
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  sub: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      className="flex-1 gap-1.5 rounded-2xl px-3 py-3"
+      onPress={onPress}
+      style={{
+        backgroundColor: active ? "rgba(139,92,246,0.18)" : "rgba(255,255,255,0.04)",
+        borderColor: active ? neon.purpleBright : "rgba(255,255,255,0.08)",
+        borderWidth: 1.5,
+      }}
+    >
+      <Ionicons color={active ? neon.purpleBright : neon.textMuted} name={icon} size={22} />
+      <Text className="text-sm font-bold" style={{ color: active ? neon.white : neon.textMuted }}>
+        {label}
+      </Text>
+      <Text className="text-[11px] leading-4 text-muted">{sub}</Text>
+    </Pressable>
   );
 }

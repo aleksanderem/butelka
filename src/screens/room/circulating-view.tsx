@@ -74,10 +74,10 @@ export function CirculatingView({ game }: { game: GameApi }) {
               ) : null}
             </>
           )}
-          {game.testMode ? (
+          {game.singleDevice || game.testMode ? (
             <NeonButton
               icon="person-add-outline"
-              label="Dodaj gracza testowego"
+              label={game.singleDevice ? "Dodaj gracza" : "Dodaj gracza testowego"}
               onPress={game.addDemoPlayer}
               variant="ghost"
             />

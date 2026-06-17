@@ -34,6 +34,8 @@ export interface RoomDoc {
   nextTruthApproval?: ApprovalThreshold;
   nextDareApproval?: ApprovalThreshold;
   autoStart?: boolean;
+  // Tryb „1 telefon": jedna osoba obsługuje grę (dodaje graczy lokalnie), bez głosowania.
+  singleDevice?: boolean;
   // Czas (s) na odpowiedź/wyzwanie; 0 lub brak = licznik wyłączony.
   truthSeconds?: number;
   dareSeconds?: number;
@@ -62,6 +64,7 @@ export function neededForThreshold(mode: ApprovalThreshold, total: number): numb
 
 /** Próg zgody dla akcji (z domyślnymi wartościami dla starszych pokoi). */
 export function thresholdForAction(room: RoomDoc, action: ApprovalAction): ApprovalThreshold {
+  if (room.singleDevice) return "off"; // 1 telefon = jedna osoba obsługuje, brak głosowania
   if (action === "endTurn") return room.endTurnApproval ?? "off";
   if (action === "nextTruth") return room.nextTruthApproval ?? "off";
   return room.nextDareApproval ?? "off";
@@ -100,6 +103,8 @@ export interface EnterRoomParams {
   colorId: string;
   /** Dobór treści (JSON) zapisywany na NOWO tworzonym pokoju. Pomijany przy dołączaniu. */
   contentSelection?: string;
+  /** Tryb „1 telefon" — ustawiany tylko przy tworzeniu pokoju. */
+  singleDevice?: boolean;
 }
 
 type RoomPatch = Partial<Omit<RoomDoc, "$id">>;
@@ -172,6 +177,7 @@ export async function enterRoom({
   avatarId,
   colorId,
   contentSelection,
+  singleDevice,
 }: EnterRoomParams): Promise<void> {
   let exists = true;
   try {
@@ -201,6 +207,7 @@ export async function enterRoom({
       nextTruthApproval: "off",
       nextDareApproval: "off",
       autoStart: false,
+      singleDevice: singleDevice ?? false,
       truthSeconds: 0,
       dareSeconds: 0,
       contentSelection: contentSelection ?? serializeSelection(DEFAULT_SELECTION),

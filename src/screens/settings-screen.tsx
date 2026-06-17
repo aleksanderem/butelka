@@ -87,7 +87,11 @@ export function SettingsScreen({ game }: { game: GameApi }) {
         {tab === "content" ? (
           <ContentTab game={game} />
         ) : tab === "gameplay" ? (
-          <GameplayTab settings={game.settings} onChange={game.updateSettings} />
+          <GameplayTab
+            onChange={game.updateSettings}
+            settings={game.settings}
+            singleDevice={game.singleDevice}
+          />
         ) : (
           <ComingSoon label={TABS.find((t) => t.id === tab)?.label ?? ""} />
         )}
@@ -125,9 +129,11 @@ function ContentTab({ game }: { game: GameApi }) {
 function GameplayTab({
   settings,
   onChange,
+  singleDevice,
 }: {
   settings: RoomSettings;
   onChange: (patch: Partial<RoomSettings>) => void;
+  singleDevice: boolean;
 }) {
   return (
     <View className="gap-4">
@@ -160,35 +166,41 @@ function GameplayTab({
         </Text>
       </View>
 
-      <Separator />
+      {singleDevice ? null : (
+        <>
+          <Separator />
 
-      <View className="gap-3">
-        <Text className="text-base font-bold text-foreground">Ile osób musi się zgodzić na…</Text>
-        <ThresholdRow
-          label="zmianę pytania"
-          value={settings.nextTruthApproval}
-          onChange={(v) => onChange({ nextTruthApproval: v })}
-        />
-        <Separator className="opacity-50" />
-        <ThresholdRow
-          label="zmianę wyzwania"
-          value={settings.nextDareApproval}
-          onChange={(v) => onChange({ nextDareApproval: v })}
-        />
-        <Separator className="opacity-50" />
-        <ThresholdRow
-          label="koniec tury (kolejka gracza)"
-          value={settings.endTurnApproval}
-          onChange={(v) => onChange({ endTurnApproval: v })}
-        />
-      </View>
+          <View className="gap-3">
+            <Text className="text-base font-bold text-foreground">
+              Ile osób musi się zgodzić na…
+            </Text>
+            <ThresholdRow
+              label="zmianę pytania"
+              value={settings.nextTruthApproval}
+              onChange={(v) => onChange({ nextTruthApproval: v })}
+            />
+            <Separator className="opacity-50" />
+            <ThresholdRow
+              label="zmianę wyzwania"
+              value={settings.nextDareApproval}
+              onChange={(v) => onChange({ nextDareApproval: v })}
+            />
+            <Separator className="opacity-50" />
+            <ThresholdRow
+              label="koniec tury (kolejka gracza)"
+              value={settings.endTurnApproval}
+              onChange={(v) => onChange({ endTurnApproval: v })}
+            />
+          </View>
 
-      <Separator />
+          <Separator />
 
-      <Text className="text-xs leading-5 text-muted">
-        „Bez zgody” wykonuje akcję od razu. „Połowa / Większość / Wszyscy” wymaga zgody danej części
-        graczy w głosowaniu.
-      </Text>
+          <Text className="text-xs leading-5 text-muted">
+            „Bez zgody” wykonuje akcję od razu. „Połowa / Większość / Wszyscy” wymaga zgody danej
+            części graczy w głosowaniu.
+          </Text>
+        </>
+      )}
     </View>
   );
 }

@@ -76,6 +76,8 @@ export function useGame() {
   // Lokalny stan profilu i nawigacji (zanim gracz dołączy do pokoju).
   const [stage, setStage] = useState<Stage>("entry");
   const [roomTab, setRoomTab] = useState<RoomTab>("create");
+  // Wybrany tryb przy ZAKŁADANIU pokoju: true = „1 telefon" (operator dodaje graczy, bez głosowania).
+  const [newRoomSingleDevice, setNewRoomSingleDevice] = useState(false);
   const [roomCode, setRoomCode] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [playerName, setPlayerName] = useState("");
@@ -283,6 +285,8 @@ export function useGame() {
   );
   const challengeType = (roomDoc?.challengeType ?? null) as ChallengeType | null;
   const challengeText = roomDoc?.challengeText ?? null;
+  // Tryb pokoju: „1 telefon" (operator dodaje graczy, bez głosowania).
+  const singleDevice = roomDoc?.singleDevice ?? false;
 
   // Przebieg gry: log zakończonych tur (parsowany z roomDoc.history).
   const roundHistory = useMemo(() => parseHistory(roomDoc?.history), [roomDoc?.history]);
@@ -434,6 +438,7 @@ export function useGame() {
     // a pokój powstaje w backendzie dopiero przy wejściu do gry (completeProfile).
     setRoomCode(makeRoomCode());
     setRoomTab("create");
+    setNewRoomSingleDevice(false);
     seedProfileFromGlobals();
     setStage("profile");
   }, [seedProfileFromGlobals]);
@@ -478,6 +483,7 @@ export function useGame() {
         colorId,
         // Przy zakładaniu pokoju startujemy z globalnego domyślnego doboru treści.
         contentSelection: serializeSelection(globalSettings.contentSelection),
+        singleDevice: newRoomSingleDevice,
       });
     } catch (error) {
       // Najczęściej: dołączanie do nieistniejącego pokoju. Zostajemy na onboardingu.
@@ -498,6 +504,7 @@ export function useGame() {
     clientId,
     colorId,
     globalSettings,
+    newRoomSingleDevice,
     normalizedName,
     roomCode,
     roomTab,
@@ -804,6 +811,8 @@ export function useGame() {
     // stan
     stage,
     roomTab,
+    newRoomSingleDevice,
+    singleDevice,
     roomCode,
     joinCode,
     playerName,
@@ -847,6 +856,7 @@ export function useGame() {
     lastSession,
     // settery pól formularza
     setRoomTab,
+    setNewRoomSingleDevice,
     setJoinCode,
     setPlayerName,
     setAvatarId,

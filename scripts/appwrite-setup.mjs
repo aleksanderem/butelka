@@ -167,6 +167,8 @@ async function main() {
   await strAttr("rooms", "nextTruthApproval", 16, false, "majority");
   await strAttr("rooms", "nextDareApproval", 16, false, "off");
   await boolAttr("rooms", "autoStart", false, false);
+  // Tryb „1 telefon" — jedna osoba obsluguje, bez glosowania.
+  await boolAttr("rooms", "singleDevice", false, false);
   // Czas (s) na odpowiedz / wyzwanie; 0 = licznik wylaczony.
   await intAttr("rooms", "truthSeconds", false, 0);
   await intAttr("rooms", "dareSeconds", false, 0);
@@ -180,7 +182,7 @@ async function main() {
     "code", "phase", "hostClientId", "luckyClientId", "spinSeed", "spinStartedAt",
     "challengeType", "challengeText", "requireEndTurnApproval", "requireNextTruthApproval",
     "requireNextDareApproval", "endTurnApproval", "nextTruthApproval", "nextDareApproval",
-    "autoStart", "truthSeconds", "dareSeconds", "contentSelection", "history", "pendingAction", "createdAt",
+    "autoStart", "singleDevice", "truthSeconds", "dareSeconds", "contentSelection", "history", "pendingAction", "createdAt",
   ]);
 
   // players
