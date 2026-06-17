@@ -11,6 +11,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.butelka.game",
+      "buildNumber": "10",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
