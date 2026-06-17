@@ -13,6 +13,8 @@ export function LuckyView({ game }: { game: GameApi }) {
   const amLucky = game.amLucky;
   const lucky = game.luckyPlayer;
   const luckyName = lucky?.name ?? "";
+  // Tryb „1 telefon”: host trzyma telefon i klika wybór za wylosowanego (nawet gdy to nie on).
+  const controls = amLucky || (game.singleDevice && game.amHost);
 
   // Wejscie: samo fade-in. Karta wyrosla juz w klipie losowania (DrawClip), wiec tu plynnie
   // przejmujemy ten sam widok karty (cross-fade), bez ponownego „popu”.
@@ -55,9 +57,11 @@ export function LuckyView({ game }: { game: GameApi }) {
           </Text>
         </View>
 
-        {amLucky ? (
+        {controls ? (
           <View className="w-full gap-3">
-            <Text className="text-center text-sm font-medium text-muted">Wybierz, co chcesz:</Text>
+            <Text className="text-center text-sm font-medium text-muted">
+              {amLucky ? "Wybierz, co chcesz:" : `Wybierz za ${luckyName}:`}
+            </Text>
             <NeonButton
               icon="help"
               label="Prawda"

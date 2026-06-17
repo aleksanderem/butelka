@@ -14,6 +14,8 @@ export function ChallengeView({ game }: { game: GameApi }) {
   const accent = isTruth ? neon.purpleBright : neon.magenta;
   const amLucky = game.amLucky;
   const luckyName = game.luckyPlayer?.name ?? "";
+  // Tryb „1 telefon”: host obsługuje turę (wybory/przyciski) za wylosowanego, nawet gdy to nie on.
+  const controls = amLucky || (game.singleDevice && game.amHost);
   // Czas na odpowiedź (prawda) / wykonanie (wyzwanie); 0 = licznik wyłączony.
   const countdown = isTruth ? game.settings.truthSeconds : game.settings.dareSeconds;
 
@@ -56,7 +58,7 @@ export function ChallengeView({ game }: { game: GameApi }) {
         </View>
       ) : (
         <Text className="text-center text-sm font-medium text-muted">
-          {amLucky
+          {controls
             ? isTruth
               ? "Odpowiedz szczerze!"
               : "Ty nie dasz rady?"
@@ -66,7 +68,7 @@ export function ChallengeView({ game }: { game: GameApi }) {
         </Text>
       )}
 
-      {amLucky ? (
+      {controls ? (
         timedOut ? (
           <NeonButton icon="people" label="Następny gracz" onPress={game.passTurn} variant="pink" />
         ) : (
