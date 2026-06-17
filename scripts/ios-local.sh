@@ -32,18 +32,16 @@ npx expo prebuild --platform ios --clean
 echo "▶ 2/4 wymuszam CFBundleVersion=$BUILD_NO w Info.plist (niezależnie od appVersionSource)"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NO" "ios/Butelka/Info.plist"
 
-echo "▶ 3/4 xcodebuild archive (automatic signing + klucz ASC)"
+echo "▶ 3/4 xcodebuild archive (manual signing — profil App Store + lokalny cert dystrybucyjny)"
 rm -rf build/Butelka.xcarchive
 xcodebuild archive \
   -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release \
   -archivePath "$(pwd)/build/Butelka.xcarchive" \
   -destination "generic/platform=iOS" \
-  -allowProvisioningUpdates \
-  -authenticationKeyPath "$ASC_KEY" \
-  -authenticationKeyID "$ASC_KEY_ID" \
-  -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
-  CODE_SIGN_STYLE=Automatic \
-  DEVELOPMENT_TEAM="$TEAM"
+  CODE_SIGN_STYLE=Manual \
+  DEVELOPMENT_TEAM="$TEAM" \
+  CODE_SIGN_IDENTITY="Apple Distribution" \
+  PROVISIONING_PROFILE_SPECIFIER="com.butelka.game AppStore"
 
 echo "▶ 4/4 xcodebuild -exportArchive (podpis dystrybucyjny via klucz ASC)"
 rm -rf build/ipa
