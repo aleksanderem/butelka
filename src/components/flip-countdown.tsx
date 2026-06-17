@@ -17,8 +17,8 @@ import { fonts } from "@/theme/fonts";
 
 const DIGITS = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9] as AnimationObject[];
 
-const W = 58;
-const H = 70;
+const W = 104;
+const H = 120;
 
 /**
  * Pojedyncza klapka flipboard: animowana tablica (Lottie) + nałożona cyfra.
@@ -27,7 +27,7 @@ const H = 70;
  */
 function FlipDigit({ value }: { value: number }) {
   return (
-    <View style={{ borderRadius: 7, height: H, overflow: "hidden", width: W }}>
+    <View style={{ borderRadius: 12, height: H, overflow: "hidden", width: W }}>
       <LottieView
         autoPlay
         key={value}
@@ -48,11 +48,11 @@ const styles = StyleSheet.create({
   digit: {
     color: "#F4F1FA",
     fontFamily: fonts.extrabold,
-    fontSize: 40,
+    fontSize: 72,
     includeFontPadding: false,
     textShadowColor: "rgba(0,0,0,0.6)",
     textShadowOffset: { height: 1, width: 0 },
-    textShadowRadius: 2,
+    textShadowRadius: 3,
   },
 });
 
