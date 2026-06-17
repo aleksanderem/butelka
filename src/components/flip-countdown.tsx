@@ -17,8 +17,8 @@ import { fonts } from "@/theme/fonts";
 
 const DIGITS = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9] as AnimationObject[];
 
-const MAX_TILE = 104; // górny limit boku klapki (na szerokich ekranach)
-const GAP = 8;
+const MAX_TILE = 132; // górny limit boku klapki (na szerokich ekranach)
+const GAP = 3; // mały odstęp — klapki blisko siebie
 
 /**
  * Pojedyncza klapka flipboard: animowana tablica (Lottie) + nałożona cyfra.
@@ -51,8 +51,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.08)",
     borderRadius: 22,
     borderWidth: 1,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
   center: { alignItems: "center", justifyContent: "center" },
   digit: {
@@ -109,7 +109,7 @@ export function FlipCountdown({
   const urgent = clamped <= 5;
 
   // Rozmiar klapki tak, by 3 sztuki + „s” + padding boxa zmieściły się na szerokości.
-  const tile = Math.min(MAX_TILE, Math.floor((width - 132) / 3));
+  const tile = Math.min(MAX_TILE, Math.floor((width - 100) / 3));
 
   return (
     <View style={styles.box}>
