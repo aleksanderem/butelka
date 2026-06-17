@@ -17,7 +17,13 @@ IPA="${1:-build-local-ios.ipa}"
 [ -f "$IPA" ] || { echo "❌ Brak pliku $IPA — najpierw: bash scripts/ios-local.sh"; exit 1; }
 
 echo "▶ Wgrywam $IPA → App Store Connect (altool, bez Expo)"
-xcrun altool --upload-app -f "$IPA" --type ios \
-  --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
-echo "✅ Wgrane. Apple przetwarza ~5–10 min, potem pojawi się w TestFlight:"
-echo "   https://appstoreconnect.apple.com/apps/6780188325/testflight/ios"
+# altool potrafi zakończyć się kodem 0 mimo błędu walidacji — sami wykrywamy sukces po treści.
+OUT=$(xcrun altool --upload-app -f "$IPA" --type ios --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID" 2>&1)
+echo "$OUT"
+if echo "$OUT" | grep -qiE "UPLOAD SUCCEEDED|No errors uploading"; then
+  echo "✅ Wgrane. Apple przetwarza ~5–10 min, potem pojawi się w TestFlight:"
+  echo "   https://appstoreconnect.apple.com/apps/6780188325/testflight/ios"
+else
+  echo "❌ Upload nieudany — patrz błąd wyżej (np. zbyt niska wersja/build)."
+  exit 1
+fi
