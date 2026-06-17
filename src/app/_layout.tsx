@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { FullscreenClip } from "@/components/fullscreen-clip";
+import { IapProvider } from "@/iap/use-iap";
 
 import "../global.css";
 
@@ -48,7 +49,9 @@ export default function RootLayout(): JSX.Element | null {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <HeroUINativeProvider>
-        <Stack screenOptions={{ headerShown: false }} />
+        <IapProvider>
+          <Stack screenOptions={{ headerShown: false }} />
+        </IapProvider>
         {showIntro ? (
           <FullscreenClip
             maxDurationMs={11600}
