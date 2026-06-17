@@ -53,3 +53,7 @@ Animations/
 
 # Zrodlo animacji burst — uzyte wyekstrahowane do assets/bursts/
 burst_and_shapes/
+
+# Lokalne buildy iOS (scripts/ios-local.sh)
+/build
+build-local-ios.ipa
