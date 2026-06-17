@@ -17,8 +17,8 @@ import { fonts } from "@/theme/fonts";
 
 const DIGITS = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9] as AnimationObject[];
 
-const W = 38;
-const H = 44;
+const W = 58;
+const H = 70;
 
 /**
  * Pojedyncza klapka flipboard: animowana tablica (Lottie) + nałożona cyfra.
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
   digit: {
     color: "#F4F1FA",
     fontFamily: fonts.extrabold,
-    fontSize: 26,
+    fontSize: 40,
     includeFontPadding: false,
     textShadowColor: "rgba(0,0,0,0.6)",
     textShadowOffset: { height: 1, width: 0 },
