@@ -48,9 +48,12 @@ export function ChallengeView({ game }: { game: GameApi }) {
       ) : null}
 
       {timedOut ? (
-        <Text className="text-center text-base font-extrabold" style={{ color: neon.magenta }}>
-          {amLucky ? "⏰ Czas minął — przegrałeś!" : `⏰ Czas minął — ${luckyName} przegrał!`}
-        </Text>
+        <View className="flex-row items-center justify-center gap-2">
+          <Ionicons color={neon.magenta} name="alarm" size={18} />
+          <Text className="text-base font-extrabold" style={{ color: neon.magenta }}>
+            {amLucky ? "Czas minął — przegrałeś!" : `Czas minął — ${luckyName} przegrał!`}
+          </Text>
+        </View>
       ) : (
         <Text className="text-center text-sm font-medium text-muted">
           {amLucky
