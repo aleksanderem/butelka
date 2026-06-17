@@ -70,12 +70,6 @@ export function LuckyView({ game }: { game: GameApi }) {
               onPress={() => game.pickChallenge("wyzwanie")}
               variant="pink"
             />
-            <NeonButton
-              icon="dice-outline"
-              label="Wylosuj inne"
-              onPress={game.rerollLucky}
-              variant="ghost"
-            />
           </View>
         ) : (
           <View className="items-center gap-3 rounded-3xl border border-border bg-surface px-6 py-7">

@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { NeonButton } from "@/components/neon-button";
 import { NeonCard } from "@/components/neon-card";
@@ -26,20 +26,16 @@ export function ChallengeView({ game }: { game: GameApi }) {
         <Text className="text-center text-xl font-bold leading-8 text-foreground">
           {game.challengeText ? cleanCardText(game.challengeText) : null}
         </Text>
-        {amLucky ? (
-          <Pressable
-            accessibilityRole="button"
-            className="flex-row items-center gap-2 rounded-full border border-border px-4 py-2"
-            onPress={game.rerollChallenge}
-          >
-            <Ionicons color={neon.textMuted} name="dice-outline" size={16} />
-            <Text className="text-sm font-semibold text-muted">Wylosuj inne</Text>
-          </Pressable>
-        ) : null}
       </NeonCard>
 
       <Text className="text-center text-sm font-medium text-muted">
-        {amLucky ? "Odpowiedz szczerze!" : `${luckyName} odpowiada — czekajcie na wynik.`}
+        {amLucky
+          ? isTruth
+            ? "Odpowiedz szczerze!"
+            : "Ty nie dasz rady?"
+          : isTruth
+            ? `${luckyName} odpowiada — czekajcie na wynik.`
+            : `${luckyName} ma wyzwanie — czekajcie na wynik.`}
       </Text>
 
       {amLucky ? (
@@ -47,21 +43,21 @@ export function ChallengeView({ game }: { game: GameApi }) {
           <View className="flex-row gap-3">
             <NeonButton
               className="flex-1"
-              iconRight="arrow-forward"
-              label="Następne"
+              icon="dice-outline"
+              label="Wylosuj inne"
               onPress={game.nextChallenge}
               variant="ghost"
             />
             <NeonButton
               className="flex-1"
               icon="people"
-              label="Podaj dalej"
+              label="Następny gracz"
               onPress={game.passTurn}
               variant="violet"
             />
           </View>
           <Text className="text-center text-xs text-muted">
-            Po podaniu dalej tura przechodzi na kolejnego gracza.
+            „Następny gracz" przekazuje turę kolejnej osobie.
           </Text>
         </>
       ) : null}
