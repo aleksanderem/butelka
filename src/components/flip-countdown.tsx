@@ -21,14 +21,23 @@ const MAX_TILE = 132; // górny limit boku klapki (na szerokich ekranach)
 const GAP = 3; // mały odstęp — klapki blisko siebie
 
 /**
- * Pojedyncza klapka flipboard: animowana tablica (Lottie) + nałożona cyfra.
+ * Pojedyncza klapka flipboard: animowana tablica (Lottie) + akcentowy tint + nałożona cyfra.
  * Cyfra w samym Lottie to warstwa tekstu, której lottie-react-native nie renderuje,
  * więc liczbę rysujemy własnym <Text>. Key = cyfra → remount → ponowny obrót klapki.
  */
-function FlipDigit({ value, w }: { value: number; w: number }) {
+function FlipDigit({ value, w, accent }: { value: number; w: number; accent: string }) {
   const h = Math.round(w * 1.18);
   return (
-    <View style={{ borderRadius: Math.round(w * 0.12), height: h, overflow: "hidden", width: w }}>
+    <View
+      style={{
+        borderColor: `${accent}59`,
+        borderRadius: Math.round(w * 0.12),
+        borderWidth: 1.5,
+        height: h,
+        overflow: "hidden",
+        width: w,
+      }}
+    >
       <LottieView
         autoPlay
         key={value}
@@ -37,47 +46,43 @@ function FlipDigit({ value, w }: { value: number; w: number }) {
         source={DIGITS[value] ?? DIGITS[0]}
         style={StyleSheet.absoluteFill}
       />
+      {/* Akcentowy tint na ciemnej klapce — wpina licznik w neonowy motyw. */}
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: `${accent}24` }]} />
       <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.center]}>
-        <Text style={[styles.digit, { fontSize: Math.round(w * 0.66) }]}>{value}</Text>
+        <Text style={[styles.digit, { fontSize: Math.round(w * 0.66), textShadowColor: `${accent}cc` }]}>
+          {value}
+        </Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  box: {
-    alignSelf: "center",
-    backgroundColor: neon.surface,
-    borderColor: "rgba(255,255,255,0.08)",
-    borderRadius: 22,
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-  },
   center: { alignItems: "center", justifyContent: "center" },
   digit: {
-    color: "#F4F1FA",
+    color: "#FFFFFF",
     fontFamily: fonts.extrabold,
     includeFontPadding: false,
-    textShadowColor: "rgba(0,0,0,0.6)",
-    textShadowOffset: { height: 1, width: 0 },
-    textShadowRadius: 3,
+    textShadowOffset: { height: 0, width: 0 },
+    textShadowRadius: 10,
   },
 });
 
 /**
- * Odliczanie czasu w stylu tablicy klapkowej (flipboard). TRZY klapki SSS, bo czas może mieć
- * 3 cyfry (do 120 s). Licznik LOKALNY — startuje, gdy pojawia się dana karta (restart po `restartKey`).
+ * Odliczanie czasu w stylu tablicy klapkowej (flipboard). TRZY klapki SSS (do 120 s).
+ * Kolor (box/obwódka/glow/tint/„s") bierze z `accent` rundy. Licznik LOKALNY — startuje,
+ * gdy pojawia się dana karta (restart po `restartKey`).
  */
 export function FlipCountdown({
   seconds,
   restartKey,
   onExpire,
+  accent,
 }: {
   seconds: number;
   restartKey: string | number;
-  /** Wołane RAZ, gdy licznik zejdzie do zera. */
   onExpire?: () => void;
+  accent: string;
 }) {
   const { width } = useWindowDimensions();
   const [remaining, setRemaining] = useState(seconds);
@@ -107,23 +112,33 @@ export function FlipCountdown({
   const tens = Math.floor((clamped % 100) / 10);
   const ones = clamped % 10;
   const urgent = clamped <= 5;
+  const sColor = urgent ? neon.magenta : accent;
 
   // Rozmiar klapki tak, by 3 sztuki + „s” + padding boxa zmieściły się na szerokości.
   const tile = Math.min(MAX_TILE, Math.floor((width - 100) / 3));
 
   return (
-    <View style={styles.box}>
+    <View
+      style={{
+        alignSelf: "center",
+        backgroundColor: "rgba(10,7,18,0.55)",
+        borderColor: `${accent}66`,
+        borderRadius: 22,
+        borderWidth: 1.5,
+        elevation: 10,
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        shadowColor: accent,
+        shadowOffset: { height: 0, width: 0 },
+        shadowOpacity: 0.5,
+        shadowRadius: 22,
+      }}
+    >
       <View className="flex-row items-center justify-center" style={{ gap: GAP }}>
-        <FlipDigit value={hundreds} w={tile} />
-        <FlipDigit value={tens} w={tile} />
-        <FlipDigit value={ones} w={tile} />
-        <Text
-          className="ml-1 font-extrabold"
-          style={{
-            color: urgent ? neon.magenta : neon.textMuted,
-            fontSize: Math.round(tile * 0.28),
-          }}
-        >
+        <FlipDigit accent={accent} value={hundreds} w={tile} />
+        <FlipDigit accent={accent} value={tens} w={tile} />
+        <FlipDigit accent={accent} value={ones} w={tile} />
+        <Text className="ml-1 font-extrabold" style={{ color: sColor, fontSize: Math.round(tile * 0.3) }}>
           s
         </Text>
       </View>

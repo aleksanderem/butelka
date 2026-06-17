@@ -40,6 +40,7 @@ export function ChallengeView({ game }: { game: GameApi }) {
 
       {countdown > 0 ? (
         <FlipCountdown
+          accent={accent}
           onExpire={() => setTimedOut(true)}
           restartKey={game.challengeText ?? ""}
           seconds={countdown}
@@ -64,12 +65,7 @@ export function ChallengeView({ game }: { game: GameApi }) {
 
       {amLucky ? (
         timedOut ? (
-          <NeonButton
-            icon="people"
-            label="Następny gracz"
-            onPress={game.passTurn}
-            variant="pink"
-          />
+          <NeonButton icon="people" label="Następny gracz" onPress={game.passTurn} variant="pink" />
         ) : (
           <>
             <View className="flex-row gap-3">
