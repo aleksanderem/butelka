@@ -45,6 +45,15 @@ function FlipDigit({ value, w }: { value: number; w: number }) {
 }
 
 const styles = StyleSheet.create({
+  box: {
+    alignSelf: "center",
+    backgroundColor: neon.surface,
+    borderColor: "rgba(255,255,255,0.08)",
+    borderRadius: 22,
+    borderWidth: 1,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+  },
   center: { alignItems: "center", justifyContent: "center" },
   digit: {
     color: "#F4F1FA",
@@ -99,20 +108,25 @@ export function FlipCountdown({
   const ones = clamped % 10;
   const urgent = clamped <= 5;
 
-  // Rozmiar klapki tak, by 3 sztuki + „s” zmieściły się na szerokości (z limitem na dużych ekranach).
-  const tile = Math.min(MAX_TILE, Math.floor((width - 96) / 3));
+  // Rozmiar klapki tak, by 3 sztuki + „s” + padding boxa zmieściły się na szerokości.
+  const tile = Math.min(MAX_TILE, Math.floor((width - 132) / 3));
 
   return (
-    <View className="flex-row items-center justify-center" style={{ gap: GAP }}>
-      <FlipDigit value={hundreds} w={tile} />
-      <FlipDigit value={tens} w={tile} />
-      <FlipDigit value={ones} w={tile} />
-      <Text
-        className="ml-1 font-extrabold"
-        style={{ color: urgent ? neon.magenta : neon.textMuted, fontSize: Math.round(tile * 0.28) }}
-      >
-        s
-      </Text>
+    <View style={styles.box}>
+      <View className="flex-row items-center justify-center" style={{ gap: GAP }}>
+        <FlipDigit value={hundreds} w={tile} />
+        <FlipDigit value={tens} w={tile} />
+        <FlipDigit value={ones} w={tile} />
+        <Text
+          className="ml-1 font-extrabold"
+          style={{
+            color: urgent ? neon.magenta : neon.textMuted,
+            fontSize: Math.round(tile * 0.28),
+          }}
+        >
+          s
+        </Text>
+      </View>
     </View>
   );
 }
