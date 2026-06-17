@@ -1,0 +1,9 @@
+# Generowane natywne projekty (regenerowane przez prebuild) + artefakty buildów
+/ios
+/android
+build/
+build-local-ios.ipa
+*.apk
+*.aab
+doddles/
+flipboard/
