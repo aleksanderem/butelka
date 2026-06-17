@@ -1,3 +1,4 @@
+import { BlurView } from "expo-blur";
 import LottieView, { type AnimationObject } from "lottie-react-native";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
@@ -47,9 +48,14 @@ function FlipDigit({ value, w, accent }: { value: number; w: number; accent: str
         style={StyleSheet.absoluteFill}
       />
       {/* Akcentowy tint na ciemnej klapce — wpina licznik w neonowy motyw. */}
-      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: `${accent}24` }]} />
+      <View
+        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, { backgroundColor: `${accent}24` }]}
+      />
       <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.center]}>
-        <Text style={[styles.digit, { fontSize: Math.round(w * 0.66), textShadowColor: `${accent}cc` }]}>
+        <Text
+          style={[styles.digit, { fontSize: Math.round(w * 0.66), textShadowColor: `${accent}cc` }]}
+        >
           {value}
         </Text>
       </View>
@@ -118,29 +124,45 @@ export function FlipCountdown({
   const tile = Math.min(MAX_TILE, Math.floor((width - 100) / 3));
 
   return (
+    // Zewnętrzna warstwa = neonowy glow (cień nie może być przycięty overflow:hidden).
     <View
       style={{
         alignSelf: "center",
-        backgroundColor: "rgba(10,7,18,0.55)",
-        borderColor: `${accent}66`,
-        borderRadius: 22,
-        borderWidth: 1.5,
-        elevation: 10,
-        paddingHorizontal: 12,
-        paddingVertical: 12,
+        borderRadius: 24,
+        elevation: 16,
         shadowColor: accent,
         shadowOffset: { height: 0, width: 0 },
-        shadowOpacity: 0.5,
-        shadowRadius: 22,
+        shadowOpacity: 0.75,
+        shadowRadius: 28,
       }}
     >
-      <View className="flex-row items-center justify-center" style={{ gap: GAP }}>
-        <FlipDigit accent={accent} value={hundreds} w={tile} />
-        <FlipDigit accent={accent} value={tens} w={tile} />
-        <FlipDigit accent={accent} value={ones} w={tile} />
-        <Text className="ml-1 font-extrabold" style={{ color: sColor, fontSize: Math.round(tile * 0.3) }}>
-          s
-        </Text>
+      {/* Wewnętrzna warstwa = szkło: frosted BlurView + akcentowy tint + obwódka, przycięte do rogów. */}
+      <View
+        style={{
+          borderColor: `${accent}80`,
+          borderRadius: 24,
+          borderWidth: 1.5,
+          overflow: "hidden",
+          paddingHorizontal: 14,
+          paddingVertical: 14,
+        }}
+      >
+        <BlurView intensity={28} pointerEvents="none" style={StyleSheet.absoluteFill} tint="dark" />
+        <View
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, { backgroundColor: `${accent}1f` }]}
+        />
+        <View className="flex-row items-center justify-center" style={{ gap: GAP }}>
+          <FlipDigit accent={accent} value={hundreds} w={tile} />
+          <FlipDigit accent={accent} value={tens} w={tile} />
+          <FlipDigit accent={accent} value={ones} w={tile} />
+          <Text
+            className="ml-1 font-extrabold"
+            style={{ color: sColor, fontSize: Math.round(tile * 0.3) }}
+          >
+            s
+          </Text>
+        </View>
       </View>
     </View>
   );
