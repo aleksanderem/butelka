@@ -1,6 +1,6 @@
 import LottieView, { type AnimationObject } from "lottie-react-native";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import d0 from "@/assets/flipboard/0.json";
 import d1 from "@/assets/flipboard/1.json";
@@ -13,13 +13,18 @@ import d7 from "@/assets/flipboard/7.json";
 import d8 from "@/assets/flipboard/8.json";
 import d9 from "@/assets/flipboard/9.json";
 import { neon } from "@/theme/colors";
+import { fonts } from "@/theme/fonts";
 
 const DIGITS = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9] as AnimationObject[];
 
 const W = 38;
 const H = 44;
 
-/** Pojedyncza klapka flipboard. Key = cyfra → remount → ponowne odtworzenie animacji obrotu. */
+/**
+ * Pojedyncza klapka flipboard: animowana tablica (Lottie) + nałożona cyfra.
+ * Cyfra w samym Lottie to warstwa tekstu, której lottie-react-native nie renderuje,
+ * więc liczbę rysujemy własnym <Text>. Key = cyfra → remount → ponowny obrót klapki.
+ */
 function FlipDigit({ value }: { value: number }) {
   return (
     <View style={{ borderRadius: 7, height: H, overflow: "hidden", width: W }}>
@@ -29,11 +34,27 @@ function FlipDigit({ value }: { value: number }) {
         loop={false}
         resizeMode="cover"
         source={DIGITS[value] ?? DIGITS[0]}
-        style={{ height: H, width: W }}
+        style={StyleSheet.absoluteFill}
       />
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.center]}>
+        <Text style={styles.digit}>{value}</Text>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  center: { alignItems: "center", justifyContent: "center" },
+  digit: {
+    color: "#F4F1FA",
+    fontFamily: fonts.extrabold,
+    fontSize: 26,
+    includeFontPadding: false,
+    textShadowColor: "rgba(0,0,0,0.6)",
+    textShadowOffset: { height: 1, width: 0 },
+    textShadowRadius: 2,
+  },
+});
 
 /**
  * Odliczanie czasu na odpowiedź/wyzwanie w stylu tablicy klapkowej (flipboard).
