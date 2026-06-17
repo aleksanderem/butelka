@@ -56,7 +56,10 @@ export function IapProvider({ children }: { children: ReactNode }) {
 
   const purchase = useCallback(
     (productId: string) => {
-      void requestPurchase({ request: { apple: { sku: productId } }, type: "in-app" });
+      void requestPurchase({
+        request: { apple: { sku: productId }, google: { skus: [productId] } },
+        type: "in-app",
+      });
     },
     [requestPurchase]
   );

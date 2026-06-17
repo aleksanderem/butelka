@@ -57,3 +57,6 @@ burst_and_shapes/
 # Lokalne buildy iOS (scripts/ios-local.sh)
 /build
 build-local-ios.ipa
+
+# Google Play service account (NIE commitować)
+google-service-account.json
