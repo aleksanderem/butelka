@@ -62,8 +62,8 @@ export function neededForThreshold(mode: ApprovalThreshold, total: number): numb
 
 /** Próg zgody dla akcji (z domyślnymi wartościami dla starszych pokoi). */
 export function thresholdForAction(room: RoomDoc, action: ApprovalAction): ApprovalThreshold {
-  if (action === "endTurn") return room.endTurnApproval ?? "majority";
-  if (action === "nextTruth") return room.nextTruthApproval ?? "majority";
+  if (action === "endTurn") return room.endTurnApproval ?? "off";
+  if (action === "nextTruth") return room.nextTruthApproval ?? "off";
   return room.nextDareApproval ?? "off";
 }
 
@@ -197,8 +197,8 @@ export async function enterRoom({
       spinStartedAt: null,
       challengeType: null,
       challengeText: null,
-      endTurnApproval: "majority",
-      nextTruthApproval: "majority",
+      endTurnApproval: "off",
+      nextTruthApproval: "off",
       nextDareApproval: "off",
       autoStart: false,
       truthSeconds: 0,

@@ -271,8 +271,8 @@ export function useGame() {
     () =>
       roomDoc
         ? {
-            endTurnApproval: roomDoc.endTurnApproval ?? "majority",
-            nextTruthApproval: roomDoc.nextTruthApproval ?? "majority",
+            endTurnApproval: roomDoc.endTurnApproval ?? "off",
+            nextTruthApproval: roomDoc.nextTruthApproval ?? "off",
             nextDareApproval: roomDoc.nextDareApproval ?? "off",
             autoStart: roomDoc.autoStart ?? false,
             truthSeconds: roomDoc.truthSeconds ?? 0,

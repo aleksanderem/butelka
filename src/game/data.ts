@@ -13,8 +13,10 @@ export const colorOrder: PlayerColorId[] = [
 ];
 
 export const defaultSettings: RoomSettings = {
-  endTurnApproval: "majority",
-  nextTruthApproval: "majority",
+  // Domyślnie BEZ głosowania — akcje (koniec tury / zmiana karty) wykonują się od razu.
+  // Głosowanie to opcja w ustawieniach pokoju (próg > „off").
+  endTurnApproval: "off",
+  nextTruthApproval: "off",
   nextDareApproval: "off",
   autoStart: false,
   truthSeconds: 0,
