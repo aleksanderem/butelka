@@ -5,11 +5,16 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { ColorDot } from "@/components/color-dot";
 import { ContentLevelEditor } from "@/components/content-level-editor";
+import { Paywall } from "@/components/paywall";
 import { AvatarVisual } from "@/components/player-avatar";
 import { SelectableAvatar } from "@/components/selectable-avatar";
 import { avatarOrder } from "@/game/avatars";
+import type { ModeGroup } from "@/game/content-types";
 import { colorOrder } from "@/game/data";
 import type { GameApi } from "@/game/use-game";
+import { isCategoryUnlocked } from "@/iap/entitlements";
+import { CATEGORY_PRODUCT_ID, isPremiumCategory, type PremiumCategory } from "@/iap/products";
+import { useIap } from "@/iap/use-iap";
 import { neon, playerPalette } from "@/theme/colors";
 
 type TabId = "profile" | "content";
@@ -147,6 +152,9 @@ function ProfileTab({ game }: { game: GameApi }) {
 }
 
 function ContentDefaultsTab({ game }: { game: GameApi }) {
+  const { entitlements, priceFor } = useIap();
+  const [paywallCat, setPaywallCat] = useState<PremiumCategory | null>(null);
+
   return (
     <View className="gap-4">
       <View className="gap-1">
@@ -161,13 +169,28 @@ function ContentDefaultsTab({ game }: { game: GameApi }) {
         acceptedCategories={game.acceptedCategories}
         ageVerified={game.ageVerified}
         bundle={game.contentBundle}
+        isPremiumLocked={(key) =>
+          isPremiumCategory(key as ModeGroup) && !isCategoryUnlocked(key as ModeGroup, entitlements)
+        }
         onAcceptCategory={game.acceptCategory}
+        onOpenPaywall={(key) => {
+          if (isPremiumCategory(key as ModeGroup)) {
+            setPaywallCat(key as PremiumCategory);
+          }
+        }}
         onSetCategoryEnabled={game.setGlobalCategoryEnabled}
         onSetFilter={game.setGlobalFilter}
         onSetLevel={game.setGlobalContentLevel}
         onVerifyAge={game.verifyAge}
+        premiumPrice={(key) =>
+          isPremiumCategory(key as ModeGroup)
+            ? priceFor(CATEGORY_PRODUCT_ID[key as PremiumCategory])
+            : null
+        }
         selection={game.globalSettings.contentSelection}
       />
+
+      {paywallCat ? <Paywall category={paywallCat} onClose={() => setPaywallCat(null)} /> : null}
     </View>
   );
 }

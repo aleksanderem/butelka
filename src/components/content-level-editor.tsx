@@ -33,6 +33,12 @@ export interface ContentEditorApi {
   onVerifyAge: () => void;
   acceptedCategories: string[];
   onAcceptCategory: (categoryId: string) => void;
+  /** Czy kategoria premium jest zablokowana zakupem (true = pokaż kłódkę/cenę zamiast suwaka). */
+  isPremiumLocked: (key: string) => boolean;
+  /** Cena pojedynczej kategorii ze StoreKitu (np. "8,99 zł") lub null. */
+  premiumPrice: (key: string) => string | null;
+  /** Otwórz paywall dla danej kategorii premium. */
+  onOpenPaywall: (key: string) => void;
 }
 
 /** Edytor doboru treści: 6 trybów (slider + podkategorie) + filtry + bramka wieku. */
@@ -62,6 +68,7 @@ export function ContentLevelEditor(api: ContentEditorApi) {
               ).length
             : 0;
           const locked = ADULT_MODE_GROUPS.has(cat.key) && !api.ageVerified;
+          const premiumLocked = api.isPremiumLocked(cat.key);
           return (
             <View key={cat.key}>
               {i > 0 ? <Separator className="mb-3 opacity-50" /> : null}
@@ -74,7 +81,10 @@ export function ContentLevelEditor(api: ContentEditorApi) {
                 name={cat.namePl}
                 onChange={(next) => api.onSetLevel(cat.key, next)}
                 onOpenAgeGate={() => setAgeGateOpen(true)}
+                onOpenPaywall={() => api.onOpenPaywall(cat.key)}
                 onOpenSubcats={() => setSubcatMode(cat)}
+                premiumLocked={premiumLocked}
+                premiumPrice={api.premiumPrice(cat.key)}
                 total={total}
               />
             </View>
@@ -140,22 +150,28 @@ function ContentLevelRow({
   accent,
   level,
   locked,
+  premiumLocked,
+  premiumPrice,
   total,
   enabledCount,
   onChange,
   onOpenSubcats,
   onOpenAgeGate,
+  onOpenPaywall,
 }: {
   name: string;
   ageLabel: string;
   accent: string;
   level: ContentLevel;
   locked: boolean;
+  premiumLocked: boolean;
+  premiumPrice: string | null;
   total: number;
   enabledCount: number;
   onChange: (level: ContentLevel) => void;
   onOpenSubcats: () => void;
   onOpenAgeGate: () => void;
+  onOpenPaywall: () => void;
 }) {
   const [idx, setIdx] = useState<number>(level);
   const current = (idx as ContentLevel) ?? 0;
@@ -194,6 +210,18 @@ function ContentLevelRow({
           <Text style={{ fontSize: 14 }}>🔞</Text>
           <Text className="text-sm font-bold" style={{ color: neon.magenta }}>
             Potwierdź wiek 18+, aby włączyć
+          </Text>
+        </Pressable>
+      ) : premiumLocked ? (
+        <Pressable
+          accessibilityRole="button"
+          className="flex-row items-center justify-center gap-2 rounded-2xl py-3"
+          onPress={onOpenPaywall}
+          style={{ borderColor: "rgba(192,132,252,0.5)", borderWidth: 1.5 }}
+        >
+          <Ionicons color={neon.purpleBright} name="lock-closed" size={15} />
+          <Text className="text-sm font-bold" style={{ color: neon.purpleBright }}>
+            {premiumPrice ? `Odblokuj — ${premiumPrice}` : "Odblokuj"}
           </Text>
         </Pressable>
       ) : (

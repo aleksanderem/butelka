@@ -4,8 +4,13 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { ContentLevelEditor } from "@/components/content-level-editor";
+import { Paywall } from "@/components/paywall";
+import type { ModeGroup } from "@/game/content-types";
 import type { ApprovalThreshold, RoomSettings } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
+import { isCategoryUnlocked } from "@/iap/entitlements";
+import { CATEGORY_PRODUCT_ID, isPremiumCategory, type PremiumCategory } from "@/iap/products";
+import { useIap } from "@/iap/use-iap";
 import { neon } from "@/theme/colors";
 
 type TabId = "general" | "content" | "gameplay" | "sounds";
@@ -101,6 +106,9 @@ export function SettingsScreen({ game }: { game: GameApi }) {
 }
 
 function ContentTab({ game }: { game: GameApi }) {
+  const { entitlements, priceFor } = useIap();
+  const [paywallCat, setPaywallCat] = useState<PremiumCategory | null>(null);
+
   return (
     <View className="gap-4">
       <View className="gap-1">
@@ -115,13 +123,28 @@ function ContentTab({ game }: { game: GameApi }) {
         acceptedCategories={game.acceptedCategories}
         ageVerified={game.ageVerified}
         bundle={game.contentBundle}
+        isPremiumLocked={(key) =>
+          isPremiumCategory(key as ModeGroup) && !isCategoryUnlocked(key as ModeGroup, entitlements)
+        }
         onAcceptCategory={game.acceptCategory}
+        onOpenPaywall={(key) => {
+          if (isPremiumCategory(key as ModeGroup)) {
+            setPaywallCat(key as PremiumCategory);
+          }
+        }}
         onSetCategoryEnabled={game.setRoomCategoryEnabled}
         onSetFilter={game.setRoomFilter}
         onSetLevel={game.setContentLevel}
         onVerifyAge={game.verifyAge}
+        premiumPrice={(key) =>
+          isPremiumCategory(key as ModeGroup)
+            ? priceFor(CATEGORY_PRODUCT_ID[key as PremiumCategory])
+            : null
+        }
         selection={game.contentSelection}
       />
+
+      {paywallCat ? <Paywall category={paywallCat} onClose={() => setPaywallCat(null)} /> : null}
     </View>
   );
 }
