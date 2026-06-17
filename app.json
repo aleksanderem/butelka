@@ -36,7 +36,8 @@
       ],
       "expo-font",
       "expo-video",
-      "expo-iap"
+      "expo-iap",
+      "./plugins/withStoreKitConfig"
     ],
     "experiments": {
       "typedRoutes": true,
