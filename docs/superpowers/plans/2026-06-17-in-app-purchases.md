@@ -764,9 +764,18 @@ git commit -m "feat(iap): bramkowanie premium w edytorze tresci + paywall z Usta
 
 **Files:** brak (weryfikacja manualna)
 
+> WERYFIKACJA (2026-06-17): bramkowanie i paywall ZWERYFIKOWANE w symulatorze (premium kategorie
+> pokazują „Odblokuj", nie-premium normalne kontrolki; paywall otwiera się z PRO/pojedynczą/restore).
+> WAŻNE USTALENIE: lokalny StoreKit testing (.storekit) aktywuje się TYLKO przy starcie z Xcode
+> (otwórz `ios/Butelka.xcworkspace`, wybierz schemat Butelka, Cmd+R). Przy `expo run:ios`
+> (`simctl launch`) konfiguracja StoreKit NIE jest aktywna → `fetchProducts` zwraca pusto, ceny są
+> puste, a arkusz zakupu się nie pojawia. Dlatego ceny/zakup/restore testuj uruchamiając z Xcode.
+
 - [ ] **Step 1: Zbuduj i uruchom w symulatorze**
 
-Run: `npx expo run:ios` (debug; używa schematu z referencją `.storekit` z Task 8).
+Do testu bramkowania/paywalla: `npx expo run:ios` wystarczy.
+Do testu CEN + ZAKUPU + RESTORE: otwórz `ios/Butelka.xcworkspace` w Xcode i Cmd+R (schemat Butelka) —
+wtedy `.storekit` z Task 8 aktywuje lokalny StoreKit testing.
 
 - [ ] **Step 2: Scenariusze (potwierdź każdy)**
 - Otwórz Ustawienia → Treści. Kategorie premium (Melanż, Hot — grupowo, Tylko we 2 — Hot) po potwierdzeniu 18+ pokazują „Odblokuj — 8,99 zł" zamiast suwaka.
