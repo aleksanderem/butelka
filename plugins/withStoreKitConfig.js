@@ -37,11 +37,14 @@ const withSchemeStoreKit = (config) =>
       if (xml.includes("StoreKitConfigurationFileReference")) {
         return cfg;
       }
+      // Ścieżka względna do SourceRoot/.xcodeproj (potwierdzone: Xcode pisze "../<plik>",
+      // co wskazuje plik o jeden poziom wyżej niż katalog projektu). Wstawiamy jako ostatnie
+      // dziecko <LaunchAction>, dokładnie tak jak robi to Xcode UI.
       const ref =
         `      <StoreKitConfigurationFileReference\n` +
-        `         identifier = "../../../${STOREKIT_FILE}">\n` +
-        `      </StoreKitConfigurationFileReference>\n`;
-      xml = xml.replace(/(<LaunchAction\b[^>]*>\n?)/, `$1${ref}`);
+        `         identifier = "../${STOREKIT_FILE}">\n` +
+        `      </StoreKitConfigurationFileReference>\n      `;
+      xml = xml.replace("</LaunchAction>", `${ref}</LaunchAction>`);
       fs.writeFileSync(schemePath, xml);
       return cfg;
     },
