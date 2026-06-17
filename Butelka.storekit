@@ -1,0 +1,75 @@
+{
+  "identifier" : "B17E1A00-0000-4000-8000-000000000001",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "19.99",
+      "familyShareable" : false,
+      "internalID" : "B17E1A00-0000-4000-8000-0000000000A1",
+      "localizations" : [
+        {
+          "description" : "Wszystkie kategorie premium",
+          "displayName" : "PRO — wszystko",
+          "locale" : "pl_PL"
+        }
+      ],
+      "productID" : "com.butelka.game.pro",
+      "referenceName" : "PRO",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "8.99",
+      "familyShareable" : false,
+      "internalID" : "B17E1A00-0000-4000-8000-0000000000A2",
+      "localizations" : [
+        {
+          "description" : "Melanż / Impreza",
+          "displayName" : "Melanż / Impreza",
+          "locale" : "pl_PL"
+        }
+      ],
+      "productID" : "com.butelka.game.party",
+      "referenceName" : "party",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "8.99",
+      "familyShareable" : false,
+      "internalID" : "B17E1A00-0000-4000-8000-0000000000A3",
+      "localizations" : [
+        {
+          "description" : "Hot — grupowo",
+          "displayName" : "Hot — grupowo",
+          "locale" : "pl_PL"
+        }
+      ],
+      "productID" : "com.butelka.game.group_hot",
+      "referenceName" : "group_hot",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "8.99",
+      "familyShareable" : false,
+      "internalID" : "B17E1A00-0000-4000-8000-0000000000A4",
+      "localizations" : [
+        {
+          "description" : "Tylko we 2 — Hot",
+          "displayName" : "Tylko we 2 — Hot",
+          "locale" : "pl_PL"
+        }
+      ],
+      "productID" : "com.butelka.game.couple_hot",
+      "referenceName" : "couple_hot",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_locale" : "pl_PL",
+    "_storefront" : "POL"
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}
