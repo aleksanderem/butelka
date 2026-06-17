@@ -1,5 +1,5 @@
 import LottieView, { type AnimationObject } from "lottie-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
 import d0 from "@/assets/flipboard/0.json";
@@ -63,12 +63,18 @@ const styles = StyleSheet.create({
 export function FlipCountdown({
   seconds,
   restartKey,
+  onExpire,
 }: {
   seconds: number;
   restartKey: string | number;
+  /** Wołane RAZ, gdy licznik zejdzie do zera. */
+  onExpire?: () => void;
 }) {
   const { width } = useWindowDimensions();
   const [remaining, setRemaining] = useState(seconds);
+  // Ref, żeby zmiana (niestabilnej) funkcji onExpire nie restartowała odliczania.
+  const onExpireRef = useRef(onExpire);
+  onExpireRef.current = onExpire;
 
   useEffect(() => {
     setRemaining(seconds);
@@ -81,6 +87,7 @@ export function FlipCountdown({
       setRemaining(current);
       if (current <= 0) {
         clearInterval(id);
+        onExpireRef.current?.();
       }
     }, 1000);
     return () => clearInterval(id);

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 import { FlipCountdown } from "@/components/flip-countdown";
@@ -16,6 +17,12 @@ export function ChallengeView({ game }: { game: GameApi }) {
   // Czas na odpowiedź (prawda) / wykonanie (wyzwanie); 0 = licznik wyłączony.
   const countdown = isTruth ? game.settings.truthSeconds : game.settings.dareSeconds;
 
+  // Przegrana: czas minął, a szczęśliwiec nie przeszedł dalej. Reset przy nowej karcie.
+  const [timedOut, setTimedOut] = useState(false);
+  useEffect(() => {
+    setTimedOut(false);
+  }, [game.challengeText]);
+
   return (
     <View className="gap-5 pt-2">
       <View className="flex-row items-center justify-center gap-2">
@@ -32,41 +39,60 @@ export function ChallengeView({ game }: { game: GameApi }) {
       </NeonCard>
 
       {countdown > 0 ? (
-        <FlipCountdown restartKey={game.challengeText ?? ""} seconds={countdown} />
+        <FlipCountdown
+          onExpire={() => setTimedOut(true)}
+          restartKey={game.challengeText ?? ""}
+          seconds={countdown}
+        />
       ) : null}
 
-      <Text className="text-center text-sm font-medium text-muted">
-        {amLucky
-          ? isTruth
-            ? "Odpowiedz szczerze!"
-            : "Ty nie dasz rady?"
-          : isTruth
-            ? `${luckyName} odpowiada — czekajcie na wynik.`
-            : `${luckyName} ma wyzwanie — czekajcie na wynik.`}
-      </Text>
+      {timedOut ? (
+        <Text className="text-center text-base font-extrabold" style={{ color: neon.magenta }}>
+          {amLucky ? "⏰ Czas minął — przegrałeś!" : `⏰ Czas minął — ${luckyName} przegrał!`}
+        </Text>
+      ) : (
+        <Text className="text-center text-sm font-medium text-muted">
+          {amLucky
+            ? isTruth
+              ? "Odpowiedz szczerze!"
+              : "Ty nie dasz rady?"
+            : isTruth
+              ? `${luckyName} odpowiada — czekajcie na wynik.`
+              : `${luckyName} ma wyzwanie — czekajcie na wynik.`}
+        </Text>
+      )}
 
       {amLucky ? (
-        <>
-          <View className="flex-row gap-3">
-            <NeonButton
-              className="flex-1"
-              icon="dice-outline"
-              label="Wylosuj inne"
-              onPress={game.nextChallenge}
-              variant="ghost"
-            />
-            <NeonButton
-              className="flex-1"
-              icon="people"
-              label="Następny gracz"
-              onPress={game.passTurn}
-              variant="violet"
-            />
-          </View>
-          <Text className="text-center text-xs text-muted">
-            „Następny gracz" przekazuje turę kolejnej osobie.
-          </Text>
-        </>
+        timedOut ? (
+          <NeonButton
+            icon="people"
+            label="Następny gracz"
+            onPress={game.passTurn}
+            variant="pink"
+          />
+        ) : (
+          <>
+            <View className="flex-row gap-3">
+              <NeonButton
+                className="flex-1"
+                icon="dice-outline"
+                label="Wylosuj inne"
+                onPress={game.nextChallenge}
+                variant="ghost"
+              />
+              <NeonButton
+                className="flex-1"
+                icon="people"
+                label="Następny gracz"
+                onPress={game.passTurn}
+                variant="violet"
+              />
+            </View>
+            <Text className="text-center text-xs text-muted">
+              „Następny gracz" przekazuje turę kolejnej osobie.
+            </Text>
+          </>
+        )
       ) : null}
     </View>
   );
