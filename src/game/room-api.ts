@@ -34,6 +34,9 @@ export interface RoomDoc {
   nextTruthApproval?: ApprovalThreshold;
   nextDareApproval?: ApprovalThreshold;
   autoStart?: boolean;
+  // Czas (s) na odpowiedź/wyzwanie; 0 lub brak = licznik wyłączony.
+  truthSeconds?: number;
+  dareSeconds?: number;
   // Dobór treści: JSON map modeKey -> poziom 0..3 (patrz content-selection.ts).
   contentSelection?: string;
   // Przebieg gry: JSON tablica zakończonych tur (patrz round-history.ts). Opcjonalne (starsze pokoje).
@@ -198,6 +201,8 @@ export async function enterRoom({
       nextTruthApproval: "majority",
       nextDareApproval: "off",
       autoStart: false,
+      truthSeconds: 0,
+      dareSeconds: 0,
       contentSelection: contentSelection ?? serializeSelection(DEFAULT_SELECTION),
       pendingAction: null,
       createdAt: Date.now(),
@@ -458,6 +463,8 @@ export async function updateSettings(
     nextTruthApproval: ApprovalThreshold;
     nextDareApproval: ApprovalThreshold;
     autoStart: boolean;
+    truthSeconds: number;
+    dareSeconds: number;
   }
 ): Promise<void> {
   await updateRoom(code, settings);

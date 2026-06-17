@@ -59,6 +59,10 @@ export interface RoomSettings {
   nextDareApproval: ApprovalThreshold;
   /** Czy runda startuje automatycznie (bez losowania przez hosta). */
   autoStart: boolean;
+  /** Czas (s) na odpowiedź przy PRAWDZIE; 0 = wyłączony licznik. */
+  truthSeconds: number;
+  /** Czas (s) na wykonanie WYZWANIA; 0 = wyłączony licznik. */
+  dareSeconds: number;
 }
 
 /** Stan głosowania w modalu akceptacji (ekran 7). */

@@ -25,6 +25,10 @@ const THRESHOLD_LABEL: Record<ApprovalThreshold, string> = {
   all: "Wszyscy",
 };
 
+/** Presety czasu (s) na suwaku; 0 = licznik wyłączony. */
+const TIME_OPTIONS = [0, 15, 30, 45, 60, 90, 120];
+const timeLabel = (s: number): string => (s <= 0 ? "Wył." : `${s}s`);
+
 /** Pełnoekranowa podstrona ustawień pokoju (taby u góry). */
 export function SettingsScreen({ game }: { game: GameApi }) {
   const [tab, setTab] = useState<TabId>("content");
@@ -139,6 +143,26 @@ function GameplayTab({
       <Separator />
 
       <View className="gap-3">
+        <Text className="text-base font-bold text-foreground">Czas na odpowiedź</Text>
+        <TimeRow
+          label="Prawda — czas na odpowiedź"
+          onChange={(v) => onChange({ truthSeconds: v })}
+          value={settings.truthSeconds}
+        />
+        <Separator className="opacity-50" />
+        <TimeRow
+          label="Wyzwanie — czas na wykonanie"
+          onChange={(v) => onChange({ dareSeconds: v })}
+          value={settings.dareSeconds}
+        />
+        <Text className="text-xs leading-5 text-muted">
+          „Wył.” chowa licznik. W rundzie odliczanie pojawia się między kartą a przyciskami.
+        </Text>
+      </View>
+
+      <Separator />
+
+      <View className="gap-3">
         <Text className="text-base font-bold text-foreground">Ile osób musi się zgodzić na…</Text>
         <ThresholdRow
           label="zmianę pytania"
@@ -231,6 +255,52 @@ function ThresholdRow({
       <View className="flex-row justify-between">
         <Text className="text-[10px] text-muted">Bez zgody</Text>
         <Text className="text-[10px] text-muted">Wszyscy</Text>
+      </View>
+    </View>
+  );
+}
+
+function TimeRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  // Lokalny indeks suwaka; zapis dopiero po puszczeniu (jak ThresholdRow).
+  const [idx, setIdx] = useState(() => Math.max(0, TIME_OPTIONS.indexOf(value)));
+  const current = TIME_OPTIONS[idx] ?? 0;
+
+  return (
+    <View className="gap-2">
+      <View className="flex-row items-center justify-between">
+        <Text className="text-sm text-foreground">{label}</Text>
+        <Text className="text-xs font-bold" style={{ color: neon.purpleBright }}>
+          {timeLabel(current)}
+        </Text>
+      </View>
+      <Slider
+        maxValue={TIME_OPTIONS.length - 1}
+        minValue={0}
+        onChange={(v) => setIdx(toIndex(v))}
+        onChangeEnd={(v) => {
+          const i = toIndex(v);
+          setIdx(i);
+          onChange(TIME_OPTIONS[i] ?? 0);
+        }}
+        step={1}
+        value={idx}
+      >
+        <Slider.Track>
+          <Slider.Fill />
+          <Slider.Thumb />
+        </Slider.Track>
+      </Slider>
+      <View className="flex-row justify-between">
+        <Text className="text-[10px] text-muted">Wył.</Text>
+        <Text className="text-[10px] text-muted">120s</Text>
       </View>
     </View>
   );

@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
+import { FlipCountdown } from "@/components/flip-countdown";
 import { NeonButton } from "@/components/neon-button";
 import { NeonCard } from "@/components/neon-card";
 import { cleanCardText } from "@/game/content-selection";
@@ -12,6 +13,8 @@ export function ChallengeView({ game }: { game: GameApi }) {
   const accent = isTruth ? neon.purpleBright : neon.magenta;
   const amLucky = game.amLucky;
   const luckyName = game.luckyPlayer?.name ?? "";
+  // Czas na odpowiedź (prawda) / wykonanie (wyzwanie); 0 = licznik wyłączony.
+  const countdown = isTruth ? game.settings.truthSeconds : game.settings.dareSeconds;
 
   return (
     <View className="gap-5 pt-2">
@@ -27,6 +30,10 @@ export function ChallengeView({ game }: { game: GameApi }) {
           {game.challengeText ? cleanCardText(game.challengeText) : null}
         </Text>
       </NeonCard>
+
+      {countdown > 0 ? (
+        <FlipCountdown restartKey={game.challengeText ?? ""} seconds={countdown} />
+      ) : null}
 
       <Text className="text-center text-sm font-medium text-muted">
         {amLucky

@@ -17,6 +17,8 @@ export const defaultSettings: RoomSettings = {
   nextTruthApproval: "majority",
   nextDareApproval: "off",
   autoStart: false,
+  truthSeconds: 0,
+  dareSeconds: 0,
 };
 
 /** ID pokoju: 6 cyfr (jak kod OTP). Generowane lokalnie, aby „Utwórz pokój”

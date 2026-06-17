@@ -275,6 +275,8 @@ export function useGame() {
             nextTruthApproval: roomDoc.nextTruthApproval ?? "majority",
             nextDareApproval: roomDoc.nextDareApproval ?? "off",
             autoStart: roomDoc.autoStart ?? false,
+            truthSeconds: roomDoc.truthSeconds ?? 0,
+            dareSeconds: roomDoc.dareSeconds ?? 0,
           }
         : defaultSettings,
     [roomDoc]
@@ -709,6 +711,8 @@ export function useGame() {
           nextTruthApproval: settings.nextTruthApproval,
           nextDareApproval: settings.nextDareApproval,
           autoStart: settings.autoStart,
+          truthSeconds: settings.truthSeconds,
+          dareSeconds: settings.dareSeconds,
           ...patch,
         };
         void roomApi

@@ -167,6 +167,9 @@ async function main() {
   await strAttr("rooms", "nextTruthApproval", 16, false, "majority");
   await strAttr("rooms", "nextDareApproval", 16, false, "off");
   await boolAttr("rooms", "autoStart", false, false);
+  // Czas (s) na odpowiedz / wyzwanie; 0 = licznik wylaczony.
+  await intAttr("rooms", "truthSeconds", false, 0);
+  await intAttr("rooms", "dareSeconds", false, 0);
   // Dobór treści: JSON map modeKey -> poziom 0..3.
   await strAttr("rooms", "contentSelection", 2000, false);
   // Przebieg gry: JSON tablica zakończonych tur (round-history.ts).
@@ -177,7 +180,7 @@ async function main() {
     "code", "phase", "hostClientId", "luckyClientId", "spinSeed", "spinStartedAt",
     "challengeType", "challengeText", "requireEndTurnApproval", "requireNextTruthApproval",
     "requireNextDareApproval", "endTurnApproval", "nextTruthApproval", "nextDareApproval",
-    "autoStart", "contentSelection", "history", "pendingAction", "createdAt",
+    "autoStart", "truthSeconds", "dareSeconds", "contentSelection", "history", "pendingAction", "createdAt",
   ]);
 
   // players
