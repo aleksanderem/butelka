@@ -7,3 +7,10 @@ build-local-ios.ipa
 *.aab
 doddles/
 flipboard/
+
+# Surowe zrodla animacji / assety publikacji — nie sa importowane przez kod,
+# rozdymaly paczke EAS do 1.3 GB i upload padal (EPIPE).
+icons_animated/
+Animations/
+burst_and_shapes/
+store/
