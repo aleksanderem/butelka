@@ -3,7 +3,7 @@
 // jest puste — fallback do PL. UI-stringi samej aplikacji NIE są tu objęte (osobny zakres).
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getLocales } from "expo-localization";
+import { NativeModules, Platform } from "react-native";
 
 import type { Card, Category, ModeGroupRef, Setting } from "@/game/content-types";
 
@@ -12,13 +12,22 @@ export type Lang = "pl" | "en";
 const KEY = "butelka.lang.v1";
 let current: Lang = "pl";
 
+/** Locale urządzenia bez natywnego modułu (unikamy dodatkowego poda — wbudowane w RN). */
+function deviceLocale(): string {
+  try {
+    if (Platform.OS === "ios") {
+      const s = NativeModules.SettingsManager?.settings;
+      return String(s?.AppleLocale ?? s?.AppleLanguages?.[0] ?? "");
+    }
+    return String(NativeModules.I18nManager?.localeIdentifier ?? "");
+  } catch {
+    return "";
+  }
+}
+
 /** Język z ustawień systemu urządzenia (en -> "en", wszystko inne -> "pl"). */
 export function detectLang(): Lang {
-  try {
-    return getLocales()[0]?.languageCode === "en" ? "en" : "pl";
-  } catch {
-    return "pl";
-  }
+  return deviceLocale().toLowerCase().startsWith("en") ? "en" : "pl";
 }
 
 /** Synchroniczny odczyt bieżącego języka (używa picker w room-api). */
@@ -57,8 +66,10 @@ const pick = (en: string | undefined, pl: string): string =>
 
 export const cardText = (c: Card): string => pick(c.textEn, c.textPl);
 export const catName = (c: Category): string => pick(c.nameEn, c.namePl);
-export const catDisclaimerTitle = (c: Category): string => pick(c.disclaimerTitleEn, c.disclaimerTitlePl);
-export const catDisclaimerBody = (c: Category): string => pick(c.disclaimerBodyEn, c.disclaimerBodyPl);
+export const catDisclaimerTitle = (c: Category): string =>
+  pick(c.disclaimerTitleEn, c.disclaimerTitlePl);
+export const catDisclaimerBody = (c: Category): string =>
+  pick(c.disclaimerBodyEn, c.disclaimerBodyPl);
 export const catAcceptBtn = (c: Category): string => pick(c.acceptButtonEn, c.acceptButtonPl);
 export const catDeclineBtn = (c: Category): string => pick(c.declineButtonEn, c.declineButtonPl);
 export const settingName = (s: Setting): string => pick(s.nameEn, s.namePl);
