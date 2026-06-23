@@ -12,6 +12,7 @@ export type PublicPrivate = "public" | "either" | "private";
 export interface ModeGroupRef {
   key: ModeGroup;
   namePl: string;
+  nameEn: string;
   order: number;
 }
 
@@ -27,6 +28,11 @@ export interface Category {
   acceptButtonPl: string;
   declineButtonPl: string;
   rememberAcceptance: boolean;
+  nameEn: string;
+  disclaimerTitleEn: string;
+  disclaimerBodyEn: string;
+  acceptButtonEn: string;
+  declineButtonEn: string;
   order: number;
   enabled: boolean;
 }
@@ -45,6 +51,9 @@ export interface Card {
   textPl: string;
   altSoftPl: string; // łagodniejszy wariant (zwykle pusty — placeholder)
   altHardPl: string; // ostrzejszy wariant (placeholder)
+  textEn: string; // wersja EN (puste = fallback do textPl)
+  altSoftEn: string;
+  altHardEn: string;
   tags: string[];
   enabled: boolean;
 }
@@ -53,6 +62,8 @@ export interface Setting {
   settingId: string;
   namePl: string;
   descriptionPl: string;
+  nameEn: string;
+  descriptionEn: string;
   recommendedDefault: string; // "on" | "off"
   availableValues: string; // np. "on/off"
   order: number;

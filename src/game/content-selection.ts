@@ -6,6 +6,7 @@
 // (global-settings), nie tutaj.
 
 import { getCachedContent } from "@/game/content-client";
+import { cardText } from "@/game/language";
 import { pickPrompt } from "@/game/prompts";
 import type { Card, CardType, ContentBundle } from "@/game/content-types";
 import type { ChallengeType } from "@/game/types";
@@ -250,7 +251,9 @@ export function pickCardText(
   const pool = cardPool(bundle, parseSelection(selectionJson), type);
   if (pool.length === 0) return pickPrompt(type, exclude);
 
-  const fresh = exclude ? pool.filter((card) => card.textPl !== exclude) : pool;
+  // Tekst karty wg bieżącego języka (EN z fallbackiem do PL). `exclude` to ostatnio
+  // pokazany tekst w tym samym języku, więc porównujemy w wyświetlanym wariancie.
+  const fresh = exclude ? pool.filter((card) => cardText(card) !== exclude) : pool;
   const source = fresh.length > 0 ? fresh : pool;
-  return cleanCardText(source[Math.floor(Math.random() * source.length)].textPl);
+  return cleanCardText(cardText(source[Math.floor(Math.random() * source.length)]));
 }
