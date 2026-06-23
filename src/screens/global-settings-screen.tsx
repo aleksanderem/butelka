@@ -20,7 +20,8 @@ import { neon, playerPalette } from "@/theme/colors";
 
 type TabId = "profile" | "content";
 
-const TABS: { id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
+// Funkcja (nie stała): t() przy renderze, inaczej zamraża język z czasu importu.
+const TABS = (): { id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }[] => [
   { id: "profile", icon: "person-outline", label: t("globalSettingsScreen.tabProfile") },
   { id: "content", icon: "sparkles-outline", label: t("globalSettingsScreen.tabContent") },
 ];
@@ -47,7 +48,7 @@ export function GlobalSettingsScreen({ game }: { game: GameApi }) {
       </View>
 
       <View className="flex-row gap-2">
-        {TABS.map((item) => {
+        {TABS().map((item) => {
           const active = tab === item.id;
           return (
             <Pressable

@@ -35,7 +35,8 @@ function otpSlotStyle(isActive: boolean): ViewStyle {
 
 type InfoKind = "rules" | "about";
 
-const infoSlides: Record<InfoKind, OnboardingSlide[]> = {
+// Funkcja (nie stała): t() przy renderze, inaczej tytuły/treści zamrażają język z importu.
+const infoSlides = (): Record<InfoKind, OnboardingSlide[]> => ({
   rules: [
     {
       icon: require("../../assets/icons/glass/cards.png"),
@@ -65,7 +66,7 @@ const infoSlides: Record<InfoKind, OnboardingSlide[]> = {
       body: t("startScreen.aboutSlide2Body"),
     },
   ],
-};
+});
 
 export function StartScreen({ game }: { game: GameApi }) {
   const [info, setInfo] = useState<InfoKind | null>(null);
@@ -260,7 +261,9 @@ export function StartScreen({ game }: { game: GameApi }) {
         </View>
       </View>
 
-      {info ? <OnboardingCarousel onClose={() => setInfo(null)} slides={infoSlides[info]} /> : null}
+      {info ? (
+        <OnboardingCarousel onClose={() => setInfo(null)} slides={infoSlides()[info]} />
+      ) : null}
     </View>
   );
 }

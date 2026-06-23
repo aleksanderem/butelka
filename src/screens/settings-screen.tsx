@@ -16,7 +16,8 @@ import { neon } from "@/theme/colors";
 
 type TabId = "general" | "content" | "gameplay" | "sounds";
 
-const TABS: { id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
+// Funkcje (nie stałe): t() musi być wołane przy renderze, inaczej zamraża język z czasu importu.
+const TABS = (): { id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }[] => [
   { id: "content", icon: "sparkles-outline", label: t("settingsScreen.tabContent") },
   { id: "gameplay", icon: "game-controller-outline", label: t("settingsScreen.tabGameplay") },
   { id: "sounds", icon: "volume-high-outline", label: t("settingsScreen.tabSounds") },
@@ -24,12 +25,12 @@ const TABS: { id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }[]
 
 /** Kolejność poziomów progu na suwaku: 0=brak zgody … 3=wszyscy. */
 const THRESHOLD_ORDER: ApprovalThreshold[] = ["off", "half", "majority", "all"];
-const THRESHOLD_LABEL: Record<ApprovalThreshold, string> = {
+const THRESHOLD_LABEL = (): Record<ApprovalThreshold, string> => ({
   off: t("settingsScreen.thresholdOff"),
   half: t("settingsScreen.thresholdHalf"),
   majority: t("settingsScreen.thresholdMajority"),
   all: t("settingsScreen.thresholdAll"),
-};
+});
 
 /** Presety czasu (s) na suwaku; 0 = licznik wyłączony. */
 const TIME_OPTIONS = [0, 15, 30, 45, 60, 90, 120];
@@ -55,7 +56,7 @@ export function SettingsScreen({ game }: { game: GameApi }) {
       </View>
 
       <View className="flex-row gap-2">
-        {TABS.map((item) => {
+        {TABS().map((item) => {
           const active = tab === item.id;
           return (
             <Pressable
@@ -99,7 +100,7 @@ export function SettingsScreen({ game }: { game: GameApi }) {
             singleDevice={game.singleDevice}
           />
         ) : (
-          <ComingSoon label={TABS.find((t) => t.id === tab)?.label ?? ""} />
+          <ComingSoon label={TABS().find((t) => t.id === tab)?.label ?? ""} />
         )}
       </ScrollView>
     </View>
@@ -190,9 +191,7 @@ function GameplayTab({
           onChange={(v) => onChange({ dareSeconds: v })}
           value={settings.dareSeconds}
         />
-        <Text className="text-xs leading-5 text-muted">
-          {t("settingsScreen.timerHint")}
-        </Text>
+        <Text className="text-xs leading-5 text-muted">{t("settingsScreen.timerHint")}</Text>
       </View>
 
       {singleDevice ? null : (
@@ -224,9 +223,7 @@ function GameplayTab({
 
           <Separator />
 
-          <Text className="text-xs leading-5 text-muted">
-            {t("settingsScreen.approvalHint")}
-          </Text>
+          <Text className="text-xs leading-5 text-muted">{t("settingsScreen.approvalHint")}</Text>
         </>
       )}
     </View>
@@ -272,7 +269,7 @@ function ThresholdRow({
       <View className="flex-row items-center justify-between">
         <Text className="text-sm text-foreground">{label}</Text>
         <Text className="text-xs font-bold" style={{ color: neon.purpleBright }}>
-          {THRESHOLD_LABEL[current]}
+          {THRESHOLD_LABEL()[current]}
         </Text>
       </View>
       <Slider

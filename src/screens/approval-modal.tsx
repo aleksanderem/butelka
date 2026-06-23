@@ -10,10 +10,11 @@ import type { GameApi } from "@/game/use-game";
 import { t } from "@/game/ui-strings";
 import { gradients, neon } from "@/theme/colors";
 
-const copy: Record<
+// Funkcja (nie stała): t() przy renderze, inaczej zamraża język z czasu importu.
+const copy = (): Record<
   ApprovalAction,
   { title: string; verb: string; icon: keyof typeof Ionicons.glyphMap }
-> = {
+> => ({
   endTurn: {
     title: t("approvalModal.endTurnTitle"),
     verb: t("approvalModal.endTurnVerb"),
@@ -29,11 +30,11 @@ const copy: Record<
     verb: t("approvalModal.nextDareVerb"),
     icon: "flash",
   },
-};
+});
 
 export function ApprovalModal({ game }: { game: GameApi }) {
   const action = game.pendingApproval;
-  const info = action ? copy[action] : null;
+  const info = action ? copy()[action] : null;
   const initiator = game.luckyPlayer?.isSelf
     ? t("approvalModal.selfLabel")
     : (game.luckyPlayer?.name ?? t("approvalModal.playerFallback"));
