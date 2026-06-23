@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { avatarOrder } from "@/game/avatars";
 import { ensureContent } from "@/game/content-client";
+import { initLang, setLang as applyLang, type Lang } from "@/game/language";
 import {
   parseSelection,
   serializeSelection,
@@ -131,6 +132,23 @@ export function useGame() {
     return () => {
       alive = false;
     };
+  }, []);
+
+  // Język treści (PL/EN). Moduł language trzyma stan dla pickera; tu mirror w stanie Reacta,
+  // żeby zmiana języka przerenderowała ekrany czytające helpery (catName/cardText itd.).
+  const [lang, setLangState] = useState<Lang>("pl");
+  useEffect(() => {
+    let alive = true;
+    void initLang().then((l) => {
+      if (alive) setLangState(l);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const setLanguage = useCallback(async (next: Lang) => {
+    await applyLang(next);
+    setLangState(next);
   }, []);
 
   // Tożsamość, którą traktujemy jako „Ty” (umożliwia podgląd jako gracz testowy).
@@ -835,6 +853,8 @@ export function useGame() {
     globalSettings,
     globalSettingsOpen,
     categoriesOpen,
+    lang,
+    setLanguage,
     testMode: globalSettings.testMode,
     ageVerified: globalSettings.ageVerified,
     acceptedCategories: globalSettings.acceptedCategories,

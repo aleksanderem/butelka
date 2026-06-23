@@ -4,7 +4,7 @@ import type { ImageSourcePropType } from "react-native";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { CATEGORY_IMAGES } from "@/game/category-images";
-import { ageBadge, type MainCategory } from "@/game/main-categories";
+import { ageBadge, mainName, mainTagline, type MainCategory } from "@/game/main-categories";
 import { neon } from "@/theme/colors";
 
 /** Kwadratowa karta głównej kategorii: obraz higgsfield + nazwa + podgląd podkategorii.
@@ -37,7 +37,7 @@ export function CategoryCard({
       }}
     >
       <Pressable
-        accessibilityLabel={`Kategoria ${category.namePl}`}
+        accessibilityLabel={`Kategoria ${mainName(category)}`}
         accessibilityRole="button"
         onPress={onPress}
         style={({ pressed }) => ({
@@ -96,7 +96,7 @@ export function CategoryCard({
         <View className="absolute inset-x-0 bottom-0 gap-2.5 p-4">
           <View className="flex-row items-center gap-1">
             <Text className="flex-1 text-xl font-extrabold text-white" numberOfLines={1}>
-              {category.namePl}
+              {mainName(category)}
             </Text>
             <Ionicons color="rgba(255,255,255,0.8)" name="chevron-forward" size={18} />
           </View>
@@ -135,7 +135,7 @@ export function CategoryCard({
             </View>
           ) : (
             <Text className="text-xs leading-4 text-white/75" numberOfLines={1}>
-              {category.tagline}
+              {mainTagline(category)}
             </Text>
           )}
         </View>

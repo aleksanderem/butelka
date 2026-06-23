@@ -16,7 +16,7 @@ import {
   type ContentSelection,
 } from "@/game/content-selection";
 import type { ContentBundle } from "@/game/content-types";
-import { MAIN_CATEGORIES, ageBadge, type MainCategory } from "@/game/main-categories";
+import { MAIN_CATEGORIES, ageBadge, mainName, type MainCategory } from "@/game/main-categories";
 import { neon } from "@/theme/colors";
 
 function toIndex(value: number | number[]): number {
@@ -78,7 +78,7 @@ export function ContentLevelEditor(api: ContentEditorApi) {
                 enabledCount={enabledCount}
                 level={level}
                 locked={locked}
-                name={cat.namePl}
+                name={mainName(cat)}
                 onChange={(next) => api.onSetLevel(cat.key, next)}
                 onOpenAgeGate={() => setAgeGateOpen(true)}
                 onOpenPaywall={() => api.onOpenPaywall(cat.key)}

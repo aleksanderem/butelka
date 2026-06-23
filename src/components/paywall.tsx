@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Linking, Modal, Text, View } from "react-native";
 
 import { NeonButton } from "@/components/neon-button";
-import { mainCategoryByKey } from "@/game/main-categories";
+import { mainCategoryByKey, mainDesc, mainName } from "@/game/main-categories";
 import { isCategoryUnlocked } from "@/iap/entitlements";
 import { CATEGORY_PRODUCT_ID, PRO_PRODUCT_ID, type PremiumCategory } from "@/iap/products";
 import { useIap } from "@/iap/use-iap";
@@ -11,15 +11,10 @@ import { neon } from "@/theme/colors";
 
 const PRIVACY_URL = "https://butelka-legal.aleksander-kolabogroup.workers.dev/privacy";
 
-export function Paywall({
-  category,
-  onClose,
-}: {
-  category: PremiumCategory;
-  onClose: () => void;
-}) {
+export function Paywall({ category, onClose }: { category: PremiumCategory; onClose: () => void }) {
   const { entitlements, priceFor, purchase, restore } = useIap();
   const cat = mainCategoryByKey(category);
+  const catLabel = cat ? mainName(cat) : "";
   const singlePrice = priceFor(CATEGORY_PRODUCT_ID[category]);
   const proPrice = priceFor(PRO_PRODUCT_ID);
 
@@ -43,8 +38,10 @@ export function Paywall({
         >
           <View className="items-center gap-1.5">
             <Ionicons color={neon.purpleBright} name="sparkles" size={28} />
-            <Text className="text-xl font-extrabold text-foreground">Odblokuj {cat?.namePl}</Text>
-            <Text className="text-center text-sm leading-5 text-muted">{cat?.descriptionPl}</Text>
+            <Text className="text-xl font-extrabold text-foreground">Odblokuj {catLabel}</Text>
+            <Text className="text-center text-sm leading-5 text-muted">
+              {cat ? mainDesc(cat) : ""}
+            </Text>
           </View>
 
           <NeonButton
@@ -53,7 +50,7 @@ export function Paywall({
             variant="violet"
           />
           <NeonButton
-            label={singlePrice ? `Tylko ${cat?.namePl} — ${singlePrice}` : `Odblokuj ${cat?.namePl}`}
+            label={singlePrice ? `Tylko ${catLabel} — ${singlePrice}` : `Odblokuj ${catLabel}`}
             onPress={() => purchase(CATEGORY_PRODUCT_ID[category])}
             variant="pink"
           />

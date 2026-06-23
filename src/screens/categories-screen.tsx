@@ -4,6 +4,7 @@ import { Pressable, ScrollView, Text, useWindowDimensions, View } from "react-na
 
 import { CategoryCard } from "@/components/category-card";
 import { logEvent } from "@/game/analytics";
+import { catName } from "@/game/language";
 import { MAIN_CATEGORIES, type MainCategory } from "@/game/main-categories";
 import type { GameApi } from "@/game/use-game";
 import { useClientId } from "@/lib/client-id";
@@ -37,7 +38,10 @@ export function CategoriesScreen({ game }: { game: GameApi }) {
     bundle
       ? bundle.categories
           .filter((c) => c.modeGroup === key && c.enabled)
-          .map((c) => c.namePl.split("—").pop()?.trim() ?? c.namePl)
+          .map((c) => {
+            const n = catName(c);
+            return n.split("—").pop()?.trim() ?? n;
+          })
       : [];
 
   return (

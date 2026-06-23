@@ -6,7 +6,14 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-nati
 import { NeonButton } from "@/components/neon-button";
 import { isCategoryEnabled, type ContentSelection } from "@/game/content-selection";
 import type { Category, ContentBundle } from "@/game/content-types";
-import type { MainCategory } from "@/game/main-categories";
+import {
+  catAcceptBtn,
+  catDeclineBtn,
+  catDisclaimerBody,
+  catDisclaimerTitle,
+  catName,
+} from "@/game/language";
+import { mainName, type MainCategory } from "@/game/main-categories";
 import { neon } from "@/theme/colors";
 
 /** Modal wyboru konkretnych podkategorii danego trybu + disclaimery (akceptacja przy włączeniu). */
@@ -66,7 +73,9 @@ export function SubcategorySheet({
         >
           <View className="flex-row items-center justify-between">
             <View>
-              <Text className="text-lg font-extrabold text-foreground">{mainCategory.namePl}</Text>
+              <Text className="text-lg font-extrabold text-foreground">
+                {mainName(mainCategory)}
+              </Text>
               <Text className="text-xs text-muted">Wybierz podkategorie do losowania</Text>
             </View>
             <Pressable
@@ -95,7 +104,9 @@ export function SubcategorySheet({
                   >
                     <View className="flex-1">
                       <View className="flex-row items-center gap-1.5">
-                        <Text className="text-sm font-semibold text-foreground">{cat.namePl}</Text>
+                        <Text className="text-sm font-semibold text-foreground">
+                          {catName(cat)}
+                        </Text>
                         {cat.requiresAcceptance ? (
                           <Ionicons color={neon.magenta} name="warning" size={13} />
                         ) : null}
@@ -126,20 +137,22 @@ export function SubcategorySheet({
               <View className="flex-row items-center gap-2">
                 <Ionicons color={neon.magenta} name="alert-circle" size={22} />
                 <Text className="flex-1 text-base font-extrabold" style={{ color: neon.magenta }}>
-                  {pending.disclaimerTitlePl}
+                  {catDisclaimerTitle(pending)}
                 </Text>
               </View>
-              <Text className="text-sm leading-6 text-foreground">{pending.disclaimerBodyPl}</Text>
+              <Text className="text-sm leading-6 text-foreground">
+                {catDisclaimerBody(pending)}
+              </Text>
               <View className="flex-row gap-3">
                 <NeonButton
                   className="flex-1"
-                  label={pending.declineButtonPl || "Anuluj"}
+                  label={catDeclineBtn(pending) || "Anuluj"}
                   onPress={() => setPending(null)}
                   variant="ghost"
                 />
                 <NeonButton
                   className="flex-1"
-                  label={pending.acceptButtonPl || "Akceptuję"}
+                  label={catAcceptBtn(pending) || "Akceptuję"}
                   onPress={acceptPending}
                   variant="pink"
                 />

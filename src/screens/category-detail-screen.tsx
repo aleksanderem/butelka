@@ -8,7 +8,8 @@ import { NeonButton } from "@/components/neon-button";
 import { CATEGORY_IMAGES } from "@/game/category-images";
 import { ADULT_MODE_GROUPS, cleanCardText } from "@/game/content-selection";
 import type { Card, Category } from "@/game/content-types";
-import { ageBadge, type MainCategory } from "@/game/main-categories";
+import { cardText, catName } from "@/game/language";
+import { ageBadge, mainDesc, mainName, type MainCategory } from "@/game/main-categories";
 import type { ChallengeType } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
@@ -103,7 +104,7 @@ export function CategoryDetailScreen({
           <Ionicons color={neon.white} name="arrow-back" size={22} />
         </Pressable>
         <View className="absolute inset-x-0 bottom-0 flex-row items-center gap-2 px-5 pb-3">
-          <Text className="text-2xl font-extrabold text-white">{category.namePl}</Text>
+          <Text className="text-2xl font-extrabold text-white">{mainName(category)}</Text>
           <View
             className="rounded-full px-2 py-0.5"
             style={{ backgroundColor: "rgba(5,3,12,0.6)" }}
@@ -131,7 +132,7 @@ export function CategoryDetailScreen({
       </View>
 
       <View className="flex-1 gap-3 px-5 pt-3" style={{ backgroundColor: neon.bg }}>
-        <Text className="text-sm leading-5 text-muted">{category.descriptionPl}</Text>
+        <Text className="text-sm leading-5 text-muted">{mainDesc(category)}</Text>
 
         {locked ? (
           <View className="flex-1 items-center justify-center gap-3 px-4">
@@ -182,7 +183,7 @@ export function CategoryDetailScreen({
                     style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
                   >
                     <Text className="text-sm leading-5 text-foreground">
-                      {cleanCardText(card.textPl)}
+                      {cleanCardText(cardText(card))}
                     </Text>
                   </View>
                 ))
@@ -230,9 +231,8 @@ function SubcategorySelect({
   onSelect: (s: string | null) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const selectedName = selectedSub
-    ? (subs.find((s) => s.categoryId === selectedSub)?.namePl ?? "Wszystkie podkategorie")
-    : "Wszystkie podkategorie";
+  const selectedSubCat = selectedSub ? subs.find((s) => s.categoryId === selectedSub) : null;
+  const selectedName = selectedSubCat ? catName(selectedSubCat) : "Wszystkie podkategorie";
 
   const choose = (s: string | null) => {
     onSelect(s);
@@ -274,7 +274,7 @@ function SubcategorySelect({
               <SelectOption
                 accent={accent}
                 key={sub.categoryId}
-                label={sub.namePl}
+                label={catName(sub)}
                 onPress={() => choose(sub.categoryId)}
                 selected={selectedSub === sub.categoryId}
               />

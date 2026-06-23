@@ -147,6 +147,34 @@ function ProfileTab({ game }: { game: GameApi }) {
           ))}
         </View>
       </View>
+
+      <View className="gap-3">
+        <Text className="text-base font-bold text-foreground">Język / Language</Text>
+        <View className="flex-row gap-2">
+          {(["pl", "en"] as const).map((l) => {
+            const active = game.lang === l;
+            return (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+                className="flex-1 items-center rounded-2xl px-3 py-3"
+                key={l}
+                onPress={() => void game.setLanguage(l)}
+                style={{
+                  backgroundColor: active ? "rgba(139,92,246,0.18)" : "rgba(255,255,255,0.04)",
+                }}
+              >
+                <Text
+                  className="text-sm font-semibold"
+                  style={{ color: active ? neon.white : neon.textMuted }}
+                >
+                  {l === "pl" ? "Polski" : "English"}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
     </View>
   );
 }
