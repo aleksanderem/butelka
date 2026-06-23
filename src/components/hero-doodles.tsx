@@ -3,6 +3,7 @@ import { Text, View } from "react-native";
 import Svg, { Defs, Ellipse, RadialGradient, Stop } from "react-native-svg";
 
 import { doodleSources } from "@/game/doodles";
+import { getLang } from "@/game/language";
 
 type Placement = {
   /** Indeks 0-based do doodleSources (np. korona = scribble-26 = index 25). */
@@ -28,17 +29,15 @@ type Placement = {
  * (360x176), bo HeroDoodles jest renderowany wewnatrz kontenera logo — dzieki temu doodle
  * scrolluja RAZEM z logiem, a nie zostaja przyklejone do ekranu. Kazdy z neonowym glow.
  */
-const HERO: Placement[] = [
-  // Korona nad logo (rozowy) — wysrodkowana, nad slowem PRAWDA
-  {
-    index: 25,
-    top: -19,
-    left: 138,
-    width: 80,
-    glow: "#EC4899",
-    opacity: 0.95,
-    glowScale: 1.5,
-  },
+// Korona nad logo (rozowy, neon glow). Pozycja zalezna od jezyka, bo logo PL i EN maja
+// inne proporcje (PL 913x446 wypelnia szerokosc; EN 1800x1017 jest wezsze, wysrodkowane).
+const HERO_PL: Placement[] = [
+  // Wysrodkowana nad slowem PRAWDA
+  { index: 25, top: -19, left: 138, width: 80, glow: "#EC4899", opacity: 0.95, glowScale: 1.5 },
+];
+const HERO_EN: Placement[] = [
+  // Wysrodkowana nad slowem TRUTH, wyzej (odstep nad logo)
+  { index: 25, top: -40, left: 130, width: 76, glow: "#EC4899", opacity: 0.95, glowScale: 1.5 },
 ];
 
 /** Miekki neonowy blob (radial gradient) jako poswiata pod doodle. */
@@ -103,6 +102,8 @@ export function HeroDoodles({ preview = false }: { preview?: boolean }) {
       </View>
     );
   }
+
+  const HERO = getLang() === "en" ? HERO_EN : HERO_PL;
 
   return (
     <View
