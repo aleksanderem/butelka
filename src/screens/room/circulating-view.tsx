@@ -6,12 +6,13 @@ import { ContentSummary } from "@/components/content-summary";
 import { GameCard } from "@/components/game-card";
 import { NeonButton } from "@/components/neon-button";
 import { RoundHistory } from "@/components/round-history";
+import { t } from "@/game/ui-strings";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 
 function cardLabelFor(name: string | null, isSelf: boolean | undefined): string {
   if (isSelf || !name) {
-    return "Ty";
+    return t("circulatingView.you");
   }
   return name.trim().slice(0, 2).toUpperCase();
 }
@@ -33,16 +34,16 @@ export function CirculatingView({ game }: { game: GameApi }) {
         )}
         <View className="items-center gap-1.5">
           <Text className="text-2xl font-extrabold text-foreground">
-            {spinning ? "Karta krąży…" : "Gotowi na rundę?"}
+            {spinning ? t("circulatingView.cardSpinning") : t("circulatingView.readyForRound")}
           </Text>
           <Text className="text-center text-sm font-medium" style={{ color: neon.textMuted }}>
             {spinning
-              ? "Czekajcie, na kogo wskaże los"
+              ? t("circulatingView.waitForLuck")
               : autoStart
-                ? "Runda zacznie się automatycznie"
+                ? t("circulatingView.roundStartsAuto")
                 : game.amHost
-                  ? "Wylosuj, kto zostanie szczęśliwcem"
-                  : "Host za chwilę rozpocznie rundę"}
+                  ? t("circulatingView.pickLuckyOne")
+                  : t("circulatingView.hostWillStart")}
           </Text>
         </View>
       </View>
@@ -54,8 +55,8 @@ export function CirculatingView({ game }: { game: GameApi }) {
               <Ionicons color={neon.purpleBright} name="sparkles" size={18} />
               <Text className="text-sm font-medium text-foreground">
                 {enoughPlayers
-                  ? "Runda zacznie się automatycznie…"
-                  : "Czekam na co najmniej 2 graczy…"}
+                  ? t("circulatingView.roundStartsAutoEllipsis")
+                  : t("circulatingView.waitingForPlayers")}
               </Text>
             </View>
           ) : (
@@ -63,13 +64,13 @@ export function CirculatingView({ game }: { game: GameApi }) {
               <NeonButton
                 disabled={!game.canSpin}
                 icon="sparkles"
-                label="Losuj szczęśliwca"
+                label={t("circulatingView.spinButton")}
                 onPress={game.spin}
                 variant="violet"
               />
               {!enoughPlayers ? (
                 <Text className="text-center text-xs text-muted">
-                  Potrzeba co najmniej 2 graczy, aby zacząć.
+                  {t("circulatingView.needMorePlayers")}
                 </Text>
               ) : null}
             </>
@@ -77,7 +78,11 @@ export function CirculatingView({ game }: { game: GameApi }) {
           {game.singleDevice || game.testMode ? (
             <NeonButton
               icon="person-add-outline"
-              label={game.singleDevice ? "Dodaj gracza" : "Dodaj gracza testowego"}
+              label={
+                game.singleDevice
+                  ? t("circulatingView.addPlayer")
+                  : t("circulatingView.addTestPlayer")
+              }
               onPress={game.addDemoPlayer}
               variant="ghost"
             />
@@ -87,7 +92,9 @@ export function CirculatingView({ game }: { game: GameApi }) {
         <View className="flex-row items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4">
           <Ionicons color={neon.textMuted} name="hourglass-outline" size={18} />
           <Text className="text-sm font-medium text-muted">
-            {autoStart ? "Runda zacznie się automatycznie…" : "Czekajcie, aż host rozpocznie rundę"}
+            {autoStart
+              ? t("circulatingView.roundStartsAutoEllipsis")
+              : t("circulatingView.waitForHost")}
           </Text>
         </View>
       ) : null}

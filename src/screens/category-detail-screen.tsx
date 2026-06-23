@@ -5,6 +5,7 @@ import type { ImageSourcePropType } from "react-native";
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { NeonButton } from "@/components/neon-button";
+import { t } from "@/game/ui-strings";
 import { CATEGORY_IMAGES } from "@/game/category-images";
 import { ADULT_MODE_GROUPS, cleanCardText } from "@/game/content-selection";
 import type { Card, Category } from "@/game/content-types";
@@ -95,7 +96,7 @@ export function CategoryDetailScreen({
           style={StyleSheet.absoluteFill}
         />
         <Pressable
-          accessibilityLabel="Wróć"
+          accessibilityLabel={t("categoryDetailScreen.backButton")}
           accessibilityRole="button"
           className="absolute left-4 top-3 h-10 w-10 items-center justify-center rounded-full"
           onPress={onBack}
@@ -138,9 +139,13 @@ export function CategoryDetailScreen({
           <View className="flex-1 items-center justify-center gap-3 px-4">
             <Text style={{ fontSize: 40 }}>🔞</Text>
             <Text className="text-center text-xs leading-5 text-muted">
-              Treści 18+. Potwierdź wiek, aby podejrzeć karty z tej kategorii.
+              {t("categoryDetailScreen.ageGateDescription")}
             </Text>
-            <NeonButton label="Mam 18+" onPress={game.verifyAge} variant="pink" />
+            <NeonButton
+              label={t("categoryDetailScreen.confirmAge")}
+              onPress={game.verifyAge}
+              variant="pink"
+            />
           </View>
         ) : (
           <View className="flex-1 gap-3">
@@ -154,7 +159,9 @@ export function CategoryDetailScreen({
             ) : null}
 
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-muted">{sample.length} przykładów</Text>
+              <Text className="text-xs text-muted">
+                {sample.length} {t("categoryDetailScreen.examplesCount")}
+              </Text>
               {sample.length > 0 ? (
                 <Pressable
                   accessibilityRole="button"
@@ -164,7 +171,7 @@ export function CategoryDetailScreen({
                 >
                   <Ionicons color={category.accent} name="shuffle" size={14} />
                   <Text className="text-xs font-semibold" style={{ color: category.accent }}>
-                    Losuj inne
+                    {t("categoryDetailScreen.shuffleOther")}
                   </Text>
                 </Pressable>
               ) : null}
@@ -189,7 +196,9 @@ export function CategoryDetailScreen({
                 ))
               ) : (
                 <Text className="py-4 text-center text-xs text-muted">
-                  {bundle ? "Brak kart tego typu." : "Ładuję karty…"}
+                  {bundle
+                    ? t("categoryDetailScreen.noCards")
+                    : t("categoryDetailScreen.loadingCards")}
                 </Text>
               )}
             </ScrollView>
@@ -202,14 +211,14 @@ export function CategoryDetailScreen({
           <NeonButton
             className="flex-1"
             icon="help"
-            label="Prawda"
+            label={t("categoryDetailScreen.truth")}
             onPress={() => changeType("prawda")}
             variant={previewType === "prawda" ? "violet" : "ghost"}
           />
           <NeonButton
             className="flex-1"
             icon="flash"
-            label="Wyzwanie"
+            label={t("categoryDetailScreen.dare")}
             onPress={() => changeType("wyzwanie")}
             variant={previewType === "wyzwanie" ? "pink" : "ghost"}
           />
@@ -232,7 +241,9 @@ function SubcategorySelect({
 }) {
   const [open, setOpen] = useState(false);
   const selectedSubCat = selectedSub ? subs.find((s) => s.categoryId === selectedSub) : null;
-  const selectedName = selectedSubCat ? catName(selectedSubCat) : "Wszystkie podkategorie";
+  const selectedName = selectedSubCat
+    ? catName(selectedSubCat)
+    : t("categoryDetailScreen.allSubcategories");
 
   const choose = (s: string | null) => {
     onSelect(s);
@@ -266,7 +277,7 @@ function SubcategorySelect({
           <ScrollView nestedScrollEnabled showsVerticalScrollIndicator={false}>
             <SelectOption
               accent={accent}
-              label="Wszystkie podkategorie"
+              label={t("categoryDetailScreen.allSubcategories")}
               onPress={() => choose(null)}
               selected={selectedSub === null}
             />

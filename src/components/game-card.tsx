@@ -43,7 +43,7 @@ const SPARKLES = [
   { x: 44, y: 184, r: 1 },
 ];
 
-/** Duża neonowa karta „Ty” z sunburstem (krąży wśród graczy / wachlarz w lobby). */
+/** Duża neonowa karta „Ty" z sunburstem (krąży wśród graczy / wachlarz w lobby). */
 export function GameCard({
   label,
   avatarId,

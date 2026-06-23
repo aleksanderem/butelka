@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { NeonButton } from "@/components/neon-button";
 import { AvatarVisual } from "@/components/player-avatar";
+import { t } from "@/game/ui-strings";
 import type { Player } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
@@ -37,18 +38,18 @@ export function PlayersSheet({ game }: { game: GameApi }) {
           />
 
           <View className="flex-row items-center justify-between">
-            <Dialog.Title>Gracze ({game.players.length})</Dialog.Title>
+            <Dialog.Title>
+              {t("playersSheet.title")} ({game.players.length})
+            </Dialog.Title>
             <Dialog.Close
-              accessibilityLabel="Zamknij"
+              accessibilityLabel={t("playersSheet.close")}
               className="h-9 w-9 rounded-full p-0"
               variant="tertiary"
             />
           </View>
 
           {game.testMode ? (
-            <Text className="text-xs leading-5 text-muted">
-              Dotknij gracza, aby oglądać grę z jego perspektywy (test na jednym urządzeniu).
-            </Text>
+            <Text className="text-xs leading-5 text-muted">{t("playersSheet.testModeHint")}</Text>
           ) : null}
 
           <ScrollView
@@ -71,7 +72,7 @@ export function PlayersSheet({ game }: { game: GameApi }) {
           {game.amHost && game.testMode ? (
             <NeonButton
               icon="person-add-outline"
-              label="Dodaj gracza testowego"
+              label={t("playersSheet.addTestPlayer")}
               onPress={game.addDemoPlayer}
               variant="ghost"
             />
@@ -85,7 +86,7 @@ export function PlayersSheet({ game }: { game: GameApi }) {
           >
             <Ionicons color={neon.magenta} name="exit-outline" size={18} />
             <Text className="text-base font-bold" style={{ color: neon.magenta }}>
-              Opuść pokój
+              {t("playersSheet.leaveRoom")}
             </Text>
           </Pressable>
         </Dialog.Content>
@@ -122,11 +123,13 @@ function PlayerRow({
             <View className="mt-0.5 flex-row items-center gap-1">
               <Ionicons color={neon.green} name="eye" size={13} />
               <Text className="text-xs font-semibold" style={{ color: neon.green }}>
-                Oglądasz ten widok
+                {t("playersSheet.watchingThisView")}
               </Text>
             </View>
           ) : (
-            <Text className="mt-0.5 text-xs text-muted">Dotknij, aby zobaczyć jego widok</Text>
+            <Text className="mt-0.5 text-xs text-muted">
+              {t("playersSheet.tapToViewPerspective")}
+            </Text>
           )
         ) : null}
       </View>
@@ -142,7 +145,7 @@ function PlayerRow({
     >
       {canImpersonate ? (
         <Pressable
-          accessibilityLabel={`Pokaż widok: ${player.name}`}
+          accessibilityLabel={`${t("playersSheet.viewPerspectiveOf")} ${player.name}`}
           accessibilityRole="button"
           className="flex-1 flex-row items-center gap-3"
           onPress={onView}
@@ -155,7 +158,7 @@ function PlayerRow({
 
       {canKick ? (
         <Pressable
-          accessibilityLabel={`Wyrzuć: ${player.name}`}
+          accessibilityLabel={`${t("playersSheet.kick")} ${player.name}`}
           accessibilityRole="button"
           className="h-9 w-9 items-center justify-center rounded-full"
           hitSlop={6}

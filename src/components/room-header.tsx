@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { PlayerAvatar } from "@/components/player-avatar";
+import { t } from "@/game/ui-strings";
 import type { Player } from "@/game/types";
 import { neon } from "@/theme/colors";
 
@@ -26,7 +27,7 @@ export function RoomHeader({
     <View className="gap-4">
       <View className="flex-row items-center justify-between">
         <Pressable
-          accessibilityLabel="Opuść pokój"
+          accessibilityLabel={t("roomHeader.leaveRoom")}
           accessibilityRole="button"
           className="-ml-1 h-9 w-9 items-center justify-center"
           hitSlop={8}
@@ -36,12 +37,12 @@ export function RoomHeader({
         </Pressable>
 
         <Text className="text-base font-bold text-foreground">
-          Pokój: <Text style={{ color: neon.purpleBright }}>{roomCode}</Text>
+          {t("roomHeader.roomLabel")} <Text style={{ color: neon.purpleBright }}>{roomCode}</Text>
         </Text>
 
         <View className="flex-row items-center gap-1">
           <Pressable
-            accessibilityLabel="Gracze w pokoju"
+            accessibilityLabel={t("roomHeader.playersInRoom")}
             accessibilityRole="button"
             className="flex-row items-center gap-1.5 rounded-full px-2.5 py-1.5"
             hitSlop={6}
@@ -52,7 +53,7 @@ export function RoomHeader({
             <Text className="text-sm font-bold text-foreground">{players.length}</Text>
           </Pressable>
           <Pressable
-            accessibilityLabel="Ustawienia pokoju"
+            accessibilityLabel={t("roomHeader.roomSettings")}
             accessibilityRole="button"
             className="h-9 w-9 items-center justify-center"
             hitSlop={6}

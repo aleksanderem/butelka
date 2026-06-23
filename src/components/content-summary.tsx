@@ -3,6 +3,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { LEVEL_LABELS, type ContentLevel } from "@/game/content-selection";
 import { MAIN_CATEGORIES, mainName } from "@/game/main-categories";
+import { t } from "@/game/ui-strings";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 
@@ -16,7 +17,7 @@ export function ContentSummary({ game }: { game: GameApi }) {
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <Ionicons color={neon.purpleBright} name="sparkles" size={16} />
-          <Text className="text-sm font-bold text-foreground">Treści w grze</Text>
+          <Text className="text-sm font-bold text-foreground">{t("contentSummary.title")}</Text>
         </View>
         {game.amHost ? (
           <Pressable
@@ -26,7 +27,7 @@ export function ContentSummary({ game }: { game: GameApi }) {
             onPress={() => game.setSettingsOpen(true)}
           >
             <Text className="text-xs font-semibold" style={{ color: neon.purpleBright }}>
-              Zmień
+              {t("contentSummary.change")}
             </Text>
             <Ionicons color={neon.purpleBright} name="chevron-forward" size={13} />
           </Pressable>
@@ -52,9 +53,7 @@ export function ContentSummary({ game }: { game: GameApi }) {
         </View>
       ) : (
         <Text className="text-xs text-muted">
-          {game.amHost
-            ? "Brak aktywnych kategorii — wybierz w Ustawienia → Treści."
-            : "Host nie wybrał jeszcze kategorii treści."}
+          {game.amHost ? t("contentSummary.emptyHost") : t("contentSummary.emptyGuest")}
         </Text>
       )}
     </View>

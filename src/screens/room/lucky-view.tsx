@@ -5,6 +5,7 @@ import { Animated, Text, View } from "react-native";
 import { Confetti } from "@/components/confetti";
 import { GameCard } from "@/components/game-card";
 import { NeonButton } from "@/components/neon-button";
+import { t } from "@/game/ui-strings";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 import { fonts } from "@/theme/fonts";
@@ -13,11 +14,11 @@ export function LuckyView({ game }: { game: GameApi }) {
   const amLucky = game.amLucky;
   const lucky = game.luckyPlayer;
   const luckyName = lucky?.name ?? "";
-  // Tryb „1 telefon”: host trzyma telefon i klika wybór za wylosowanego (nawet gdy to nie on).
+  // Tryb „1 telefon": host trzyma telefon i klika wybór za wylosowanego (nawet gdy to nie on).
   const controls = amLucky || (game.singleDevice && game.amHost);
 
   // Wejscie: samo fade-in. Karta wyrosla juz w klipie losowania (DrawClip), wiec tu plynnie
-  // przejmujemy ten sam widok karty (cross-fade), bez ponownego „popu”.
+  // przejmujemy ten sam widok karty (cross-fade), bez ponownego „popu".
   const enter = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.timing(enter, { duration: 280, toValue: 1, useNativeDriver: true }).start();
@@ -33,7 +34,7 @@ export function LuckyView({ game }: { game: GameApi }) {
               animate
               avatarId={lucky?.avatarId}
               colorId={lucky?.colorId}
-              label={amLucky ? "Ty" : luckyName}
+              label={amLucky ? t("luckyView.you") : luckyName}
             />
           </View>
         </View>
@@ -50,27 +51,29 @@ export function LuckyView({ game }: { game: GameApi }) {
               textShadowRadius: 18,
             }}
           >
-            Szczęśliwiec!
+            {t("luckyView.luckyOne")}
           </Text>
           <Text className="text-lg font-bold text-foreground">
-            {amLucky ? "To Ty!" : `To ${luckyName}!`}
+            {amLucky ? t("luckyView.itsYou") : `${t("luckyView.itsPrefix")} ${luckyName}!`}
           </Text>
         </View>
 
         {controls ? (
           <View className="w-full gap-3">
             <Text className="text-center text-sm font-medium text-muted">
-              {amLucky ? "Wybierz, co chcesz:" : `Wybierz za ${luckyName}:`}
+              {amLucky
+                ? t("luckyView.chooseForYourself")
+                : `${t("luckyView.chooseFor")} ${luckyName}:`}
             </Text>
             <NeonButton
               icon="help"
-              label="Prawda"
+              label={t("luckyView.truth")}
               onPress={() => game.pickChallenge("prawda")}
               variant="violet"
             />
             <NeonButton
               icon="flash"
-              label="Wyzwanie"
+              label={t("luckyView.dare")}
               onPress={() => game.pickChallenge("wyzwanie")}
               variant="pink"
             />
@@ -79,11 +82,9 @@ export function LuckyView({ game }: { game: GameApi }) {
           <View className="items-center gap-3 rounded-3xl border border-border bg-surface px-6 py-7">
             <Spinner color="default" size="sm" />
             <Text className="text-center text-base font-semibold text-foreground">
-              {luckyName} wybiera prawdę albo wyzwanie…
+              {`${luckyName} ${t("luckyView.choosingTruthOrDare")}`}
             </Text>
-            <Text className="text-center text-sm text-muted">
-              Za chwilę zobaczysz, co go czeka.
-            </Text>
+            <Text className="text-center text-sm text-muted">{t("luckyView.waitForResult")}</Text>
           </View>
         )}
       </View>

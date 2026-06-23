@@ -9,6 +9,7 @@ import { GameCard } from "@/components/game-card";
 import { RoomHeader } from "@/components/room-header";
 import type { Phase, Player } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
+import { t } from "@/game/ui-strings";
 import { hapticPulse, hapticReveal, hapticSpinTick } from "@/lib/haptics";
 
 const DRAW_SOURCE = require("../../assets/animated/draw-shuffle.mp4");
@@ -211,7 +212,7 @@ function DrawClip({
     p.play();
   });
 
-  // Karta wybrańca wyrasta, gdy los wskaże (faza „chosen” + znany gracz).
+  // Karta wybrańca wyrasta, gdy los wskaże (faza „chosen" + znany gracz).
   useEffect(() => {
     if (!grownRef.current && phase === "chosen" && luckyPlayer) {
       grownRef.current = true;
@@ -269,7 +270,7 @@ function DrawClip({
             animate
             avatarId={luckyPlayer?.avatarId}
             colorId={luckyPlayer?.colorId}
-            label={amLucky ? "Ty" : (luckyPlayer?.name ?? "")}
+            label={amLucky ? t("roomScreen.you") : (luckyPlayer?.name ?? "")}
           />
         </Animated.View>
       </View>
@@ -289,7 +290,7 @@ function ImpersonationBanner({ game }: { game: GameApi }) {
     >
       <Ionicons color={neon.gold} name="eye" size={16} />
       <Text className="flex-1 text-sm font-semibold" style={{ color: neon.goldBright }}>
-        Oglądasz jako {game.viewAsPlayer?.name ?? "gracz"}
+        {t("roomScreen.watchingAs")} {game.viewAsPlayer?.name ?? t("roomScreen.player")}
       </Text>
       <Pressable
         accessibilityRole="button"
@@ -298,7 +299,7 @@ function ImpersonationBanner({ game }: { game: GameApi }) {
         style={{ backgroundColor: "rgba(251,191,36,0.22)" }}
       >
         <Text className="text-xs font-bold" style={{ color: neon.goldBright }}>
-          Wróć do siebie
+          {t("roomScreen.backToSelf")}
         </Text>
       </Pressable>
     </View>

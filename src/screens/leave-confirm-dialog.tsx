@@ -2,6 +2,7 @@ import { Alert } from "heroui-native";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { NeonButton } from "@/components/neon-button";
+import { t } from "@/game/ui-strings";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 
@@ -20,7 +21,7 @@ export function LeaveConfirmDialog({ game }: { game: GameApi }) {
     >
       {/* Backdrop — dotknięcie poza kartą zamyka (jak „Zostań"). */}
       <Pressable
-        accessibilityLabel="Zamknij"
+        accessibilityLabel={t("leaveConfirmDialog.closeAccessibilityLabel")}
         onPress={() => game.setConfirmLeaveOpen(false)}
         style={StyleSheet.absoluteFill}
       />
@@ -36,9 +37,9 @@ export function LeaveConfirmDialog({ game }: { game: GameApi }) {
         <Alert status="danger">
           <Alert.Indicator />
           <Alert.Content>
-            <Alert.Title>Wyjść z pokoju?</Alert.Title>
+            <Alert.Title>{t("leaveConfirmDialog.title")}</Alert.Title>
             <Alert.Description>
-              Możesz wrócić do tej sesji z ekranu głównego przyciskiem „Dołącz ponownie”.
+              {t("leaveConfirmDialog.description")}
             </Alert.Description>
           </Alert.Content>
         </Alert>
@@ -46,11 +47,11 @@ export function LeaveConfirmDialog({ game }: { game: GameApi }) {
         <View className="flex-row gap-3">
           <NeonButton
             className="flex-1"
-            label="Zostań"
+            label={t("leaveConfirmDialog.stayButton")}
             onPress={() => game.setConfirmLeaveOpen(false)}
             variant="ghost"
           />
-          <NeonButton className="flex-1" label="Wyjdź" onPress={game.leaveRoom} variant="pink" />
+          <NeonButton className="flex-1" label={t("leaveConfirmDialog.leaveButton")} onPress={game.leaveRoom} variant="pink" />
         </View>
       </View>
     </View>

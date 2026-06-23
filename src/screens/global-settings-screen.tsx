@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { ColorDot } from "@/components/color-dot";
+import { t } from "@/game/ui-strings";
 import { ContentLevelEditor } from "@/components/content-level-editor";
 import { Paywall } from "@/components/paywall";
 import { AvatarVisual } from "@/components/player-avatar";
@@ -20,8 +21,8 @@ import { neon, playerPalette } from "@/theme/colors";
 type TabId = "profile" | "content";
 
 const TABS: { id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
-  { id: "profile", icon: "person-outline", label: "Profil" },
-  { id: "content", icon: "sparkles-outline", label: "Treści" },
+  { id: "profile", icon: "person-outline", label: t("globalSettingsScreen.tabProfile") },
+  { id: "content", icon: "sparkles-outline", label: t("globalSettingsScreen.tabContent") },
 ];
 
 /** Globalne ustawienia (urządzeniowe): domyślny profil + domyślny dobór treści dla nowych pokoi. */
@@ -32,7 +33,7 @@ export function GlobalSettingsScreen({ game }: { game: GameApi }) {
     <View className="flex-1 gap-4 px-5 pt-4">
       <View className="flex-row items-center gap-3">
         <Pressable
-          accessibilityLabel="Wróć"
+          accessibilityLabel={t("globalSettingsScreen.backAccessibilityLabel")}
           accessibilityRole="button"
           className="h-10 w-10 items-center justify-center rounded-full"
           onPress={() => game.setGlobalSettingsOpen(false)}
@@ -40,7 +41,9 @@ export function GlobalSettingsScreen({ game }: { game: GameApi }) {
         >
           <Ionicons color={neon.white} name="arrow-back" size={22} />
         </Pressable>
-        <Text className="text-xl font-extrabold text-foreground">Ustawienia</Text>
+        <Text className="text-xl font-extrabold text-foreground">
+          {t("globalSettingsScreen.title")}
+        </Text>
       </View>
 
       <View className="flex-row gap-2">
@@ -94,19 +97,19 @@ function ProfileTab({ game }: { game: GameApi }) {
     <View className="gap-6">
       <View className="items-center gap-2">
         <AvatarVisual active avatarId={previewAvatar} colorId={previewColor} size="xl" />
-        <Text className="text-xs text-muted">
-          Domyślny profil — podstawiany przy tworzeniu pokoju
-        </Text>
+        <Text className="text-xs text-muted">{t("globalSettingsScreen.profileSubtitle")}</Text>
       </View>
 
       <View className="gap-3">
-        <Text className="text-base font-bold text-foreground">Domyślne imię</Text>
+        <Text className="text-base font-bold text-foreground">
+          {t("globalSettingsScreen.defaultNameLabel")}
+        </Text>
         <View className="justify-center">
           <Input
             autoCapitalize="words"
             maxLength={20}
             onChangeText={(name) => game.updateGlobalSettings({ name })}
-            placeholder="Twoje imię"
+            placeholder={t("globalSettingsScreen.namePlaceholder")}
             value={gs.name}
           />
           <View
@@ -119,7 +122,9 @@ function ProfileTab({ game }: { game: GameApi }) {
       </View>
 
       <View className="gap-3">
-        <Text className="text-base font-bold text-foreground">Domyślny avatar</Text>
+        <Text className="text-base font-bold text-foreground">
+          {t("globalSettingsScreen.defaultAvatarLabel")}
+        </Text>
         <View className="flex-row flex-wrap gap-3">
           {avatarOrder.map((id) => (
             <SelectableAvatar
@@ -134,7 +139,9 @@ function ProfileTab({ game }: { game: GameApi }) {
       </View>
 
       <View className="gap-3">
-        <Text className="text-base font-bold text-foreground">Domyślny kolor</Text>
+        <Text className="text-base font-bold text-foreground">
+          {t("globalSettingsScreen.defaultColorLabel")}
+        </Text>
         <View className="flex-row items-center justify-between">
           {colorOrder.map((id) => (
             <ColorDot
@@ -149,7 +156,9 @@ function ProfileTab({ game }: { game: GameApi }) {
       </View>
 
       <View className="gap-3">
-        <Text className="text-base font-bold text-foreground">Język / Language</Text>
+        <Text className="text-base font-bold text-foreground">
+          {t("globalSettingsScreen.languageLabel")}
+        </Text>
         <View className="flex-row gap-2">
           {(["pl", "en"] as const).map((l) => {
             const active = game.lang === l;
@@ -168,7 +177,7 @@ function ProfileTab({ game }: { game: GameApi }) {
                   className="text-sm font-semibold"
                   style={{ color: active ? neon.white : neon.textMuted }}
                 >
-                  {l === "pl" ? "Polski" : "English"}
+                  {l === "pl" ? t("globalSettingsScreen.langPolish") : "English"}
                 </Text>
               </Pressable>
             );
@@ -186,10 +195,11 @@ function ContentDefaultsTab({ game }: { game: GameApi }) {
   return (
     <View className="gap-4">
       <View className="gap-1">
-        <Text className="text-base font-bold text-foreground">Domyślne kategorie treści</Text>
+        <Text className="text-base font-bold text-foreground">
+          {t("globalSettingsScreen.contentCategoriesLabel")}
+        </Text>
         <Text className="text-xs leading-5 text-muted">
-          Ten dobór zostanie zastosowany automatycznie przy zakładaniu nowego pokoju. W pokoju
-          (Ustawienia → Treści) możesz go w każdej chwili zmienić.
+          {t("globalSettingsScreen.contentCategoriesDescription")}
         </Text>
       </View>
 

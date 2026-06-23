@@ -9,6 +9,7 @@ import Animated, {
 
 import { GameCard } from "@/components/game-card";
 import type { Player } from "@/game/types";
+import { t } from "@/game/ui-strings";
 
 const MAX = 5;
 const CARD_W = 160;
@@ -27,7 +28,7 @@ function xStepFor(count: number): number {
   return 50;
 }
 
-/** Wachlarz kart graczy (do 5). Karta „Ty” (tego telefonu) zawsze w środku i na wierzchu,
+/** Wachlarz kart graczy (do 5). Karta „Ty" (tego telefonu) zawsze w środku i na wierzchu,
  *  reszta układa się symetrycznie wokół. Wachlarz jest zawsze wyśrodkowany. */
 export function CardFan({ players }: { players: Player[] }) {
   const self = players.find((p) => p.isSelf);
@@ -36,7 +37,7 @@ export function CardFan({ players }: { players: Player[] }) {
   const list = self ? [self, ...shownOthers] : shownOthers;
   const xStep = xStepFor(list.length);
 
-  // Sloty: „Ty” w środku, reszta naprzemiennie +1,-1,+2,-2. Następnie przesuwamy wszystkie
+  // Sloty: „Ty" w środku, reszta naprzemiennie +1,-1,+2,-2. Następnie przesuwamy wszystkie
   // o średnią, żeby GRUPA była zawsze wyśrodkowana (też przy parzystej liczbie, np. 2 karty).
   const raw = list.map((player, i) => ({
     player,
@@ -69,7 +70,7 @@ function FanCard({
   const depth = Math.abs(slot);
   const targetX = slot * xStep;
   const targetScale = prominent ? 1 : Math.max(0.8, 1 - depth * 0.09);
-  // Karta „Ty” zawsze na samej górze; reszta według głębi.
+  // Karta „Ty" zawsze na samej górze; reszta według głębi.
   const zIndex = prominent ? 100 : MAX - depth;
   // Głębia: blur i przyciemnienie głównie na skrajnych (depth ≈ 2); środkowe ostre.
   const blur = prominent ? 0 : Math.round(Math.max(0, depth - 1) * 30);
@@ -85,7 +86,7 @@ function FanCard({
     sc.value = withTiming(targetScale, TIMING);
   }, [targetX, targetScale, tx, sc]);
 
-  // Lekkie „wskakiwanie” (floor skali 0.88 — nawet bez ukończonej animacji karta ma dobrą wielkość).
+  // Lekkie „wskakiwanie" (floor skali 0.88 — nawet bez ukończonej animacji karta ma dobrą wielkość).
   useEffect(() => {
     entered.value = withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) });
   }, [entered]);
@@ -102,7 +103,7 @@ function FanCard({
         blur={blur}
         colorId={player.colorId}
         dim={dim}
-        label={player.isSelf ? "Ty" : player.name}
+        label={player.isSelf ? t("cardFan.you") : player.name}
       />
     </Animated.View>
   );

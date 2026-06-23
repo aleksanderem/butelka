@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NeonButton } from "@/components/neon-button";
+import { t } from "@/game/ui-strings";
 import { neon } from "@/theme/colors";
 
 export type OnboardingSlide = {
@@ -24,7 +25,7 @@ export type OnboardingSlide = {
 
 /**
  * Pełnoekranowy onboarding w formie przesuwanych slajdów (ikona + tytuł + opis), kropki postępu
- * i przycisk „Dalej / Rozumiem”. Zamykany krzyżykiem albo na ostatnim slajdzie.
+ * i przycisk „Dalej / Rozumiem". Zamykany krzyżykiem albo na ostatnim slajdzie.
  */
 export function OnboardingCarousel({
   slides,
@@ -64,7 +65,7 @@ export function OnboardingCarousel({
       }}
     >
       <Pressable
-        accessibilityLabel="Zamknij"
+        accessibilityLabel={t("onboardingCarousel.close")}
         accessibilityRole="button"
         hitSlop={10}
         onPress={onClose}
@@ -144,7 +145,7 @@ export function OnboardingCarousel({
           ))}
         </View>
         <NeonButton
-          label={isLast ? "Rozumiem" : "Dalej"}
+          label={isLast ? t("onboardingCarousel.gotIt") : t("onboardingCarousel.next")}
           onPress={goNext}
           variant={isLast ? "pink" : "violet"}
         />

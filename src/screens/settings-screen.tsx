@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { ContentLevelEditor } from "@/components/content-level-editor";
+import { t } from "@/game/ui-strings";
 import { Paywall } from "@/components/paywall";
 import type { ModeGroup } from "@/game/content-types";
 import type { ApprovalThreshold, RoomSettings } from "@/game/types";
@@ -16,23 +17,23 @@ import { neon } from "@/theme/colors";
 type TabId = "general" | "content" | "gameplay" | "sounds";
 
 const TABS: { id: TabId; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
-  { id: "content", icon: "sparkles-outline", label: "Treści" },
-  { id: "gameplay", icon: "game-controller-outline", label: "Rozgrywka" },
-  { id: "sounds", icon: "volume-high-outline", label: "Dźwięki" },
+  { id: "content", icon: "sparkles-outline", label: t("settingsScreen.tabContent") },
+  { id: "gameplay", icon: "game-controller-outline", label: t("settingsScreen.tabGameplay") },
+  { id: "sounds", icon: "volume-high-outline", label: t("settingsScreen.tabSounds") },
 ];
 
 /** Kolejność poziomów progu na suwaku: 0=brak zgody … 3=wszyscy. */
 const THRESHOLD_ORDER: ApprovalThreshold[] = ["off", "half", "majority", "all"];
 const THRESHOLD_LABEL: Record<ApprovalThreshold, string> = {
-  off: "Bez zgody",
-  half: "Połowa",
-  majority: "Większość",
-  all: "Wszyscy",
+  off: t("settingsScreen.thresholdOff"),
+  half: t("settingsScreen.thresholdHalf"),
+  majority: t("settingsScreen.thresholdMajority"),
+  all: t("settingsScreen.thresholdAll"),
 };
 
 /** Presety czasu (s) na suwaku; 0 = licznik wyłączony. */
 const TIME_OPTIONS = [0, 15, 30, 45, 60, 90, 120];
-const timeLabel = (s: number): string => (s <= 0 ? "Wył." : `${s}s`);
+const timeLabel = (s: number): string => (s <= 0 ? t("settingsScreen.timerOff") : `${s}s`);
 
 /** Pełnoekranowa podstrona ustawień pokoju (taby u góry). */
 export function SettingsScreen({ game }: { game: GameApi }) {
@@ -42,7 +43,7 @@ export function SettingsScreen({ game }: { game: GameApi }) {
     <View className="flex-1 gap-4 px-5 pt-4">
       <View className="flex-row items-center gap-3">
         <Pressable
-          accessibilityLabel="Wróć do pokoju"
+          accessibilityLabel={t("settingsScreen.backToRoom")}
           accessibilityRole="button"
           className="h-10 w-10 items-center justify-center rounded-full"
           onPress={() => game.setSettingsOpen(false)}
@@ -50,7 +51,7 @@ export function SettingsScreen({ game }: { game: GameApi }) {
         >
           <Ionicons color={neon.white} name="arrow-back" size={22} />
         </Pressable>
-        <Text className="text-xl font-extrabold text-foreground">Ustawienia pokoju</Text>
+        <Text className="text-xl font-extrabold text-foreground">{t("settingsScreen.title")}</Text>
       </View>
 
       <View className="flex-row gap-2">
@@ -112,10 +113,11 @@ function ContentTab({ game }: { game: GameApi }) {
   return (
     <View className="gap-4">
       <View className="gap-1">
-        <Text className="text-base font-bold text-foreground">Z czego losujemy?</Text>
+        <Text className="text-base font-bold text-foreground">
+          {t("settingsScreen.contentSectionTitle")}
+        </Text>
         <Text className="text-xs leading-5 text-muted">
-          Wybierz główne kategorie i jak mocne treści mają z nich wpadać. Suwak: Wył. → Łagodne →
-          Mocniejsze → Pełne. Możesz włączyć kilka naraz.
+          {t("settingsScreen.contentSectionHint")}
         </Text>
       </View>
 
@@ -161,9 +163,11 @@ function GameplayTab({
   return (
     <View className="gap-4">
       <View className="gap-3">
-        <Text className="text-base font-bold text-foreground">Start rundy</Text>
+        <Text className="text-base font-bold text-foreground">
+          {t("settingsScreen.roundStartTitle")}
+        </Text>
         <SettingRow
-          label="Runda startuje automatycznie (bez losowania przez hosta)"
+          label={t("settingsScreen.autoStartLabel")}
           value={settings.autoStart}
           onChange={(v) => onChange({ autoStart: v })}
         />
@@ -172,20 +176,22 @@ function GameplayTab({
       <Separator />
 
       <View className="gap-3">
-        <Text className="text-base font-bold text-foreground">Czas na odpowiedź</Text>
+        <Text className="text-base font-bold text-foreground">
+          {t("settingsScreen.answerTimeTitle")}
+        </Text>
         <TimeRow
-          label="Prawda — czas na odpowiedź"
+          label={t("settingsScreen.truthTimeLabel")}
           onChange={(v) => onChange({ truthSeconds: v })}
           value={settings.truthSeconds}
         />
         <Separator className="opacity-50" />
         <TimeRow
-          label="Wyzwanie — czas na wykonanie"
+          label={t("settingsScreen.dareTimeLabel")}
           onChange={(v) => onChange({ dareSeconds: v })}
           value={settings.dareSeconds}
         />
         <Text className="text-xs leading-5 text-muted">
-          „Wył.” chowa licznik. W rundzie odliczanie pojawia się między kartą a przyciskami.
+          {t("settingsScreen.timerHint")}
         </Text>
       </View>
 
@@ -195,22 +201,22 @@ function GameplayTab({
 
           <View className="gap-3">
             <Text className="text-base font-bold text-foreground">
-              Ile osób musi się zgodzić na…
+              {t("settingsScreen.approvalSectionTitle")}
             </Text>
             <ThresholdRow
-              label="zmianę pytania"
+              label={t("settingsScreen.approvalChangeQuestion")}
               value={settings.nextTruthApproval}
               onChange={(v) => onChange({ nextTruthApproval: v })}
             />
             <Separator className="opacity-50" />
             <ThresholdRow
-              label="zmianę wyzwania"
+              label={t("settingsScreen.approvalChangeDare")}
               value={settings.nextDareApproval}
               onChange={(v) => onChange({ nextDareApproval: v })}
             />
             <Separator className="opacity-50" />
             <ThresholdRow
-              label="koniec tury (kolejka gracza)"
+              label={t("settingsScreen.approvalEndTurn")}
               value={settings.endTurnApproval}
               onChange={(v) => onChange({ endTurnApproval: v })}
             />
@@ -219,8 +225,7 @@ function GameplayTab({
           <Separator />
 
           <Text className="text-xs leading-5 text-muted">
-            „Bez zgody” wykonuje akcję od razu. „Połowa / Większość / Wszyscy” wymaga zgody danej
-            części graczy w głosowaniu.
+            {t("settingsScreen.approvalHint")}
           </Text>
         </>
       )}
@@ -288,8 +293,8 @@ function ThresholdRow({
         </Slider.Track>
       </Slider>
       <View className="flex-row justify-between">
-        <Text className="text-[10px] text-muted">Bez zgody</Text>
-        <Text className="text-[10px] text-muted">Wszyscy</Text>
+        <Text className="text-[10px] text-muted">{t("settingsScreen.thresholdOff")}</Text>
+        <Text className="text-[10px] text-muted">{t("settingsScreen.thresholdAll")}</Text>
       </View>
     </View>
   );
@@ -334,7 +339,7 @@ function TimeRow({
         </Slider.Track>
       </Slider>
       <View className="flex-row justify-between">
-        <Text className="text-[10px] text-muted">Wył.</Text>
+        <Text className="text-[10px] text-muted">{t("settingsScreen.timerOff")}</Text>
         <Text className="text-[10px] text-muted">120s</Text>
       </View>
     </View>
@@ -347,7 +352,7 @@ function ComingSoon({ label }: { label: string }) {
       <Text className="text-base font-bold text-foreground">{label}</Text>
       <View className="items-center gap-2 rounded-2xl border border-border bg-background px-4 py-8">
         <Ionicons color={neon.textMuted} name="construct-outline" size={24} />
-        <Text className="text-center text-sm text-muted">Ta sekcja pojawi się wkrótce.</Text>
+        <Text className="text-center text-sm text-muted">{t("settingsScreen.comingSoon")}</Text>
       </View>
     </View>
   );

@@ -120,7 +120,7 @@ export function FlipCountdown({
   const urgent = clamped <= 5;
   const sColor = urgent ? neon.magenta : accent;
 
-  // Rozmiar klapki tak, by 3 sztuki + „s” + padding boxa zmieściły się na szerokości.
+  // Rozmiar klapki tak, by 3 sztuki + „s" + padding boxa zmieściły się na szerokości.
   const tile = Math.min(MAX_TILE, Math.floor((width - 100) / 3));
 
   return (

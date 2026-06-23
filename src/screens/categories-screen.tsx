@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Text, useWindowDimensions, View } from "react-na
 import { CategoryCard } from "@/components/category-card";
 import { logEvent } from "@/game/analytics";
 import { catName } from "@/game/language";
+import { t } from "@/game/ui-strings";
 import { MAIN_CATEGORIES, type MainCategory } from "@/game/main-categories";
 import type { GameApi } from "@/game/use-game";
 import { useClientId } from "@/lib/client-id";
@@ -48,7 +49,7 @@ export function CategoriesScreen({ game }: { game: GameApi }) {
     <View className="flex-1 pt-4">
       <View className="flex-row items-center gap-3 px-5 pb-3">
         <Pressable
-          accessibilityLabel="Wróć"
+          accessibilityLabel={t("categoriesScreen.back")}
           accessibilityRole="button"
           className="h-10 w-10 items-center justify-center rounded-full"
           onPress={() => game.setCategoriesOpen(false)}
@@ -57,8 +58,10 @@ export function CategoriesScreen({ game }: { game: GameApi }) {
           <Ionicons color={neon.white} name="arrow-back" size={22} />
         </Pressable>
         <View>
-          <Text className="text-xl font-extrabold text-foreground">Kategorie</Text>
-          <Text className="text-xs text-muted">Dotknij, by podejrzeć karty</Text>
+          <Text className="text-xl font-extrabold text-foreground">
+            {t("categoriesScreen.title")}
+          </Text>
+          <Text className="text-xs text-muted">{t("categoriesScreen.subtitle")}</Text>
         </View>
       </View>
 

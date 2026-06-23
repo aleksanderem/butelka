@@ -17,6 +17,7 @@ import {
 } from "@/game/content-selection";
 import type { ContentBundle } from "@/game/content-types";
 import { MAIN_CATEGORIES, ageBadge, mainName, type MainCategory } from "@/game/main-categories";
+import { t } from "@/game/ui-strings";
 import { neon } from "@/theme/colors";
 
 function toIndex(value: number | number[]): number {
@@ -95,7 +96,9 @@ export function ContentLevelEditor(api: ContentEditorApi) {
       <Separator />
 
       <View className="gap-3">
-        <Text className="text-base font-bold text-foreground">Filtry treści</Text>
+        <Text className="text-base font-bold text-foreground">
+          {t("contentLevelEditor.contentFilters")}
+        </Text>
         {CONTENT_FILTERS.map((f) => (
           <View className="flex-row items-center justify-between gap-3" key={f.id}>
             <Text className="flex-1 text-sm text-foreground">{f.namePl}</Text>
@@ -114,10 +117,10 @@ export function ContentLevelEditor(api: ContentEditorApi) {
         <Ionicons color={neon.purpleBright} name="albums-outline" size={18} />
         <Text className="flex-1 text-xs leading-5 text-foreground">
           {poolCount === null
-            ? "Ładuję treści…"
+            ? t("contentLevelEditor.loadingContent")
             : poolCount > 0
-              ? `W puli: ${poolCount} kart z wybranych treści.`
-              : "Brak kart — włącz tryb albo poluzuj filtry."}
+              ? `${t("contentLevelEditor.poolCountPrefix")} ${poolCount} ${t("contentLevelEditor.poolCountSuffix")}`
+              : t("contentLevelEditor.noCards")}
         </Text>
       </View>
 
@@ -209,7 +212,7 @@ function ContentLevelRow({
         >
           <Text style={{ fontSize: 14 }}>🔞</Text>
           <Text className="text-sm font-bold" style={{ color: neon.magenta }}>
-            Potwierdź wiek 18+, aby włączyć
+            {t("contentLevelEditor.confirmAge")}
           </Text>
         </Pressable>
       ) : premiumLocked ? (
@@ -221,7 +224,9 @@ function ContentLevelRow({
         >
           <Ionicons color={neon.purpleBright} name="lock-closed" size={15} />
           <Text className="text-sm font-bold" style={{ color: neon.purpleBright }}>
-            {premiumPrice ? `Odblokuj — ${premiumPrice}` : "Odblokuj"}
+            {premiumPrice
+              ? `${t("contentLevelEditor.unlock")} — ${premiumPrice}`
+              : t("contentLevelEditor.unlock")}
           </Text>
         </Pressable>
       ) : (
@@ -251,17 +256,19 @@ function ContentLevelRow({
               style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
             >
               <Text className="text-xs text-muted">
-                Podkategorie: {enabledCount}/{total}
+                {t("contentLevelEditor.subcategories")}: {enabledCount}/{total}
               </Text>
               <View className="flex-row items-center gap-1">
                 <Text className="text-xs font-semibold" style={{ color: accent }}>
-                  Wybierz
+                  {t("contentLevelEditor.select")}
                 </Text>
                 <Ionicons color={accent} name="chevron-forward" size={13} />
               </View>
             </Pressable>
           ) : (
-            <Text className="text-[10px] text-muted">{total} podkategorii</Text>
+            <Text className="text-[10px] text-muted">
+              {total} {t("contentLevelEditor.subcategoriesCount")}
+            </Text>
           )}
         </>
       )}
@@ -286,15 +293,26 @@ function AgeGateModal({ onConfirm, onCancel }: { onConfirm: () => void; onCancel
         >
           <View className="items-center gap-2">
             <Text style={{ fontSize: 36 }}>🔞</Text>
-            <Text className="text-lg font-extrabold text-foreground">Treści dla dorosłych</Text>
+            <Text className="text-lg font-extrabold text-foreground">
+              {t("contentLevelEditor.adultContentTitle")}
+            </Text>
             <Text className="text-center text-sm leading-6 text-muted">
-              Te tryby zawierają treści 18+ (flirt, dotyk, seksualne pytania). Potwierdź, że Ty i
-              gracze macie ukończone 18 lat.
+              {t("contentLevelEditor.adultContentDescription")}
             </Text>
           </View>
           <View className="flex-row gap-3">
-            <NeonButton className="flex-1" label="Nie" onPress={onCancel} variant="ghost" />
-            <NeonButton className="flex-1" label="Mamy 18+" onPress={onConfirm} variant="pink" />
+            <NeonButton
+              className="flex-1"
+              label={t("contentLevelEditor.no")}
+              onPress={onCancel}
+              variant="ghost"
+            />
+            <NeonButton
+              className="flex-1"
+              label={t("contentLevelEditor.weAre18")}
+              onPress={onConfirm}
+              variant="pink"
+            />
           </View>
         </View>
       </View>

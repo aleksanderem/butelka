@@ -6,6 +6,7 @@ import { FlipCountdown } from "@/components/flip-countdown";
 import { NeonButton } from "@/components/neon-button";
 import { NeonCard } from "@/components/neon-card";
 import { cleanCardText } from "@/game/content-selection";
+import { t } from "@/game/ui-strings";
 import type { GameApi } from "@/game/use-game";
 import { neon } from "@/theme/colors";
 
@@ -14,7 +15,7 @@ export function ChallengeView({ game }: { game: GameApi }) {
   const accent = isTruth ? neon.purpleBright : neon.magenta;
   const amLucky = game.amLucky;
   const luckyName = game.luckyPlayer?.name ?? "";
-  // Tryb „1 telefon”: host obsługuje turę (wybory/przyciski) za wylosowanego, nawet gdy to nie on.
+  // Tryb „1 telefon": host obsługuje turę (wybory/przyciski) za wylosowanego, nawet gdy to nie on.
   const controls = amLucky || (game.singleDevice && game.amHost);
   // Czas na odpowiedź (prawda) / wykonanie (wyzwanie); 0 = licznik wyłączony.
   const countdown = isTruth ? game.settings.truthSeconds : game.settings.dareSeconds;
@@ -30,7 +31,7 @@ export function ChallengeView({ game }: { game: GameApi }) {
       <View className="flex-row items-center justify-center gap-2">
         <Ionicons color={accent} name={isTruth ? "help-circle" : "flash"} size={22} />
         <Text style={{ color: accent }} className="text-lg font-extrabold uppercase tracking-wider">
-          {isTruth ? "Prawda" : "Wyzwanie"}
+          {isTruth ? t("challengeView.truth") : t("challengeView.dare")}
         </Text>
       </View>
 
@@ -53,44 +54,51 @@ export function ChallengeView({ game }: { game: GameApi }) {
         <View className="flex-row items-center justify-center gap-2">
           <Ionicons color={neon.magenta} name="alarm" size={18} />
           <Text className="text-base font-extrabold" style={{ color: neon.magenta }}>
-            {amLucky ? "Czas minął — przegrałeś!" : `Czas minął — ${luckyName} przegrał!`}
+            {amLucky
+              ? t("challengeView.timeUpYouLost")
+              : `${t("challengeView.timeUpPlayerLost")} ${luckyName}!`}
           </Text>
         </View>
       ) : (
         <Text className="text-center text-sm font-medium text-muted">
           {controls
             ? isTruth
-              ? "Odpowiedz szczerze!"
-              : "Ty nie dasz rady?"
+              ? t("challengeView.answerHonestly")
+              : t("challengeView.cantDoIt")
             : isTruth
-              ? `${luckyName} odpowiada — czekajcie na wynik.`
-              : `${luckyName} ma wyzwanie — czekajcie na wynik.`}
+              ? `${luckyName} ${t("challengeView.playerAnswering")}`
+              : `${luckyName} ${t("challengeView.playerDoing")}`}
         </Text>
       )}
 
       {controls ? (
         timedOut ? (
-          <NeonButton icon="people" label="Następny gracz" onPress={game.passTurn} variant="pink" />
+          <NeonButton
+            icon="people"
+            label={t("challengeView.nextPlayer")}
+            onPress={game.passTurn}
+            variant="pink"
+          />
         ) : (
           <>
             <View className="flex-row gap-3">
               <NeonButton
                 className="flex-1"
                 icon="dice-outline"
-                label="Wylosuj inne"
+                label={t("challengeView.reroll")}
                 onPress={game.nextChallenge}
                 variant="ghost"
               />
               <NeonButton
                 className="flex-1"
                 icon="people"
-                label="Następny gracz"
+                label={t("challengeView.nextPlayer")}
                 onPress={game.passTurn}
                 variant="violet"
               />
             </View>
             <Text className="text-center text-xs text-muted">
-              „Następny gracz" przekazuje turę kolejnej osobie.
+              {t("challengeView.nextPlayerHint")}
             </Text>
           </>
         )

@@ -7,21 +7,36 @@ import { AvatarVisual } from "@/components/player-avatar";
 import { NeonButton } from "@/components/neon-button";
 import type { ApprovalAction, Player } from "@/game/types";
 import type { GameApi } from "@/game/use-game";
+import { t } from "@/game/ui-strings";
 import { gradients, neon } from "@/theme/colors";
 
 const copy: Record<
   ApprovalAction,
   { title: string; verb: string; icon: keyof typeof Ionicons.glyphMap }
 > = {
-  endTurn: { title: "Zakończenie tury", verb: "zakończyć turę", icon: "checkmark-done" },
-  nextTruth: { title: "Następne pytanie", verb: "wylosować następne pytanie", icon: "help" },
-  nextDare: { title: "Następne wyzwanie", verb: "wylosować następne wyzwanie", icon: "flash" },
+  endTurn: {
+    title: t("approvalModal.endTurnTitle"),
+    verb: t("approvalModal.endTurnVerb"),
+    icon: "checkmark-done",
+  },
+  nextTruth: {
+    title: t("approvalModal.nextTruthTitle"),
+    verb: t("approvalModal.nextTruthVerb"),
+    icon: "help",
+  },
+  nextDare: {
+    title: t("approvalModal.nextDareTitle"),
+    verb: t("approvalModal.nextDareVerb"),
+    icon: "flash",
+  },
 };
 
 export function ApprovalModal({ game }: { game: GameApi }) {
   const action = game.pendingApproval;
   const info = action ? copy[action] : null;
-  const initiator = game.luckyPlayer?.isSelf ? "Ty" : (game.luckyPlayer?.name ?? "Gracz");
+  const initiator = game.luckyPlayer?.isSelf
+    ? t("approvalModal.selfLabel")
+    : (game.luckyPlayer?.name ?? t("approvalModal.playerFallback"));
 
   // Realne głosy z backendu: każdy gracz głosuje na swoim urządzeniu.
   const total = game.approval?.total ?? game.players.length;
@@ -67,7 +82,9 @@ export function ApprovalModal({ game }: { game: GameApi }) {
           <View className="items-center gap-1">
             <Dialog.Title>{info?.title ?? ""}</Dialog.Title>
             <Text className="text-center text-sm text-muted">
-              {initiator} chce {info?.verb}. Czy się zgadzasz?
+              {t("approvalModal.actionPrompt")
+                .replace("{initiator}", initiator)
+                .replace("{verb}", info?.verb ?? "")}
             </Text>
           </View>
 
@@ -99,7 +116,7 @@ export function ApprovalModal({ game }: { game: GameApi }) {
               />
             </View>
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-muted">Akceptacje</Text>
+              <Text className="text-xs text-muted">{t("approvalModal.approvalsLabel")}</Text>
               <Text className="text-xs font-bold text-foreground">
                 {approved} / {needed}
               </Text>
@@ -110,7 +127,7 @@ export function ApprovalModal({ game }: { game: GameApi }) {
             <View className="w-full items-center gap-2 py-1">
               <Spinner color={neon.purpleBright} size="sm" />
               <Text className="text-center text-sm font-semibold text-foreground">
-                {accepted ? "Zaakceptowano — wykonuję…" : "Odrzucono — pomijam…"}
+                {accepted ? t("approvalModal.accepted") : t("approvalModal.declined")}
               </Text>
             </View>
           ) : (
@@ -119,22 +136,24 @@ export function ApprovalModal({ game }: { game: GameApi }) {
                 <NeonButton
                   className="flex-1"
                   disabled={myVote !== null}
-                  label="Odrzuć"
+                  label={t("approvalModal.rejectButton")}
                   onPress={game.rejectApproval}
                   variant="ghost"
                 />
                 <NeonButton
                   className="flex-1"
                   disabled={myVote !== null}
-                  label="Akceptuj"
+                  label={t("approvalModal.acceptButton")}
                   onPress={game.confirmApproval}
                   variant="violet"
                 />
               </View>
               <Text className="text-center text-[11px] text-muted">
                 {myVote !== null
-                  ? "Twój głos oddany. Dotknij innego gracza, aby zagłosować w jego imieniu (test)."
-                  : `Wymagana zgoda ${needed} z ${total} graczy.`}
+                  ? t("approvalModal.voteCast")
+                  : t("approvalModal.votesRequired")
+                      .replace("{needed}", String(needed))
+                      .replace("{total}", String(total))}
               </Text>
             </>
           )}
@@ -155,7 +174,7 @@ function VoteAvatar({
 }) {
   return (
     <Pressable
-      accessibilityLabel={`Głosuj jako ${player.name}`}
+      accessibilityLabel={t("approvalModal.voteAsLabel").replace("{name}", player.name)}
       accessibilityRole="button"
       className="items-center gap-1"
       onPress={onSwitch}
@@ -191,7 +210,7 @@ function VoteAvatar({
         className="max-w-14 text-center text-[11px]"
         style={{ color: player.isSelf ? neon.white : neon.textMuted }}
       >
-        {player.isSelf ? "Ty" : player.name}
+        {player.isSelf ? t("approvalModal.selfLabel") : player.name}
       </Text>
     </Pressable>
   );

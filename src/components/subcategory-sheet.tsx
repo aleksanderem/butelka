@@ -14,6 +14,7 @@ import {
   catName,
 } from "@/game/language";
 import { mainName, type MainCategory } from "@/game/main-categories";
+import { t } from "@/game/ui-strings";
 import { neon } from "@/theme/colors";
 
 /** Modal wyboru konkretnych podkategorii danego trybu + disclaimery (akceptacja przy włączeniu). */
@@ -65,7 +66,11 @@ export function SubcategorySheet({
   return (
     <Modal animationType="fade" onRequestClose={onClose} transparent visible>
       <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(4,2,10,0.62)" }]}>
-        <Pressable accessibilityLabel="Zamknij" onPress={onClose} style={StyleSheet.absoluteFill} />
+        <Pressable
+          accessibilityLabel={t("subcategorySheet.close")}
+          onPress={onClose}
+          style={StyleSheet.absoluteFill}
+        />
 
         <View
           className="mt-auto gap-3 rounded-t-3xl px-5 pb-6 pt-4"
@@ -76,10 +81,10 @@ export function SubcategorySheet({
               <Text className="text-lg font-extrabold text-foreground">
                 {mainName(mainCategory)}
               </Text>
-              <Text className="text-xs text-muted">Wybierz podkategorie do losowania</Text>
+              <Text className="text-xs text-muted">{t("subcategorySheet.subtitle")}</Text>
             </View>
             <Pressable
-              accessibilityLabel="Zamknij"
+              accessibilityLabel={t("subcategorySheet.close")}
               accessibilityRole="button"
               className="h-9 w-9 items-center justify-center rounded-full"
               hitSlop={8}
@@ -92,7 +97,9 @@ export function SubcategorySheet({
 
           <ScrollView contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
             {cats.length === 0 ? (
-              <Text className="py-6 text-center text-sm text-muted">Ładuję podkategorie…</Text>
+              <Text className="py-6 text-center text-sm text-muted">
+                {t("subcategorySheet.loading")}
+              </Text>
             ) : (
               cats.map((cat) => {
                 const on = isCategoryEnabled(selection, cat.categoryId);
@@ -146,13 +153,13 @@ export function SubcategorySheet({
               <View className="flex-row gap-3">
                 <NeonButton
                   className="flex-1"
-                  label={catDeclineBtn(pending) || "Anuluj"}
+                  label={catDeclineBtn(pending) || t("subcategorySheet.cancel")}
                   onPress={() => setPending(null)}
                   variant="ghost"
                 />
                 <NeonButton
                   className="flex-1"
-                  label={catAcceptBtn(pending) || "Akceptuję"}
+                  label={catAcceptBtn(pending) || t("subcategorySheet.accept")}
                   onPress={acceptPending}
                   variant="pink"
                 />

@@ -7,6 +7,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BrandLogo } from "@/components/brand-logo";
+import { t } from "@/game/ui-strings";
 import { HeroDoodles } from "@/components/hero-doodles";
 import { NeonButton } from "@/components/neon-button";
 import { NeonCard } from "@/components/neon-card";
@@ -38,30 +39,30 @@ const infoSlides: Record<InfoKind, OnboardingSlide[]> = {
   rules: [
     {
       icon: require("../../assets/icons/glass/cards.png"),
-      title: "Karta krąży",
-      body: "Karta „Ty” krąży wśród wszystkich graczy w pokoju — losowo, w rytm animacji.",
+      title: t("startScreen.rulesSlide1Title"),
+      body: t("startScreen.rulesSlide1Body"),
     },
     {
       icon: require("../../assets/icons/glass/crown.png"),
-      title: "Los wskazuje szczęśliwca",
-      body: "Kogo wskaże los, ten zostaje szczęśliwcem rundy. Jego karta wyrasta na środku ekranu.",
+      title: t("startScreen.rulesSlide2Title"),
+      body: t("startScreen.rulesSlide2Body"),
     },
     {
       icon: require("../../assets/icons/glass/truth.png"),
-      title: "Prawda albo wyzwanie",
-      body: "Szczęśliwiec wybiera: prawdę albo wyzwanie. Po wykonaniu zadania tura przechodzi dalej.",
+      title: t("startScreen.rulesSlide3Title"),
+      body: t("startScreen.rulesSlide3Body"),
     },
   ],
   about: [
     {
       icon: require("../../assets/icons/glass/about.png"),
-      title: "Butelka",
-      body: "Pokojowa gra w prawdę albo wyzwanie — neonowa, szybka i robiona dla znajomych.",
+      title: t("startScreen.aboutSlide1Title"),
+      body: t("startScreen.aboutSlide1Body"),
     },
     {
       icon: require("../../assets/icons/glass/together.png"),
-      title: "Grajcie razem",
-      body: "Stwórz pokój, podaj znajomym jego ID i bawcie się na jednym lub wielu telefonach.",
+      title: t("startScreen.aboutSlide2Title"),
+      body: t("startScreen.aboutSlide2Body"),
     },
   ],
 };
@@ -112,7 +113,7 @@ export function StartScreen({ game }: { game: GameApi }) {
           ) : null}
 
           <Pressable
-            accessibilityLabel="Utwórz pokój"
+            accessibilityLabel={t("startScreen.createRoomA11y")}
             accessibilityRole="button"
             onPress={() => {
               hapticTap();
@@ -139,9 +140,9 @@ export function StartScreen({ game }: { game: GameApi }) {
                     />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-xl font-extrabold text-white">Utwórz pokój</Text>
+                    <Text className="text-xl font-extrabold text-white">{t("startScreen.createRoomTitle")}</Text>
                     <Text className="mt-0.5 text-sm text-white/80">
-                      Stwórz pokój i zaproś znajomych
+                      {t("startScreen.createRoomSubtitle")}
                     </Text>
                   </View>
                 </View>
@@ -151,8 +152,8 @@ export function StartScreen({ game }: { game: GameApi }) {
 
           <NeonCard className="items-center gap-5" glass glow="pink">
             <View className="items-center gap-2">
-              <Text className="text-lg font-extrabold text-foreground">Dołącz do pokoju</Text>
-              <Text className="text-center text-sm text-muted">Wpisz ID pokoju, aby dołączyć</Text>
+              <Text className="text-lg font-extrabold text-foreground">{t("startScreen.joinRoomTitle")}</Text>
+              <Text className="text-center text-sm text-muted">{t("startScreen.joinRoomSubtitle")}</Text>
             </View>
 
             <InputOTP
@@ -192,7 +193,7 @@ export function StartScreen({ game }: { game: GameApi }) {
             <NeonButton
               className="w-full"
               disabled={game.normalizedJoinCode.length < 6}
-              label="Dołącz"
+              label={t("startScreen.joinButton")}
               onPress={game.joinRoom}
               variant="pink"
             />
@@ -200,20 +201,20 @@ export function StartScreen({ game }: { game: GameApi }) {
         </ScrollView>
 
         <View className="flex-row justify-center gap-8 pb-2 pt-3">
-          <FooterLink icon="book-outline" label="Zasady" onPress={() => setInfo("rules")} />
+          <FooterLink icon="book-outline" label={t("startScreen.footerRules")} onPress={() => setInfo("rules")} />
           <FooterLink
             icon="layers-outline"
-            label="Kategorie"
+            label={t("startScreen.footerCategories")}
             onPress={() => game.setCategoriesOpen(true)}
           />
           <FooterLink
             icon="settings-outline"
-            label="Ustawienia"
+            label={t("startScreen.footerSettings")}
             onPress={() => game.setGlobalSettingsOpen(true)}
           />
           <FooterLink
             icon="information-circle-outline"
-            label="O grze"
+            label={t("startScreen.footerAbout")}
             onPress={() => setInfo("about")}
           />
         </View>
@@ -290,13 +291,13 @@ function ActiveSessionBanner({
           <Ionicons color={neon.magenta} name="game-controller" size={22} />
         </View>
         <View className="flex-1">
-          <Text className="text-sm font-bold text-foreground">Masz aktywną sesję</Text>
+          <Text className="text-sm font-bold text-foreground">{t("startScreen.activeSessionTitle")}</Text>
           <Text className="text-xs text-muted">
-            Pokój <Text style={{ color: neon.pink }}>{code}</Text>
+            {t("startScreen.activeSessionRoom")} <Text style={{ color: neon.pink }}>{code}</Text>
           </Text>
         </View>
         <Pressable
-          accessibilityLabel="Odrzuć sesję"
+          accessibilityLabel={t("startScreen.dismissSessionA11y")}
           accessibilityRole="button"
           className="h-8 w-8 items-center justify-center rounded-full"
           hitSlop={8}
@@ -308,7 +309,7 @@ function ActiveSessionBanner({
       <NeonButton
         className="w-full"
         icon="enter-outline"
-        label="Dołącz ponownie"
+        label={t("startScreen.rejoinButton")}
         onPress={onRejoin}
         variant="pink"
       />

@@ -3,6 +3,7 @@ import { Input } from "heroui-native";
 import { Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 
 import { ColorDot } from "@/components/color-dot";
+import { t } from "@/game/ui-strings";
 import { NeonButton } from "@/components/neon-button";
 import { AvatarVisual } from "@/components/player-avatar";
 import { SelectableAvatar } from "@/components/selectable-avatar";
@@ -15,7 +16,8 @@ const AVATAR_H_PAD = 20;
 const AVATAR_GAP = 12;
 
 export function OnboardingScreen({ game }: { game: GameApi }) {
-  const heading = game.roomTab === "create" ? "Tworzenie pokoju" : "Dołączanie do pokoju";
+  const heading =
+    game.roomTab === "create" ? t("onboardingScreen.createRoom") : t("onboardingScreen.joinRoom");
 
   // Siatka avatarów responsywna: 5 kolumn na szerokich ekranach (Pro Max/Plus ≥ 420pt), 4 na węższych.
   // Bok avatara liczony tak, by kolumny wypełniły rząd bez resztki po prawej.
@@ -52,41 +54,47 @@ export function OnboardingScreen({ game }: { game: GameApi }) {
         <View className="items-center gap-3">
           <AvatarVisual active avatarId={game.avatarId} colorId={game.colorId} size="xl" />
           <View className="items-center gap-1">
-            <Text className="text-2xl font-extrabold text-foreground">Witaj w pokoju!</Text>
-            <Text className="text-sm text-muted">Zanim dołączysz, stwórz swoją postać</Text>
+            <Text className="text-2xl font-extrabold text-foreground">
+              {t("onboardingScreen.welcomeHeading")}
+            </Text>
+            <Text className="text-sm text-muted">{t("onboardingScreen.welcomeSubheading")}</Text>
           </View>
         </View>
 
         {game.roomTab === "create" ? (
           <View className="gap-3">
-            <Text className="text-base font-bold text-foreground">Tryb gry</Text>
+            <Text className="text-base font-bold text-foreground">
+              {t("onboardingScreen.gameMode")}
+            </Text>
             <View className="flex-row gap-3">
               <ModeOption
                 active={!game.newRoomSingleDevice}
                 icon="people-outline"
-                label="Wiele telefonów"
+                label={t("onboardingScreen.modeMultiPhone")}
                 onPress={() => game.setNewRoomSingleDevice(false)}
-                sub="Każdy gra na swoim, dołącza kodem"
+                sub={t("onboardingScreen.modeMultiPhoneSub")}
               />
               <ModeOption
                 active={game.newRoomSingleDevice}
                 icon="phone-portrait-outline"
-                label="Jeden telefon"
+                label={t("onboardingScreen.modeSinglePhone")}
                 onPress={() => game.setNewRoomSingleDevice(true)}
-                sub="Jedna osoba prowadzi i dodaje graczy"
+                sub={t("onboardingScreen.modeSinglePhoneSub")}
               />
             </View>
           </View>
         ) : null}
 
         <View className="gap-3">
-          <Text className="text-base font-bold text-foreground">1. Wpisz swoje imię</Text>
+          <Text className="text-base font-bold text-foreground">
+            {t("onboardingScreen.stepName")}
+          </Text>
           <View className="justify-center">
             <Input
               autoCapitalize="words"
               maxLength={20}
               onChangeText={game.setPlayerName}
-              placeholder="Twoje imię"
+              placeholder={t("onboardingScreen.namePlaceholder")}
               value={game.playerName}
             />
             <View
@@ -105,7 +113,9 @@ export function OnboardingScreen({ game }: { game: GameApi }) {
         </View>
 
         <View className="gap-3">
-          <Text className="text-base font-bold text-foreground">2. Wybierz avatar</Text>
+          <Text className="text-base font-bold text-foreground">
+            {t("onboardingScreen.stepAvatar")}
+          </Text>
           <View className="flex-row flex-wrap" style={{ gap: AVATAR_GAP }}>
             {avatarOrder.map((id) => (
               <SelectableAvatar
@@ -121,7 +131,9 @@ export function OnboardingScreen({ game }: { game: GameApi }) {
         </View>
 
         <View className="gap-3">
-          <Text className="text-base font-bold text-foreground">3. Wybierz kolor</Text>
+          <Text className="text-base font-bold text-foreground">
+            {t("onboardingScreen.stepColor")}
+          </Text>
           <View className="flex-row items-center justify-between">
             {colorOrder.map((id) => (
               <ColorDot
@@ -140,14 +152,14 @@ export function OnboardingScreen({ game }: { game: GameApi }) {
       <View className="gap-3 px-5 pb-2 pt-3" style={{ backgroundColor: neon.bg }}>
         <NeonButton
           disabled={!game.canEnterRoom}
-          label="Dołącz do pokoju"
+          label={t("onboardingScreen.joinButton")}
           onPress={game.completeProfile}
           variant="pink"
         />
         <View className="flex-row items-center justify-center gap-2">
           <Ionicons color={neon.textMuted} name="shield-checkmark-outline" size={16} />
           <Text className="text-center text-xs text-muted">
-            Twoje imię i avatar będą widoczne dla innych graczy w pokoju
+            {t("onboardingScreen.privacyNote")}
           </Text>
         </View>
       </View>

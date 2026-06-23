@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
 import { NeonCard } from "@/components/neon-card";
+import { t } from "@/game/ui-strings";
 import { AvatarVisual } from "@/components/player-avatar";
 import { avatarSources } from "@/game/avatars";
 import type { RoundHistoryEntry } from "@/game/round-history";
@@ -19,12 +20,14 @@ export function RoundHistory({ history }: { history: RoundHistoryEntry[] }) {
     <NeonCard className="gap-3">
       <View className="flex-row items-center justify-center gap-2">
         <Ionicons color={neon.textMuted} name="time-outline" size={16} />
-        <Text className="text-center text-base font-bold text-foreground">Przebieg gry</Text>
+        <Text className="text-center text-base font-bold text-foreground">
+          {t("roundHistory.gameProgress")}
+        </Text>
       </View>
 
       {history.length === 0 ? (
         <Text className="text-center text-xs leading-5 text-muted">
-          Jeszcze nikt nie zagrał rundy — kolejne tury pojawią się tutaj.
+          {t("roundHistory.emptyState")}
         </Text>
       ) : (
         <View className="gap-2">
@@ -59,7 +62,7 @@ export function RoundHistory({ history }: { history: RoundHistoryEntry[] }) {
                 )}
                 <View className="flex-1">
                   <Text className="text-sm font-bold text-foreground" numberOfLines={1}>
-                    {entry.name || "Gracz"}
+                    {entry.name || t("roundHistory.defaultPlayerName")}
                   </Text>
                   {entry.text ? (
                     <Text className="text-xs text-muted" numberOfLines={1}>
@@ -71,7 +74,7 @@ export function RoundHistory({ history }: { history: RoundHistoryEntry[] }) {
                   className="text-xs font-bold uppercase tracking-wide"
                   style={{ color: accent }}
                 >
-                  {isTruth ? "Prawda" : "Wyzwanie"}
+                  {isTruth ? t("roundHistory.truth") : t("roundHistory.dare")}
                 </Text>
               </View>
             );

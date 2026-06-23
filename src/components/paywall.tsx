@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect } from "react";
 import { Linking, Modal, Text, View } from "react-native";
 
+import { t } from "@/game/ui-strings";
+
 import { NeonButton } from "@/components/neon-button";
 import { mainCategoryByKey, mainDesc, mainName } from "@/game/main-categories";
 import { isCategoryUnlocked } from "@/iap/entitlements";
@@ -38,34 +40,40 @@ export function Paywall({ category, onClose }: { category: PremiumCategory; onCl
         >
           <View className="items-center gap-1.5">
             <Ionicons color={neon.purpleBright} name="sparkles" size={28} />
-            <Text className="text-xl font-extrabold text-foreground">Odblokuj {catLabel}</Text>
+            <Text className="text-xl font-extrabold text-foreground">
+              {t("paywall.unlock_title")} {catLabel}
+            </Text>
             <Text className="text-center text-sm leading-5 text-muted">
               {cat ? mainDesc(cat) : ""}
             </Text>
           </View>
 
           <NeonButton
-            label={proPrice ? `PRO — wszystko za ${proPrice}` : "PRO — wszystko"}
+            label={proPrice ? `${t("paywall.pro_all_price")} ${proPrice}` : t("paywall.pro_all")}
             onPress={() => purchase(PRO_PRODUCT_ID)}
             variant="violet"
           />
           <NeonButton
-            label={singlePrice ? `Tylko ${catLabel} — ${singlePrice}` : `Odblokuj ${catLabel}`}
+            label={
+              singlePrice
+                ? `${t("paywall.single_price_prefix")} ${catLabel} — ${singlePrice}`
+                : `${t("paywall.unlock_title")} ${catLabel}`
+            }
             onPress={() => purchase(CATEGORY_PRODUCT_ID[category])}
             variant="pink"
           />
-          <NeonButton label="Przywróć zakupy" onPress={restore} variant="ghost" />
+          <NeonButton label={t("paywall.restore_purchases")} onPress={restore} variant="ghost" />
 
           <View className="flex-row items-center justify-center gap-4">
             <Text className="text-xs text-muted" onPress={onClose}>
-              Może później
+              {t("paywall.maybe_later")}
             </Text>
             <Text
               className="text-xs text-muted"
               onPress={() => void Linking.openURL(PRIVACY_URL)}
               style={{ textDecorationLine: "underline" }}
             >
-              Prywatność
+              {t("paywall.privacy")}
             </Text>
           </View>
         </View>

@@ -2,6 +2,7 @@ import LottieView from "lottie-react-native";
 import { Text, View } from "react-native";
 
 import { avatarSources } from "@/game/avatars";
+import { t } from "@/game/ui-strings";
 import type { AvatarId, Player } from "@/game/types";
 import { neon, playerPalette, type PlayerColorId } from "@/theme/colors";
 
@@ -128,7 +129,7 @@ export function PlayerAvatar({
           style={{ color: active ? neon.white : neon.textMuted }}
           className="max-w-16 text-center text-xs font-semibold"
         >
-          {player.isSelf ? "Ty" : player.name}
+          {player.isSelf ? t("playerAvatar.you") : player.name}
         </Text>
       ) : null}
     </View>
