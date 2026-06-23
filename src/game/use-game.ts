@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { avatarOrder } from "@/game/avatars";
 import { ensureContent } from "@/game/content-client";
 import { initLang, setLang as applyLang, type Lang } from "@/game/language";
+import { t } from "@/game/ui-strings";
 import {
   parseSelection,
   serializeSelection,
@@ -51,7 +52,7 @@ function getErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) {
     return error.message;
   }
-  return "Coś poszło nie tak. Spróbuj ponownie.";
+  return t("useGame.genericError");
 }
 
 function botClientId(): string {
@@ -473,8 +474,8 @@ export function useGame() {
       setJoinCode("");
       toast.show({
         variant: next ? "success" : "default",
-        label: "Tryb testowy",
-        description: next ? "Włączony — funkcje testowe są teraz dostępne." : "Wyłączony.",
+        label: t("useGame.testModeLabel"),
+        description: next ? t("useGame.testModeOn") : t("useGame.testModeOff"),
       });
       return;
     }
@@ -507,7 +508,7 @@ export function useGame() {
       // Najczęściej: dołączanie do nieistniejącego pokoju. Zostajemy na onboardingu.
       toast.show({
         variant: "danger",
-        label: roomTab === "create" ? "Nie udało się utworzyć pokoju" : "Nie udało się dołączyć",
+        label: roomTab === "create" ? t("useGame.createRoomFailed") : t("useGame.joinFailed"),
         description: getErrorMessage(error),
       });
       return;
@@ -578,7 +579,7 @@ export function useGame() {
     } catch (error) {
       toast.show({
         variant: "danger",
-        label: "Nie udało się wrócić do sesji",
+        label: t("useGame.rejoinFailed"),
         description: getErrorMessage(error),
       });
       return;

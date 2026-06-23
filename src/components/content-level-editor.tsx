@@ -101,7 +101,7 @@ export function ContentLevelEditor(api: ContentEditorApi) {
         </Text>
         {CONTENT_FILTERS.map((f) => (
           <View className="flex-row items-center justify-between gap-3" key={f.id}>
-            <Text className="flex-1 text-sm text-foreground">{f.namePl}</Text>
+            <Text className="flex-1 text-sm text-foreground">{t(`contentFilter.${f.id}`)}</Text>
             <Switch
               isSelected={selection.filters[f.id] === true}
               onSelectedChange={(v) => api.onSetFilter(f.id, v)}
@@ -198,7 +198,7 @@ function ContentLevelRow({
         </View>
         {!locked ? (
           <Text className="text-xs font-bold" style={{ color: on ? accent : neon.textMuted }}>
-            {LEVEL_LABELS[current]}
+            {t(`contentLevel.${current}`)}
           </Text>
         ) : null}
       </View>

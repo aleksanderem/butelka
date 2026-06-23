@@ -70,7 +70,11 @@ export function GlobalSettingsScreen({ game }: { game: GameApi }) {
                 numberOfLines={1}
                 style={{ color: active ? neon.white : neon.textMuted }}
               >
-                {item.label}
+                {t(
+                  item.id === "profile"
+                    ? "globalSettingsScreen.tabProfile"
+                    : "globalSettingsScreen.tabContent"
+                )}
               </Text>
             </Pressable>
           );

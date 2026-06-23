@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
-import { LEVEL_LABELS, type ContentLevel } from "@/game/content-selection";
+import { type ContentLevel } from "@/game/content-selection";
 import { MAIN_CATEGORIES, mainName } from "@/game/main-categories";
 import { t } from "@/game/ui-strings";
 import type { GameApi } from "@/game/use-game";
@@ -46,7 +46,7 @@ export function ContentSummary({ game }: { game: GameApi }) {
               >
                 <View className="h-2 w-2 rounded-full" style={{ backgroundColor: cat.accent }} />
                 <Text className="text-xs font-semibold text-foreground">{mainName(cat)}</Text>
-                <Text className="text-[10px] text-muted">· {LEVEL_LABELS[level]}</Text>
+                <Text className="text-[10px] text-muted">· {t(`contentLevel.${level}`)}</Text>
               </View>
             );
           })}
