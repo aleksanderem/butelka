@@ -40,6 +40,10 @@ export const UI: Record<string, Entry> = {
     pl: "Coś poszło nie tak. Spróbuj ponownie.",
     en: "Something went wrong. Try again.",
   },
+  "startScreen.cardsBadge": {
+    pl: "Ponad {count} tys. wyselekcjonowanych kart",
+    en: "Over {count}k curated cards",
+  },
   "approvalModal.acceptButton": {
     pl: "Akceptuj",
     en: "Accept",

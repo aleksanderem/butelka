@@ -70,6 +70,7 @@ const infoSlides: Record<InfoKind, OnboardingSlide[]> = {
 export function StartScreen({ game }: { game: GameApi }) {
   const [info, setInfo] = useState<InfoKind | null>(null);
   const insets = useSafeAreaInsets();
+  const cardK = Math.floor((game.contentBundle?.counts?.cards ?? 0) / 1000);
 
   return (
     <View className="flex-1">
@@ -103,6 +104,35 @@ export function StartScreen({ game }: { game: GameApi }) {
               <HeroDoodles />
             </View>
           </View>
+
+          {cardK >= 1 ? (
+            <View className="-mt-3 items-center">
+              <View
+                className="overflow-hidden rounded-full"
+                style={{ borderColor: "rgba(255,255,255,0.16)", borderWidth: 1 }}
+              >
+                <BlurView
+                  intensity={14}
+                  style={{
+                    alignItems: "center",
+                    flexDirection: "row",
+                    gap: 6,
+                    paddingHorizontal: 14,
+                    paddingVertical: 7,
+                  }}
+                  tint="light"
+                >
+                  <Ionicons color={neon.pink} name="sparkles" size={13} />
+                  <Text
+                    className="text-xs font-semibold"
+                    style={{ color: "rgba(255,255,255,0.92)" }}
+                  >
+                    {t("startScreen.cardsBadge").replace("{count}", String(cardK))}
+                  </Text>
+                </BlurView>
+              </View>
+            </View>
+          ) : null}
 
           {game.lastSession ? (
             <ActiveSessionBanner
@@ -140,7 +170,9 @@ export function StartScreen({ game }: { game: GameApi }) {
                     />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-xl font-extrabold text-white">{t("startScreen.createRoomTitle")}</Text>
+                    <Text className="text-xl font-extrabold text-white">
+                      {t("startScreen.createRoomTitle")}
+                    </Text>
                     <Text className="mt-0.5 text-sm text-white/80">
                       {t("startScreen.createRoomSubtitle")}
                     </Text>
@@ -152,8 +184,12 @@ export function StartScreen({ game }: { game: GameApi }) {
 
           <NeonCard className="items-center gap-5" glass glow="pink">
             <View className="items-center gap-2">
-              <Text className="text-lg font-extrabold text-foreground">{t("startScreen.joinRoomTitle")}</Text>
-              <Text className="text-center text-sm text-muted">{t("startScreen.joinRoomSubtitle")}</Text>
+              <Text className="text-lg font-extrabold text-foreground">
+                {t("startScreen.joinRoomTitle")}
+              </Text>
+              <Text className="text-center text-sm text-muted">
+                {t("startScreen.joinRoomSubtitle")}
+              </Text>
             </View>
 
             <InputOTP
@@ -201,7 +237,11 @@ export function StartScreen({ game }: { game: GameApi }) {
         </ScrollView>
 
         <View className="flex-row justify-center gap-8 pb-2 pt-3">
-          <FooterLink icon="book-outline" label={t("startScreen.footerRules")} onPress={() => setInfo("rules")} />
+          <FooterLink
+            icon="book-outline"
+            label={t("startScreen.footerRules")}
+            onPress={() => setInfo("rules")}
+          />
           <FooterLink
             icon="layers-outline"
             label={t("startScreen.footerCategories")}
@@ -291,7 +331,9 @@ function ActiveSessionBanner({
           <Ionicons color={neon.magenta} name="game-controller" size={22} />
         </View>
         <View className="flex-1">
-          <Text className="text-sm font-bold text-foreground">{t("startScreen.activeSessionTitle")}</Text>
+          <Text className="text-sm font-bold text-foreground">
+            {t("startScreen.activeSessionTitle")}
+          </Text>
           <Text className="text-xs text-muted">
             {t("startScreen.activeSessionRoom")} <Text style={{ color: neon.pink }}>{code}</Text>
           </Text>
